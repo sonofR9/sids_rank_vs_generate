@@ -7,11 +7,14 @@ name = "sids-rank-vs-generate"
 version = "0.1.0"
 requires-python = ">=3.10"
 dependencies = [
+    "numpy>=1.26",
     "polars>=1.0",
+    "torch>=2.2",
 ]
 
 [project.scripts]
 sids-run = "sids_rank_vs_generate.cli:main"
+sasrec-baseline = "sids_rank_vs_generate.experiments.sasrec:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
