@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import json
+import random
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+import numpy as np
+import torch
 
 from sids_rank_vs_generate.pipeline import PipelineConfig, run_pipeline
 
@@ -54,6 +58,23 @@ class PipelineTest(unittest.TestCase):
             summary = json.loads(completed.stdout)
             self.assertEqual(summary["catalog_size"], 3)
             self.assertEqual(json.loads(summary_path.read_text()), summary)
+
+    def test_pipeline_seed_is_applied(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            parquet_path = Path(tmpdir) / "interactions.parquet"
+            sample_interactions().write_parquet(parquet_path)
+            config = PipelineConfig(
+                interactions_path=parquet_path,
+                core_min_interactions_per_item=2,
+                test_days=1,
+                seed=17,
+            )
+
+            run_pipeline(config)
+            first = (random.random(), np.random.rand(), torch.rand(1).item())
+            run_pipeline(config)
+            second = (random.random(), np.random.rand(), torch.rand(1).item())
+            self.assertEqual(first, second)
 
 
 if __name__ == "__main__":

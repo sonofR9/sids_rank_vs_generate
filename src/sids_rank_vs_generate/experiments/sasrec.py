@@ -3,13 +3,11 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import random
 from dataclasses import asdict, dataclass
 from functools import partial
 from pathlib import Path
 from typing import Any, Sequence
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -19,6 +17,7 @@ from torch.utils.data import DataLoader, Dataset
 from ..data import PreparedInteractions, build_histories, build_targets
 from ..evaluation import evaluate_ranking
 from ..pipeline import PipelineConfig, run_pipeline
+from ..reproducibility import seed_everything
 
 
 @dataclass(frozen=True)
@@ -239,16 +238,6 @@ class SASRecModel(nn.Module):
     ) -> torch.Tensor:
         user_vectors = self.encode(history, lengths)
         return user_vectors @ self.item_embeddings.weight[: self.num_items].T
-
-
-def seed_everything(seed: int) -> None:
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
 
 
 def _resolve_device(requested: str) -> torch.device:

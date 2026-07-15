@@ -8,6 +8,7 @@ from .data import (
     PreprocessingConfig,
     load_and_prepare_interactions,
 )
+from .reproducibility import seed_everything
 
 
 @dataclass(frozen=True)
@@ -28,6 +29,7 @@ class PipelineConfig:
 def run_pipeline(config: PipelineConfig) -> PreparedInteractions:
     """Run the deterministic common part used by every experiment."""
 
+    seed_everything(config.seed)
     return load_and_prepare_interactions(
         config.interactions_path,
         config=config.preprocessing,
