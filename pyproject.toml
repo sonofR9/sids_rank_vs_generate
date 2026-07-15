@@ -6,6 +6,12 @@ build-backend = "setuptools.backends._legacy:_Backend"
 name = "sids-rank-vs-generate"
 version = "0.1.0"
 requires-python = ">=3.10"
+dependencies = [
+    "polars>=1.0",
+]
+
+[project.scripts]
+sids-run = "sids_rank_vs_generate.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
