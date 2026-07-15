@@ -1,4 +1,5 @@
-"""Evaluation scripts and everything evaluation related.
+"""Shared ranking evaluation."""
 
-May be separate from training for candgen. Also includes final plots, etc.
-"""
+from .metrics import evaluate_ranking, get_ranking_metrics
+
+__all__ = ["evaluate_ranking", "get_ranking_metrics"]
