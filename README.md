@@ -39,6 +39,62 @@ and output options. The same `PipelineConfig` and `PreparedInteractions` objects
 are used by experiments, so item mapping and train/eval boundaries are not
 reimplemented in individual scripts.
 
+## Pluggable SID evaluation
+
+A SID implementation derives from `ISidPipeline`, accepts the prepared item
+feature frame in `train`, and appends integer `sid_0`, ..., `sid_n` columns in
+`update`. Load a class or zero-argument factory from a Python module or file:
+
+```python
+import polars as pl
+
+from sids_rank_vs_generate.sids import ISidPipeline
+
+
+class TrainMySid(ISidPipeline):
+    def train(self, df: pl.DataFrame) -> None:
+        self.model.fit(df["embed"])
+
+    def update(self, df: pl.DataFrame) -> pl.DataFrame:
+        codes = self.model.transform(df["embed"])
+        return pl.DataFrame(
+            {"item_id": df["item_id"], "sid_0": codes[:, 0], "sid_1": codes[:, 1]}
+        )
+```
+
+```bash
+python run.py \
+  --interactions /path/to/interactions.parquet \
+  --embeddings /path/to/embeddings.parquet \
+  --sid experiments/my_sid.py:TrainMySid
+```
+
+By default the complete JSON and concise Markdown summary are written to
+`reports/experiments/TrainMySid.json` and
+`reports/experiments/TrainMySid.md`. Use `--run-name`, `--reports-dir`,
+`--metrics-json`, or `--report-md` to organize hyperparameter runs explicitly.
+
+The runner first restricts interactions to items covered by the supplied item
+feature parquet, then applies the usual core filter, chronological split, and
+one shared dense item mapping. This prevents downstream examples from referring
+to items that have no SID. Ranking and candidate-generation stages are
+independently optional plugins implementing `IEvaluationStage`:
+
+```bash
+python run.py \
+  --interactions /path/to/interactions.parquet \
+  --embeddings /path/to/embeddings.parquet \
+  --sid experiments/my_sid.py:TrainMySid \
+  --ranking-evaluator package.ranking:RankingEvaluator \
+  --candgen-evaluator package.candgen:CandgenEvaluator \
+  --metrics-json /tmp/my_sid.json \
+  --report-md reports/experiments/my_sid.md
+```
+
+Evaluator implementations live in the model-specific branches. Keeping the
+stages injectable lets a SID run ranking, candidate generation, or both without
+changing the common entry point.
+
 ## SASRec baseline
 
 Run the baseline with its documented defaults:
