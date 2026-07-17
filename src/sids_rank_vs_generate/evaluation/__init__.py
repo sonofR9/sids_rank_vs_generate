@@ -1,4 +1,8 @@
-"""Evaluation scripts and everything evaluation related.
+"""Evaluation interfaces shared by the common runner."""
 
-May be separate from training for candgen. Also includes final plots, etc.
-"""
+from .stages import EvaluationContext, IEvaluationStage
+
+__all__ = [
+    "EvaluationContext",
+    "IEvaluationStage",
+]
