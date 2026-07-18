@@ -63,24 +63,14 @@ class RQKMeans:
                 codes_all[start:end, level] = labels
     
         return codes_all
-
-    def fit_transform(self, items_df: pl.DataFrame) -> pl.DataFrame:
-        item_ids = items_df['item_id'].to_numpy()
-        X = self.converter(items_df)
-        residual = X.copy()
-        self.codebooks = []
-        res = {'item_id': item_ids}
+    
+    def transform(self, items_df: pl.DataFrame) -> pl.DataFrame:
+        codes = self.get_semantic_ids(items_df)
+        res = {"item_id": items_df["item_id"]}
         for level in range(self.num_levels):
-            kmeans = MiniBatchKMeans(
-                n_clusters=self.codebook_size,
-                batch_size=self.kmeans_batch_size,
-                init='k-means++',
-                tol=1e-5,
-                random_state=self.random_state,
-            )
-            labels = kmeans.fit_predict(residual)
-            codebook = kmeans.cluster_centers_
-            residual -= codebook[labels]
-            self.codebooks.append(codebook)
-            res[f'sid_{level}'] = labels
+            res[f"sid_{level}"] = codes[:, level]
         return pl.DataFrame(res)
+    
+    def fit_transform(self, items_df: pl.DataFrame) -> pl.DataFrame:
+        self.fit(items_df)
+        return self.transform(items_df)

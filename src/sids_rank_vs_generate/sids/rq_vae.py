@@ -191,7 +191,7 @@ class RQVAE(nn.Module):
             EmbeddingDataset(X),
             batch_size=self.batch_size,
             shuffle=False,
-            pin_memory=self.device == "cuda",
+            pin_memory=str(self.device).startswith("cuda"),
             num_workers=self.num_workers,
         )
 
