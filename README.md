@@ -1,8 +1,7 @@
 # SIDS rank vs generate
 
-The repository contains shared interaction preprocessing, reproducible
-sequential recommendation experiments, and the completed Transformer homework
-notebook.
+The repository contains the shared preprocessing and evaluation runner used by
+SID experiments.
 
 ## Installation
 
@@ -77,8 +76,8 @@ python run.py \
   --sid experiments/my_sid.py:TrainMySid
 ```
 
-The SID is required by the common runner. SASRec remains a separate baseline
-because it does not produce semantic IDs.
+The SID is required by the common runner. Baselines that do not produce
+semantic IDs, such as SASRec, are run separately.
 
 The runner writes all machine-generated artifacts below one directory. For the
 command above, the fixed layout is:
@@ -115,30 +114,6 @@ their model branches. Until they are merged into the common stage registry,
 enabling the corresponding flag fails with an explicit "stage is not connected"
 error. A SID-only smoke run works without either flag.
 
-## SASRec baseline
-
-Run the baseline with its documented defaults:
-
-```bash
-python experiments/sasrec_baseline.py \
-  --interactions /path/to/interactions.parquet \
-  --metrics-json /tmp/sasrec_baseline.json
-```
-
-For a short CPU execution check:
-
-```bash
-python experiments/sasrec_baseline.py \
-  --interactions /path/to/interactions.parquet \
-  --epochs 1 \
-  --device cpu
-```
-
-All model and data parameters are CLI options. The experiment output records the
-effective config, preprocessing summary, per-epoch losses, and hit rate, recall,
-NDCG, and coverage. The current experiment report is available at
-[`reports/experiments/sasrec_baseline.md`](reports/experiments/sasrec_baseline.md).
-
 ## Verification
 
 Run the repository smoke suite from the root:
@@ -147,7 +122,5 @@ Run the repository smoke suite from the root:
 python -m unittest discover -s tests -t . -v
 ```
 
-The suite exercises preprocessing, the `run.py` command, deterministic SASRec
-training/evaluation, metric output, and notebook syntax/output integrity. The
-full homework quality run still requires the course `tests.py`, Yambda data, and
-a GPU runtime; its outputs should not be committed to the notebook.
+The suite exercises preprocessing, the shared runner contract, SID validation,
+stage selection, and artifact output.

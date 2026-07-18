@@ -5,9 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import numpy as np
 import polars as pl
-import torch
+
 from sids_rank_vs_generate.pipeline import PipelineConfig, run_pipeline
 
 from tests.test_preprocessing import sample_interactions
@@ -41,9 +40,9 @@ class PipelineTest(unittest.TestCase):
             )
 
             run_pipeline(config)
-            first = (random.random(), np.random.rand(), torch.rand(1).item())
+            first = random.random()
             run_pipeline(config)
-            second = (random.random(), np.random.rand(), torch.rand(1).item())
+            second = random.random()
             self.assertEqual(first, second)
 
     def test_pipeline_can_restrict_the_eligible_item_catalog(self) -> None:
