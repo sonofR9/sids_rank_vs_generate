@@ -17,27 +17,36 @@ pip install -e .
 Datasets, archives, checkpoints, and generated metric JSON files are local
 artifacts and must not be committed.
 
-## Shared preprocessing
+## Shared data
 
-Prepare `uid`, `item_id`, and `timestamp` interactions with the project defaults
-(5-core item filtering and a final 7-day evaluation split):
+The common runner selects only the Yambda scale. Dataset paths, the 5-core item
+filter, the final 7-day split, and the random seed are shared by all SID
+experiments.
 
-```bash
-python run.py --interactions /path/to/interactions.parquet
+Prepared files live in one cache:
+
+```text
+~/.cache/sids_rank_vs_generate/datasets/
+  yambda-50m/
+    interactions.parquet
+    embeddings.parquet
+  yambda-500m/
+    interactions.parquet
+    embeddings.parquet
+  yambda-5b/
+    interactions.parquet
+    embeddings.parquet
 ```
 
-To persist a machine-readable summary outside the repository:
+For backward compatibility, the first 50m run automatically extracts these two
+files from `dataset.zip` in the repository root when the cache is empty. The
+public Kaggle Yambda archives currently have a different schema, so a remote
+dataset reference must be agreed on before automatic downloading can safely be
+enabled.
 
-```bash
-python run.py \
-  --interactions /path/to/interactions.parquet \
-  --summary-json /tmp/sids_preprocessing.json
-```
-
-Use `python run.py --help` to inspect the core threshold, split duration, seed,
-and output options. The same `PipelineConfig` and `PreparedInteractions` objects
-are used by experiments, so item mapping and train/eval boundaries are not
-reimplemented in individual scripts.
+The same `PipelineConfig` and `PreparedInteractions` objects are used by every
+experiment, so item mapping and train/eval boundaries are not reimplemented in
+individual scripts.
 
 ## Pluggable SID evaluation
 
@@ -64,36 +73,47 @@ class TrainMySid(ISidPipeline):
 
 ```bash
 python run.py \
-  --interactions /path/to/interactions.parquet \
-  --embeddings /path/to/embeddings.parquet \
+  --dataset-size 50m \
   --sid experiments/my_sid.py:TrainMySid
 ```
 
-By default the complete JSON and concise Markdown summary are written to
-`reports/experiments/TrainMySid.json` and
-`reports/experiments/TrainMySid.md`. Use `--run-name`, `--reports-dir`,
-`--metrics-json`, or `--report-md` to organize hyperparameter runs explicitly.
+The SID is required by the common runner. SASRec remains a separate baseline
+because it does not produce semantic IDs.
+
+The runner writes all machine-generated artifacts below one directory. For the
+command above, the fixed layout is:
+
+```text
+reports/experiments/50m/TrainMySid/<UTC-run-id>/
+  metrics.json
+  ranking/   # metrics, plots, or other ranking artifacts when enabled
+  candgen/   # metrics, plots, or other candidate-generation artifacts when enabled
+```
+
+Only `--reports-dir` changes the root. The generated UTC run id prevents repeated
+experiments from overwriting each other. The runner does not generate a
+narrative Markdown report: experiment-specific interpretation is written
+manually in `reports/experiments/`.
 
 The runner first restricts interactions to items covered by the supplied item
-feature parquet, then applies the usual core filter, chronological split, and
+feature cache, then applies the usual core filter, chronological split, and
 one shared dense item mapping. This prevents downstream examples from referring
-to items that have no SID. Ranking and candidate-generation stages are
-independently optional plugins implementing `IEvaluationStage`:
+to items that have no SID. Ranking and candidate-generation use fixed common
+implementations and are enabled independently by flags:
 
 ```bash
 python run.py \
-  --interactions /path/to/interactions.parquet \
-  --embeddings /path/to/embeddings.parquet \
+  --dataset-size 50m \
   --sid experiments/my_sid.py:TrainMySid \
-  --ranking-evaluator package.ranking:RankingEvaluator \
-  --candgen-evaluator package.candgen:CandgenEvaluator \
-  --metrics-json /tmp/my_sid.json \
-  --report-md reports/experiments/my_sid.md
+  --ranking \
+  --candgen \
+  --reports-dir reports/experiments
 ```
 
-Evaluator implementations live in the model-specific branches. Keeping the
-stages injectable lets a SID run ranking, candidate generation, or both without
-changing the common entry point.
+The concrete ranking and candidate-generation implementations still live in
+their model branches. Until they are merged into the common stage registry,
+enabling the corresponding flag fails with an explicit "stage is not connected"
+error. A SID-only smoke run works without either flag.
 
 ## SASRec baseline
 

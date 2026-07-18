@@ -1,4 +1,4 @@
-"""Repository entry point for the shared SIDS data pipeline."""
+"""Repository entry point for the common SID evaluation pipeline."""
 
 from __future__ import annotations
 

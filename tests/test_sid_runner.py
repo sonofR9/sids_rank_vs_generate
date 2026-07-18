@@ -3,12 +3,19 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
+from unittest.mock import patch
 
 import polars as pl
 
 from sids_rank_vs_generate.cli import main
-from sids_rank_vs_generate.evaluation import EvaluationContext, IEvaluationStage
+from sids_rank_vs_generate.datasets import DatasetFiles, resolve_dataset
+from sids_rank_vs_generate.evaluation import (
+    DEFAULT_STAGE_FACTORIES,
+    EvaluationContext,
+    IEvaluationStage,
+)
 from sids_rank_vs_generate.sid_experiment import (
     SidExperimentConfig,
     run_sid_experiment,
@@ -46,6 +53,9 @@ class FakeRankingEvaluator(IEvaluationStage):
     def evaluate(self, context: EvaluationContext) -> dict[str, float]:
         if "embed" not in context.items_with_sids.columns:
             raise AssertionError("original item features were not preserved")
+        (context.artifact_dir / "curve.txt").write_text(
+            "stage-owned artifact\n", encoding="utf-8"
+        )
         return {
             "roc_auc": 0.75,
             "catalog_fraction": (
@@ -81,33 +91,41 @@ def sample_embeddings() -> pl.DataFrame:
 
 
 class SidRunnerTest(unittest.TestCase):
-    def _write_inputs(self, directory: Path) -> tuple[Path, Path]:
+    def _write_inputs(self, directory: Path) -> DatasetFiles:
         interactions_path = directory / "interactions.parquet"
         embeddings_path = directory / "embeddings.parquet"
-        sample_interactions().write_parquet(interactions_path)
+        interactions = pl.concat([sample_interactions()] * 3)
+        interactions.write_parquet(interactions_path)
         sample_embeddings().write_parquet(embeddings_path)
-        return interactions_path, embeddings_path
+        return DatasetFiles(
+            size="50m",
+            interactions_path=interactions_path,
+            embeddings_path=embeddings_path,
+        )
 
-    def test_sid_and_both_evaluation_stages(self) -> None:
+    @staticmethod
+    def _stage_resolver(name: str) -> IEvaluationStage:
+        factories = {
+            "ranking": FakeRankingEvaluator,
+            "candgen": FakeCandgenEvaluator,
+        }
+        return factories[name]()
+
+    def test_sid_and_both_common_evaluation_stages(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            interactions_path, embeddings_path = self._write_inputs(Path(tmpdir))
+            directory = Path(tmpdir)
+            dataset = self._write_inputs(directory)
             result = run_sid_experiment(
                 SidExperimentConfig(
-                    interactions_path=interactions_path,
-                    embeddings_path=embeddings_path,
+                    dataset=dataset,
                     sid_spec="tests.test_sid_runner:FakeSid",
-                    evaluator_specs={
-                        "ranking": (
-                            "tests.test_sid_runner:FakeRankingEvaluator"
-                        ),
-                        "candgen": (
-                            "tests.test_sid_runner:FakeCandgenEvaluator"
-                        ),
-                    },
+                    enabled_stages=("ranking", "candgen"),
+                    reports_dir=directory / "reports",
                     core_min_interactions_per_item=2,
                     test_days=1,
                     seed=7,
-                )
+                ),
+                stage_resolver=self._stage_resolver,
             )
 
             self.assertEqual(result["sid"]["columns"], ["sid_0", "sid_1"])
@@ -115,89 +133,92 @@ class SidRunnerTest(unittest.TestCase):
             self.assertEqual(set(result["evaluations"]), {"ranking", "candgen"})
             self.assertEqual(result["evaluations"]["ranking"]["roc_auc"], 0.75)
             self.assertEqual(result["evaluations"]["candgen"]["recall"], 0.5)
+            run_dir = Path(result["artifacts"]["directory"])
+            self.assertTrue((run_dir / "ranking" / "curve.txt").is_file())
 
-    def test_cli_writes_full_metrics_and_human_report(self) -> None:
+    def test_cli_uses_only_shared_dataset_and_report_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             directory = Path(tmpdir)
-            interactions_path, embeddings_path = self._write_inputs(directory)
-            metrics_path = directory / "metrics.json"
-            report_path = directory / "report.md"
+            dataset = self._write_inputs(directory)
+            reports_dir = directory / "reports"
 
-            exit_code = main(
-                [
-                    "--interactions",
-                    str(interactions_path),
-                    "--embeddings",
-                    str(embeddings_path),
-                    "--sid",
-                    "tests.test_sid_runner:FakeSid",
-                    "--ranking-evaluator",
-                    "tests.test_sid_runner:FakeRankingEvaluator",
-                    "--candgen-evaluator",
-                    "tests.test_sid_runner:FakeCandgenEvaluator",
-                    "--core-min-interactions",
-                    "2",
-                    "--test-days",
-                    "1",
-                    "--seed",
-                    "7",
-                    "--metrics-json",
-                    str(metrics_path),
-                    "--report-md",
-                    str(report_path),
-                ]
-            )
+            with (
+                patch(
+                    "sids_rank_vs_generate.cli.resolve_dataset",
+                    return_value=dataset,
+                ),
+                patch.dict(
+                    DEFAULT_STAGE_FACTORIES,
+                    {
+                        "ranking": FakeRankingEvaluator,
+                        "candgen": FakeCandgenEvaluator,
+                    },
+                    clear=True,
+                ),
+            ):
+                exit_code = main(
+                    [
+                        "--dataset-size",
+                        "50m",
+                        "--sid",
+                        "tests.test_sid_runner:FakeSid",
+                        "--ranking",
+                        "--candgen",
+                        "--reports-dir",
+                        str(reports_dir),
+                    ]
+                )
 
             self.assertEqual(exit_code, 0)
+            metrics_paths = list(
+                (reports_dir / "50m" / "FakeSid").glob("*/metrics.json")
+            )
+            self.assertEqual(len(metrics_paths), 1)
+            metrics_path = metrics_paths[0]
             payload = json.loads(metrics_path.read_text(encoding="utf-8"))
             self.assertEqual(payload["experiment"], "sid_evaluation")
             self.assertEqual(set(payload["evaluations"]), {"ranking", "candgen"})
-            report = report_path.read_text(encoding="utf-8")
-            self.assertIn("# SID experiment: FakeSid", report)
-            self.assertIn("### ranking", report)
-            self.assertIn("### candgen", report)
+            self.assertFalse(list(reports_dir.rglob("*.md")))
 
     def test_sid_output_requires_integer_semantic_id_columns(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            interactions_path, embeddings_path = self._write_inputs(Path(tmpdir))
+            directory = Path(tmpdir)
+            dataset = self._write_inputs(directory)
             with self.assertRaisesRegex(ValueError, "at least one sid_<level>"):
                 run_sid_experiment(
                     SidExperimentConfig(
-                        interactions_path=interactions_path,
-                        embeddings_path=embeddings_path,
+                        dataset=dataset,
                         sid_spec="tests.test_sid_runner:MissingSidColumns",
-                        evaluator_specs={},
+                        reports_dir=directory / "reports",
                         core_min_interactions_per_item=2,
                         test_days=1,
                     )
                 )
 
-    def test_cli_uses_the_default_artifact_names(self) -> None:
+    def test_dataset_zip_bootstraps_the_shared_cache(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             directory = Path(tmpdir)
-            interactions_path, embeddings_path = self._write_inputs(directory)
-            reports_dir = directory / "reports"
+            source = directory / "source"
+            source.mkdir()
+            self._write_inputs(source)
+            archive_path = directory / "dataset.zip"
+            with zipfile.ZipFile(archive_path, "w") as archive:
+                archive.write(source / "interactions.parquet", "interactions.parquet")
+                archive.write(source / "embeddings.parquet", "embeddings.parquet")
 
-            exit_code = main(
-                [
-                    "--interactions",
-                    str(interactions_path),
-                    "--embeddings",
-                    str(embeddings_path),
-                    "--sid",
-                    "tests.test_sid_runner:FakeSid",
-                    "--core-min-interactions",
-                    "2",
-                    "--test-days",
-                    "1",
-                    "--reports-dir",
-                    str(reports_dir),
-                ]
+            dataset = resolve_dataset(
+                "50m",
+                cache_root=directory / "cache",
+                bootstrap_archive=archive_path,
             )
 
-            self.assertEqual(exit_code, 0)
-            self.assertTrue((reports_dir / "FakeSid.json").is_file())
-            self.assertTrue((reports_dir / "FakeSid.md").is_file())
+            self.assertTrue(dataset.interactions_path.is_file())
+            self.assertTrue(dataset.embeddings_path.is_file())
+            self.assertEqual(dataset.size, "50m")
+
+    def test_sid_is_required_by_the_common_runner(self) -> None:
+        with self.assertRaises(SystemExit):
+            main([])
 
 
 if __name__ == "__main__":
