@@ -5,55 +5,65 @@ import json
 from pathlib import Path
 from typing import Sequence
 
-from .pipeline import PipelineConfig, run_pipeline
+from .datasets import DATASET_SIZES, DEFAULT_DATASET_SIZE, resolve_dataset
+from .sid_experiment import SidExperimentConfig, run_sid_experiment
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run shared SIDS interaction preprocessing from scratch."
+        description="Run the common SID evaluation pipeline."
     )
     parser.add_argument(
-        "--interactions",
+        "--dataset-size",
+        choices=DATASET_SIZES,
+        default=DEFAULT_DATASET_SIZE,
+        help=f"Yambda scale from the shared cache (default: {DEFAULT_DATASET_SIZE}).",
+    )
+    parser.add_argument(
+        "--sid",
+        required=True,
+        help=(
+            "SID implementation as module:attribute or path.py:attribute. "
+            "The attribute must be an ISidPipeline class, factory, or instance."
+        ),
+    )
+    parser.add_argument(
+        "--ranking",
+        action="store_true",
+        help="Run the common ranking evaluation stage.",
+    )
+    parser.add_argument(
+        "--candgen",
+        action="store_true",
+        help="Run the common candidate-generation evaluation stage.",
+    )
+    parser.add_argument(
+        "--reports-dir",
         type=Path,
-        default=Path("interactions.parquet"),
-        help="Path to interactions.parquet (default: ./interactions.parquet).",
-    )
-    parser.add_argument(
-        "--core-min-interactions",
-        type=int,
-        default=5,
-        help="Minimum interactions required for an item (default: 5).",
-    )
-    parser.add_argument(
-        "--test-days",
-        type=float,
-        default=7.0,
-        help="Length of the chronological holdout in days (default: 7).",
-    )
-    parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument(
-        "--summary-json",
-        type=Path,
-        help="Optional path for a machine-readable preprocessing summary.",
+        default=Path("reports/experiments"),
+        help="Root directory for all generated artifacts.",
     )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    prepared = run_pipeline(
-        PipelineConfig(
-            interactions_path=args.interactions,
-            core_min_interactions_per_item=args.core_min_interactions,
-            test_days=args.test_days,
-            seed=args.seed,
+    dataset = resolve_dataset(args.dataset_size)
+    enabled_stages = tuple(
+        name
+        for name, enabled in (
+            ("ranking", args.ranking),
+            ("candgen", args.candgen),
+        )
+        if enabled
+    )
+    result = run_sid_experiment(
+        SidExperimentConfig(
+            dataset=dataset,
+            sid_spec=args.sid,
+            enabled_stages=enabled_stages,
+            reports_dir=args.reports_dir,
         )
     )
-    summary = prepared.summary()
-    rendered = json.dumps(summary, ensure_ascii=False, indent=2)
-    print(rendered)
-
-    if args.summary_json is not None:
-        args.summary_json.parent.mkdir(parents=True, exist_ok=True)
-        args.summary_json.write_text(rendered + "\n", encoding="utf-8")
+    print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0

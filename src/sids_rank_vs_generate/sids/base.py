@@ -14,8 +14,8 @@ class ISidPipeline(ABC):
 
     @abstractmethod
     def train(self, df: pl.DataFrame) -> None:
-        """Train the SID on the given DataFrame."""
+        """Train on dense item_id plus all columns from the item-feature parquet."""
 
     @abstractmethod
     def update(self, df: pl.DataFrame) -> pl.DataFrame:
-        """Run inference and append SID output columns to the given DataFrame."""
+        """Return one row per item_id and integer sid_0, ..., sid_n columns."""
