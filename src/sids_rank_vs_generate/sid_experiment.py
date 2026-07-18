@@ -2,15 +2,21 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import polars as pl
 
 from .data import PreparedInteractions
-from .evaluation.stages import EvaluationContext, IEvaluationStage
+from .datasets import DatasetFiles
+from .evaluation.stages import (
+    EvaluationContext,
+    IEvaluationStage,
+    create_evaluation_stage,
+)
 from .pipeline import PipelineConfig, run_pipeline
 from .plugins import load_plugin
 from .sids.base import ISidPipeline
@@ -18,10 +24,10 @@ from .sids.base import ISidPipeline
 
 @dataclass(frozen=True)
 class SidExperimentConfig:
-    interactions_path: Path
-    embeddings_path: Path
+    dataset: DatasetFiles
     sid_spec: str
-    evaluator_specs: Mapping[str, str]
+    enabled_stages: tuple[str, ...] = ()
+    reports_dir: Path = Path("reports/experiments")
     core_min_interactions_per_item: int = 5
     test_days: float = 7.0
     seed: int = 42
@@ -121,14 +127,27 @@ def _to_builtin(value: Any) -> Any:
         raise ValueError("experiment results must not contain non-finite floats")
     if value is None or isinstance(value, (str, int, float, bool)):
         return value
-    raise TypeError(f"experiment result is not JSON serializable: {type(value).__name__}")
+    value_type = type(value).__name__
+    raise TypeError(f"experiment result is not JSON serializable: {value_type}")
 
 
-def run_sid_experiment(config: SidExperimentConfig) -> dict[str, Any]:
-    raw_item_features = _load_item_features(config.embeddings_path)
+def run_sid_experiment(
+    config: SidExperimentConfig,
+    *,
+    stage_resolver: Callable[[str], IEvaluationStage] = create_evaluation_stage,
+) -> dict[str, Any]:
+    unknown_stages = set(config.enabled_stages) - {"ranking", "candgen"}
+    if unknown_stages:
+        raise ValueError(
+            f"unknown evaluation stages: {', '.join(sorted(unknown_stages))}"
+        )
+    if len(set(config.enabled_stages)) != len(config.enabled_stages):
+        raise ValueError("evaluation stages must not be repeated")
+
+    raw_item_features = _load_item_features(config.dataset.embeddings_path)
     prepared = run_pipeline(
         PipelineConfig(
-            interactions_path=config.interactions_path,
+            interactions_path=config.dataset.interactions_path,
             core_min_interactions_per_item=config.core_min_interactions_per_item,
             test_days=config.test_days,
             seed=config.seed,
@@ -146,25 +165,36 @@ def run_sid_experiment(config: SidExperimentConfig) -> dict[str, Any]:
         how="inner",
     )
 
-    context = EvaluationContext(
-        prepared=prepared,
-        items_with_sids=items_with_sids,
-        seed=config.seed,
+    run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    run_dir = (
+        config.reports_dir.expanduser()
+        / config.dataset.size
+        / type(sid).__name__
+        / run_id
     )
+    run_dir.mkdir(parents=True, exist_ok=True)
     evaluations: dict[str, Any] = {}
-    for requested_name, evaluator_spec in config.evaluator_specs.items():
-        evaluator = load_plugin(evaluator_spec, IEvaluationStage)
-        if evaluator.name != requested_name:
+    for stage_name in config.enabled_stages:
+        evaluator = stage_resolver(stage_name)
+        if evaluator.name != stage_name:
             raise ValueError(
-                f"evaluator {evaluator_spec!r} declares name {evaluator.name!r}; "
-                f"expected {requested_name!r}"
+                f"stage resolver returned {evaluator.name!r}; expected {stage_name!r}"
             )
+        stage_artifact_dir = run_dir / stage_name
+        stage_artifact_dir.mkdir(parents=True, exist_ok=True)
+        context = EvaluationContext(
+            prepared=prepared,
+            items_with_sids=items_with_sids,
+            seed=config.seed,
+            artifact_dir=stage_artifact_dir,
+        )
         metrics = evaluator.evaluate(context)
         if not isinstance(metrics, Mapping):
-            raise TypeError(f"evaluation stage {requested_name} must return a mapping")
-        evaluations[requested_name] = _to_builtin(metrics)
+            raise TypeError(f"evaluation stage {stage_name} must return a mapping")
+        evaluations[stage_name] = _to_builtin(metrics)
 
-    return _to_builtin(
+    metrics_path = run_dir / "metrics.json"
+    result = _to_builtin(
         {
             "experiment": "sid_evaluation",
             "data": prepared.summary(),
@@ -185,93 +215,23 @@ def run_sid_experiment(config: SidExperimentConfig) -> dict[str, Any]:
             },
             "evaluations": evaluations,
             "config": {
-                "interactions_path": config.interactions_path,
-                "embeddings_path": config.embeddings_path,
+                "dataset_size": config.dataset.size,
                 "core_min_interactions_per_item": (
                     config.core_min_interactions_per_item
                 ),
                 "test_days": config.test_days,
                 "seed": config.seed,
-                "evaluators": dict(config.evaluator_specs),
+                "enabled_stages": list(config.enabled_stages),
+            },
+            "artifacts": {
+                "run_id": run_id,
+                "directory": run_dir,
+                "metrics_json": metrics_path,
             },
         }
     )
-
-
-def _flatten_metrics(prefix: str, value: Any) -> list[tuple[str, Any]]:
-    if isinstance(value, Mapping):
-        rows: list[tuple[str, Any]] = []
-        for key, item in value.items():
-            next_prefix = f"{prefix}.{key}" if prefix else str(key)
-            rows.extend(_flatten_metrics(next_prefix, item))
-        return rows
-    return [(prefix, value)]
-
-
-def render_sid_report(result: Mapping[str, Any]) -> str:
-    sid = result["sid"]
-    data = result["data"]
-    lines = [
-        f"# SID experiment: {sid['class']}",
-        "",
-        "## Summary",
-        "",
-        f"- SID plugin: `{sid['plugin']}`",
-        f"- Items with semantic IDs: {sid['item_count']}",
-        f"- SID columns: {', '.join(sid['columns'])}",
-        f"- Seed: {result['config']['seed']}",
-        "",
-        "## Data",
-        "",
-        "| Field | Value |",
-        "| --- | ---: |",
-    ]
-    lines.extend(f"| {key} | {value} |" for key, value in data.items())
-    item_features = result.get("item_features", {})
-    if item_features:
-        lines.extend(
-            [
-                "",
-                "## Item features",
-                "",
-                f"- Source items: {item_features['source_items']}",
-                f"- Items in the prepared catalog: {item_features['catalog_items']}",
-                f"- Feature columns: {', '.join(item_features['columns'])}",
-            ]
-        )
-    lines.extend(["", "## Evaluation", ""])
-
-    evaluations = result["evaluations"]
-    if not evaluations:
-        lines.append("No ranking or candidate-generation evaluator was selected.")
-    for stage_name, metrics in evaluations.items():
-        lines.extend(
-            [
-                f"### {stage_name}",
-                "",
-                "| Metric | Value |",
-                "| --- | ---: |",
-            ]
-        )
-        lines.extend(
-            f"| {name} | {value} |"
-            for name, value in _flatten_metrics("", metrics)
-        )
-        lines.append("")
-    return "\n".join(lines).rstrip() + "\n"
-
-
-def write_sid_artifacts(
-    result: Mapping[str, Any],
-    metrics_json: Path | None = None,
-    report_md: Path | None = None,
-) -> None:
-    if metrics_json is not None:
-        metrics_json.parent.mkdir(parents=True, exist_ok=True)
-        metrics_json.write_text(
-            json.dumps(result, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
-        )
-    if report_md is not None:
-        report_md.parent.mkdir(parents=True, exist_ok=True)
-        report_md.write_text(render_sid_report(result), encoding="utf-8")
+    metrics_path.write_text(
+        json.dumps(result, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return result
