@@ -1,4 +1,15 @@
-"""Evaluation scripts and everything evaluation related.
+"""Evaluation interfaces shared by the common runner."""
 
-May be separate from training for candgen. Also includes final plots, etc.
-"""
+from .stages import (
+    DEFAULT_STAGE_FACTORIES,
+    EvaluationContext,
+    IEvaluationStage,
+    create_evaluation_stage,
+)
+
+__all__ = [
+    "DEFAULT_STAGE_FACTORIES",
+    "EvaluationContext",
+    "IEvaluationStage",
+    "create_evaluation_stage",
+]
