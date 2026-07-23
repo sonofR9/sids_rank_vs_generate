@@ -92,17 +92,16 @@ class RQVAE(nn.Module):
                 f"recon={total_loss / total_count:.6f}"
             )
 
+
     @torch.no_grad()
-    def init_codebooks_rqkmeans(self, X: pl.Series | pl.DataFrame | np.ndarray):
-        X = self.converter(X)
-        X = torch.tensor(X, device = self.device)
-        rq = RQKMeans(
-            num_levels=self.num_levels,
-            codebook_size=self.codebook_size)
-        Z = self.encoder(X).cpu().numpy()
-        rq.fit(Z)
-        for level in range(rq.num_levels):
-            self.codebooks[level].copy_(torch.from_numpy(rq.codebooks[level]).to(self.device))
+    def init_codebooks(self, codebooks):
+        for level, codebook in enumerate(codebooks):
+            codebook = torch.as_tensor(
+                codebook,
+                dtype=self.codebooks[level].dtype,
+                device=self.device
+            )
+            self.codebooks[level].copy_(codebook)
 
     def quantize(self, z):
         residual = z
@@ -157,8 +156,6 @@ class RQVAE(nn.Module):
             pin_memory=True,
             num_workers=self.num_workers,
         )
-        self.pretrain_autoencoder(loader)
-        self.init_codebooks_rqkmeans(X)
         opt = torch.optim.AdamW(self.parameters(), lr=self.lr)
     
         for epoch in range(self.num_epochs):
@@ -241,25 +238,3 @@ class RQVAE(nn.Module):
     def fit_transform(self, df):
         self.fit(df)
         return self.transform(df)
-
-
-from kagglehub import KaggleDatasetAdapter
-import kagglehub
-
-if __name__ == "__main__":
-    embeddings = kagglehub.dataset_load(
-        KaggleDatasetAdapter.POLARS,
-        "thekabeton/ysda-recsys-2026-yambda-dataset",
-        "embeddings_small.parquet",
-    ).collect()
-
-    model = RQVAE(
-        dim=len(embeddings["normalized_embed"][0]),
-        num_epochs=1,
-        batch_size=256,
-        num_workers=0,
-    )
-
-    result = model.fit_transform(embeddings)
-
-    print(result.head())
