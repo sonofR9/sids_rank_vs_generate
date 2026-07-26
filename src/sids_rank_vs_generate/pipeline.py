@@ -19,6 +19,8 @@ class PipelineConfig:
     interactions_path: Path
     core_min_interactions_per_item: int = 5
     test_days: float = 7.0
+    timestamp_unit_seconds: float = 1.0
+    latest_interactions: int | None = None
     seed: int = 42
 
     @property
@@ -26,6 +28,7 @@ class PipelineConfig:
         return PreprocessingConfig(
             core_min_interactions_per_item=self.core_min_interactions_per_item,
             test_days=self.test_days,
+            timestamp_unit_seconds=self.timestamp_unit_seconds,
         )
 
 
@@ -36,7 +39,10 @@ def run_pipeline(
     """Run the deterministic common part used by every experiment."""
 
     seed_everything(config.seed)
-    interactions = load_interactions(config.interactions_path)
+    interactions = load_interactions(
+        config.interactions_path,
+        latest_interactions=config.latest_interactions,
+    )
     if eligible_items is not None:
         if "item_id" not in eligible_items.columns:
             raise ValueError("eligible_items must contain item_id")

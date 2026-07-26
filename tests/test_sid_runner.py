@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
-import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -195,26 +194,30 @@ class SidRunnerTest(unittest.TestCase):
                     )
                 )
 
-    def test_dataset_zip_bootstraps_the_shared_cache(self) -> None:
+    def test_yambda_50m_prepares_the_shared_embedding_cache(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             directory = Path(tmpdir)
             source = directory / "source"
             source.mkdir()
-            self._write_inputs(source)
-            archive_path = directory / "dataset.zip"
-            with zipfile.ZipFile(archive_path, "w") as archive:
-                archive.write(source / "interactions.parquet", "interactions.parquet")
-                archive.write(source / "embeddings.parquet", "embeddings.parquet")
+            inputs = self._write_inputs(source)
 
             dataset = resolve_dataset(
                 "50m",
                 cache_root=directory / "cache",
-                bootstrap_archive=archive_path,
+                source_embeddings_path=inputs.embeddings_path,
+                downloader=lambda *_args, **_kwargs: str(
+                    inputs.interactions_path
+                ),
             )
 
             self.assertTrue(dataset.interactions_path.is_file())
             self.assertTrue(dataset.embeddings_path.is_file())
             self.assertEqual(dataset.size, "50m")
+            prepared_embeddings = pl.read_parquet(dataset.embeddings_path)
+            self.assertEqual(
+                prepared_embeddings.columns,
+                ["item_id", "normalized_embed"],
+            )
 
     def test_sid_is_required_by_the_common_runner(self) -> None:
         with self.assertRaises(SystemExit):
