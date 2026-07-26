@@ -4,11 +4,18 @@ import math
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import polars as pl
+import torch
 
 from sids_rank_vs_generate.data import PreprocessingConfig, prepare_interactions
-from sids_rank_vs_generate.experiments.sasrec import SASRecConfig, main, run_sasrec
+from sids_rank_vs_generate.experiments.sasrec import (
+    SASRecConfig,
+    _cuda_autocast_dtype,
+    main,
+    run_sasrec,
+)
 
 from tests.test_preprocessing import sample_interactions
 
@@ -45,6 +52,13 @@ class SASRecSmokeTest(unittest.TestCase):
         for value in first.metrics.values():
             self.assertGreaterEqual(value, 0.0)
             self.assertLessEqual(value, 1.0)
+
+    def test_v100_uses_float16_autocast(self) -> None:
+        with patch("torch.cuda.is_bf16_supported", return_value=False):
+            self.assertEqual(
+                _cuda_autocast_dtype(torch.device("cuda")),
+                torch.float16,
+            )
 
     def test_command_writes_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

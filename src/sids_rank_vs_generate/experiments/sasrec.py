@@ -450,6 +450,16 @@ def _resolve_device(requested: str) -> torch.device:
     return device
 
 
+def _cuda_autocast_dtype(device: torch.device) -> torch.dtype:
+    if device.type != "cuda":
+        return torch.bfloat16
+    return (
+        torch.bfloat16
+        if torch.cuda.is_bf16_supported()
+        else torch.float16
+    )
+
+
 def _move_tensor_batch(
     batch: dict[str, torch.Tensor],
     device: torch.device,
@@ -534,6 +544,11 @@ def run_sasrec(
         weight_decay=config.weight_decay,
         fused=device.type == "cuda",
     )
+    autocast_dtype = _cuda_autocast_dtype(device)
+    grad_scaler = torch.amp.GradScaler(
+        "cuda",
+        enabled=device.type == "cuda" and autocast_dtype == torch.float16,
+    )
     train_losses: list[float] = []
     for _ in range(config.epochs):
         model.train()
@@ -550,7 +565,7 @@ def run_sasrec(
             optimizer.zero_grad(set_to_none=True)
             with torch.autocast(
                 device_type=device.type,
-                dtype=torch.bfloat16,
+                dtype=autocast_dtype,
                 enabled=device.type == "cuda",
             ):
                 logits = model.sampled_logits(
@@ -565,8 +580,9 @@ def run_sasrec(
                     device=device,
                 )
                 loss = F.cross_entropy(logits, labels)
-            loss.backward()
-            optimizer.step()
+            grad_scaler.scale(loss).backward()
+            grad_scaler.step(optimizer)
+            grad_scaler.update()
             batch_size = batch["target"].shape[0]
             total_loss += float(loss.detach().item()) * batch_size
             example_count += batch_size
