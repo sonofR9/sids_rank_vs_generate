@@ -18,12 +18,15 @@ class PreprocessingConfig:
 
     core_min_interactions_per_item: int = 5
     test_days: float = 7.0
+    timestamp_unit_seconds: float = 1.0
 
     def __post_init__(self) -> None:
         if self.core_min_interactions_per_item <= 0:
             raise ValueError("core_min_interactions_per_item must be positive")
         if self.test_days <= 0:
             raise ValueError("test_days must be positive")
+        if self.timestamp_unit_seconds <= 0:
+            raise ValueError("timestamp_unit_seconds must be positive")
 
 
 @dataclass(frozen=True)
@@ -63,24 +66,37 @@ def _validate_interactions(data: pl.DataFrame) -> None:
         raise ValueError(f"interaction columns contain nulls: {columns_with_nulls}")
 
 
-def load_interactions(path: str | Path) -> pl.DataFrame:
+def load_interactions(
+    path: str | Path,
+    *,
+    latest_interactions: int | None = None,
+) -> pl.DataFrame:
     """Load only the canonical interaction fields from parquet."""
 
     interactions_path = Path(path).expanduser()
     if not interactions_path.is_file():
         raise FileNotFoundError(f"interactions parquet not found: {interactions_path}")
+    if latest_interactions is not None and latest_interactions <= 0:
+        raise ValueError("latest_interactions must be positive")
 
-    data = pl.read_parquet(interactions_path)
+    query = pl.scan_parquet(interactions_path).select(REQUIRED_COLUMNS)
+    if latest_interactions is not None:
+        query = query.top_k(latest_interactions, by="timestamp")
+    data = query.collect()
     _validate_interactions(data)
-    return data.select(REQUIRED_COLUMNS)
+    return data
 
 
-def _test_start_timestamp(data: pl.DataFrame, test_days: float) -> Any:
+def _test_start_timestamp(
+    data: pl.DataFrame,
+    test_days: float,
+    timestamp_unit_seconds: float,
+) -> Any:
     max_timestamp = data["timestamp"].max()
     timestamp_dtype = data.schema["timestamp"]
     if timestamp_dtype.is_temporal():
         return max_timestamp - timedelta(days=test_days)
-    return max_timestamp - test_days * SECONDS_PER_DAY
+    return max_timestamp - test_days * SECONDS_PER_DAY / timestamp_unit_seconds
 
 
 def prepare_interactions(
@@ -121,7 +137,11 @@ def prepare_interactions(
         .sort(["timestamp", "uid"])
     )
 
-    test_start = _test_start_timestamp(data, config.test_days)
+    test_start = _test_start_timestamp(
+        data,
+        config.test_days,
+        config.timestamp_unit_seconds,
+    )
     train = data.filter(pl.col("timestamp") < test_start)
     test = data.filter(pl.col("timestamp") >= test_start)
 

@@ -52,6 +52,27 @@ class PreprocessingTest(unittest.TestCase):
         self.assertEqual(histories[1], [0, 1, 0])
         self.assertEqual(histories[2], [1, 0, 1])
 
+    def test_yambda_five_second_timestamp_bins(self) -> None:
+        interactions = pl.DataFrame(
+            {
+                "uid": [1, 1, 1],
+                "item_id": [10, 10, 10],
+                "timestamp": [0, DAY // 5, 2 * DAY // 5],
+            }
+        )
+        prepared = prepare_interactions(
+            interactions,
+            PreprocessingConfig(
+                core_min_interactions_per_item=1,
+                test_days=1,
+                timestamp_unit_seconds=5,
+            ),
+        )
+
+        self.assertEqual(prepared.test_start_timestamp, DAY // 5)
+        self.assertEqual(prepared.train.height, 1)
+        self.assertEqual(prepared.test.height, 2)
+
 
 if __name__ == "__main__":
     unittest.main()

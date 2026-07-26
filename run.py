@@ -1,4 +1,4 @@
-"""Repository entry point for the common SID evaluation pipeline."""
+"""Repository entry point for the Yambda-50M SASRec experiment."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from sids_rank_vs_generate.cli import main
+from sids_rank_vs_generate.experiments.sasrec import main
 
 
 if __name__ == "__main__":

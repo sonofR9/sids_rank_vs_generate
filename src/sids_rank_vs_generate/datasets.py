@@ -1,93 +1,157 @@
 from __future__ import annotations
 
-import shutil
-import zipfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
+import numpy as np
+import polars as pl
 
-DATASET_SIZES = ("50m", "500m", "5b")
+
+DATASET_SIZES = ("50m",)
 DEFAULT_DATASET_SIZE = "50m"
 DEFAULT_CACHE_ROOT = Path.home() / ".cache" / "sids_rank_vs_generate" / "datasets"
-REQUIRED_FILES = ("interactions.parquet", "embeddings.parquet")
+HF_DATASET_REPO = "yandex/yambda"
+HF_LIKES_FILE = "flat/50m/likes.parquet"
+PREPARED_EMBEDDINGS_FILE = "embeddings.parquet"
 
 
 @dataclass(frozen=True)
 class DatasetFiles:
-    """Resolved files for one supported Yambda scale."""
+    """Resolved Yambda-50M likes and its prepared content vectors."""
 
     size: str
     interactions_path: Path
     embeddings_path: Path
 
 
-def _extract_required_files(archive_path: Path, target_dir: Path) -> None:
-    """Extract only the files used by the common pipeline from a zip archive."""
+def _hf_download(repo_id: str, *, filename: str, repo_type: str) -> str:
+    try:
+        from huggingface_hub import hf_hub_download
+    except ImportError as error:
+        raise RuntimeError(
+            "Yambda-50M download requires huggingface_hub; install the project "
+            "dependencies with `pip install -e .`"
+        ) from error
+    return hf_hub_download(
+        repo_id=repo_id,
+        filename=filename,
+        repo_type=repo_type,
+    )
 
-    with zipfile.ZipFile(archive_path) as archive:
-        members_by_name = {
-            Path(member.filename).name: member
-            for member in archive.infolist()
-            if not member.is_dir()
+
+def prepare_embedding_subset(
+    interactions_path: str | Path,
+    source_embeddings_path: str | Path,
+    destination_path: str | Path,
+) -> Path:
+    """Filter global audio vectors to Yambda-50M likes and L2-normalize them."""
+
+    interactions_path = Path(interactions_path).expanduser()
+    source_embeddings_path = Path(source_embeddings_path).expanduser()
+    destination_path = Path(destination_path).expanduser()
+    if not interactions_path.is_file():
+        raise FileNotFoundError(f"likes parquet not found: {interactions_path}")
+    if not source_embeddings_path.is_file():
+        raise FileNotFoundError(
+            f"source embeddings parquet not found: {source_embeddings_path}"
+        )
+
+    source_query = pl.scan_parquet(source_embeddings_path)
+    schema = source_query.collect_schema()
+    if "item_id" not in schema:
+        raise ValueError("source embeddings must contain item_id")
+    vector_column = (
+        "normalized_embed"
+        if "normalized_embed" in schema
+        else "embed" if "embed" in schema else None
+    )
+    if vector_column is None:
+        raise ValueError(
+            "source embeddings must contain embed or normalized_embed"
+        )
+
+    liked_items = (
+        pl.scan_parquet(interactions_path)
+        .select("item_id")
+        .unique()
+    )
+    subset = (
+        source_query.select("item_id", vector_column)
+        .join(liked_items, on="item_id", how="inner")
+        .sort("item_id")
+        .collect()
+    )
+    if subset.is_empty():
+        raise ValueError("no Yambda-50M liked items have content embeddings")
+    first_vector = subset[vector_column][0]
+    if first_vector is None or len(first_vector) == 0:
+        raise ValueError("content embedding vectors must not be empty")
+    width = len(first_vector)
+    vector_dtype = subset.schema[vector_column]
+    if isinstance(vector_dtype, pl.Array):
+        matrix = subset[vector_column].to_numpy()
+    else:
+        matrix = subset[vector_column].list.to_array(width).to_numpy()
+    matrix = np.asarray(matrix, dtype=np.float32)
+    norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+    if np.any(norms == 0) or not np.isfinite(norms).all():
+        raise ValueError("content embeddings contain zero or non-finite vectors")
+    normalized = matrix / norms
+
+    prepared = pl.DataFrame(
+        {
+            "item_id": subset["item_id"],
+            "normalized_embed": pl.Series(
+                "normalized_embed",
+                normalized,
+                dtype=pl.Array(pl.Float32, width),
+            ),
         }
-        missing = [name for name in REQUIRED_FILES if name not in members_by_name]
-        if missing:
-            raise ValueError(
-                f"dataset archive {archive_path} is missing: {', '.join(missing)}"
-            )
-
-        target_dir.mkdir(parents=True, exist_ok=True)
-        for filename in REQUIRED_FILES:
-            destination = target_dir / filename
-            with archive.open(members_by_name[filename]) as source:
-                with destination.open("wb") as target:
-                    shutil.copyfileobj(source, target)
+    )
+    destination_path.parent.mkdir(parents=True, exist_ok=True)
+    prepared.write_parquet(destination_path)
+    return destination_path
 
 
 def resolve_dataset(
-    size: str,
+    size: str = DEFAULT_DATASET_SIZE,
     *,
     cache_root: Path = DEFAULT_CACHE_ROOT,
-    bootstrap_archive: Path | None = None,
+    source_embeddings_path: Path | None = None,
+    downloader: Callable[..., str] | None = None,
 ) -> DatasetFiles:
-    """Resolve a dataset scale from the shared cache.
+    """Resolve the official Yambda-50M likes and a compact embedding subset."""
 
-    The repository's legacy ``dataset.zip`` can bootstrap the default 50m cache.
-    A remote source is intentionally not guessed here: the reviewed project files
-    use a course-specific schema that does not match the public Yambda archives.
-    """
+    if size != DEFAULT_DATASET_SIZE:
+        raise ValueError("only Yambda-50M is supported")
+    download = downloader or _hf_download
+    interactions_path = Path(
+        download(HF_DATASET_REPO, filename=HF_LIKES_FILE, repo_type="dataset")
+    ).expanduser()
 
-    normalized_size = size.lower()
-    if normalized_size not in DATASET_SIZES:
-        choices = ", ".join(DATASET_SIZES)
-        raise ValueError(f"unsupported dataset size {size!r}; choose one of: {choices}")
-
-    dataset_dir = cache_root.expanduser() / f"yambda-{normalized_size}"
-    interactions_path = dataset_dir / "interactions.parquet"
-    embeddings_path = dataset_dir / "embeddings.parquet"
-
-    if not (interactions_path.is_file() and embeddings_path.is_file()):
-        archive_path = bootstrap_archive
-        if archive_path is None and normalized_size == DEFAULT_DATASET_SIZE:
-            archive_path = Path("dataset.zip")
-        if archive_path is not None and archive_path.expanduser().is_file():
-            _extract_required_files(archive_path.expanduser(), dataset_dir)
-
-    missing = [
-        path.name
-        for path in (interactions_path, embeddings_path)
-        if not path.is_file()
-    ]
-    if missing:
-        raise FileNotFoundError(
-            f"Yambda-{normalized_size} is not available in {dataset_dir}. "
-            f"Missing: {', '.join(missing)}. Put the prepared files in this "
-            "shared cache. Automatic Kaggle download requires the team's exact "
-            "dataset reference and archive schema."
+    dataset_dir = cache_root.expanduser() / "yambda-50m"
+    embeddings_path = dataset_dir / PREPARED_EMBEDDINGS_FILE
+    if not embeddings_path.is_file():
+        source = (
+            Path(source_embeddings_path).expanduser()
+            if source_embeddings_path is not None
+            else Path("embeddings.parquet")
+        )
+        if not source.is_file():
+            raise FileNotFoundError(
+                "prepared Yambda-50M embeddings are missing. Pass "
+                "source_embeddings_path pointing to the global audio embeddings "
+                "once; the filtered cache will be reused afterwards."
+            )
+        prepare_embedding_subset(
+            interactions_path,
+            source,
+            embeddings_path,
         )
 
     return DatasetFiles(
-        size=normalized_size,
+        size=DEFAULT_DATASET_SIZE,
         interactions_path=interactions_path,
         embeddings_path=embeddings_path,
     )

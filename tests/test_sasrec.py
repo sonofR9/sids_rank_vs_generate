@@ -5,6 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import polars as pl
+
 from sids_rank_vs_generate.data import PreprocessingConfig, prepare_interactions
 from sids_rank_vs_generate.experiments.sasrec import SASRecConfig, main, run_sasrec
 
@@ -47,15 +49,30 @@ class SASRecSmokeTest(unittest.TestCase):
     def test_command_writes_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             parquet_path = Path(tmpdir) / "interactions.parquet"
+            embeddings_path = Path(tmpdir) / "embeddings.parquet"
             metrics_path = Path(tmpdir) / "sasrec.json"
             sample_interactions().write_parquet(parquet_path)
+            pl.DataFrame(
+                {
+                    "item_id": [10, 20, 30],
+                    "normalized_embed": [
+                        [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                    ],
+                }
+            ).write_parquet(embeddings_path)
             exit_code = main(
                 [
                     "--interactions",
                     str(parquet_path),
+                    "--embeddings",
+                    str(embeddings_path),
                     "--core-min-interactions",
                     "2",
                     "--test-days",
+                    "1",
+                    "--timestamp-unit-seconds",
                     "1",
                     "--embedding-dim",
                     "8",
