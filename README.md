@@ -61,8 +61,53 @@ and must not be committed.
 
 The common runner selects the Yambda scale and keeps dataset paths, the 5-core
 item filter, the final 7-day split, and the random seed shared by SID
-experiments. A SID implementation derives from `ISidPipeline` and is loaded
-with `--sid`:
+experiments.
+
+Prepared files live in one cache:
+
+```text
+~/.cache/sids_rank_vs_generate/datasets/
+  yambda-50m/
+    interactions.parquet
+    embeddings.parquet
+  yambda-500m/
+    interactions.parquet
+    embeddings.parquet
+  yambda-5b/
+    interactions.parquet
+    embeddings.parquet
+```
+
+For backward compatibility, the first 50m run automatically extracts these two
+files from `dataset.zip` in the repository root when the cache is empty. The
+public Kaggle Yambda archives currently have a different schema, so a remote
+dataset reference must be agreed on before automatic downloading can safely be
+enabled.
+
+The same `PipelineConfig` and `PreparedInteractions` objects are used by every
+experiment, so item mapping and train/eval boundaries are not reimplemented in
+individual scripts.
+
+A SID implementation derives from `ISidPipeline`, accepts the prepared item
+feature frame in `train`, and appends integer `sid_0`, ..., `sid_n` columns in
+`update`. Load a class or zero-argument factory from a Python module or file:
+
+```python
+import polars as pl
+
+from sids_rank_vs_generate.sids import ISidPipeline
+
+
+class TrainMySid(ISidPipeline):
+    def train(self, df: pl.DataFrame) -> None:
+        self.model.fit(df["embed"])
+
+    def update(self, df: pl.DataFrame) -> pl.DataFrame:
+        codes = self.model.transform(df["embed"])
+        return pl.DataFrame(
+            {"item_id": df["item_id"], "sid_0": codes[:, 0], "sid_1": codes[:, 1]}
+        )
+```
 
 ```bash
 python run.py \
@@ -71,8 +116,35 @@ python run.py \
 ```
 
 Baselines that do not produce semantic IDs, such as SASRec, are run separately.
-The pluggable ranking and candidate-generation stages remain available through
-the common SID runner.
+
+The runner writes all machine-generated artifacts below one directory:
+
+```text
+reports/experiments/50m/TrainMySid/<UTC-run-id>/
+  metrics.json
+  ranking/
+  candgen/
+```
+
+Only `--reports-dir` changes the root. The generated UTC run id prevents repeated
+experiments from overwriting each other. The runner first restricts interactions
+to items covered by the supplied item feature cache, then applies the common core
+filter, chronological split, and dense item mapping.
+
+Ranking and candidate generation are enabled independently:
+
+```bash
+python run.py \
+  --dataset-size 50m \
+  --sid experiments/my_sid.py:TrainMySid \
+  --ranking \
+  --candgen \
+  --reports-dir reports/experiments
+```
+
+Until their concrete implementations are merged into the common stage registry,
+enabling an unconnected stage fails with an explicit error. A SID-only smoke run
+works without either flag.
 
 ## Train SASRec
 
@@ -86,8 +158,6 @@ python run.py \
   --metrics-json reports/experiments/sasrec_yambda_50m.json
 ```
 
-The SID is required by the common runner. Baselines that do not produce
-semantic IDs, such as SASRec, are run separately.
 The 128-dimensional normalized audio vectors initialize SASRec's item embedding
 table and remain trainable by default. Use `--freeze-item-embeddings` to keep
 them fixed.
