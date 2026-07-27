@@ -1,5 +1,6 @@
-"""Evaluation interfaces shared by the common runner."""
+"""Evaluation interfaces and ranking metrics shared by the project."""
 
+from .metrics import evaluate_ranking, get_ranking_metrics
 from .stages import (
     DEFAULT_STAGE_FACTORIES,
     EvaluationContext,
@@ -12,4 +13,6 @@ __all__ = [
     "EvaluationContext",
     "IEvaluationStage",
     "create_evaluation_stage",
+    "evaluate_ranking",
+    "get_ranking_metrics",
 ]
