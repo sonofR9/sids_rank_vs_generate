@@ -24,6 +24,9 @@ from ..pipeline import PipelineConfig, run_pipeline
 from ..reproducibility import seed_everything
 
 
+TRAINING_OBJECTIVES = ("sampled-uniform", "in-batch", "in-batch-logq")
+
+
 @dataclass(frozen=True)
 class SASRecConfig:
     embedding_dim: int = 64
@@ -35,6 +38,7 @@ class SASRecConfig:
     epochs: int = 10
     learning_rate: float = 1e-3
     weight_decay: float = 0.0
+    training_objective: str = "sampled-uniform"
     training_negatives: int = 100
     eval_item_chunk_size: int = 20_000
     freeze_item_embeddings: bool = False
@@ -66,6 +70,11 @@ class SASRecConfig:
             raise ValueError("learning_rate must be positive")
         if self.weight_decay < 0:
             raise ValueError("weight_decay must be non-negative")
+        if self.training_objective not in TRAINING_OBJECTIVES:
+            raise ValueError(
+                "training_objective must be one of "
+                f"{', '.join(TRAINING_OBJECTIVES)}"
+            )
         if self.num_workers < 0:
             raise ValueError("num_workers must be non-negative")
 
@@ -103,12 +112,14 @@ class SASRecTrainDataset(Dataset):
         histories: dict[Any, list[int]],
         max_seq_len: int,
     ) -> None:
+        self.user_ids: list[Any] = []
         self.histories: list[list[int]] = []
         self.sample_offsets: list[int] = []
         sample_count = 0
-        for items in histories.values():
+        for uid, items in histories.items():
             if len(items) < 2:
                 continue
+            self.user_ids.append(uid)
             self.histories.append(list(items))
             sample_count += len(items) - 1
             self.sample_offsets.append(sample_count)
@@ -117,7 +128,7 @@ class SASRecTrainDataset(Dataset):
     def __len__(self) -> int:
         return self.sample_offsets[-1] if self.sample_offsets else 0
 
-    def __getitem__(self, index: int) -> tuple[list[int], int]:
+    def __getitem__(self, index: int) -> tuple[Any, list[int], int]:
         if index < 0 or index >= len(self):
             raise IndexError(index)
         history_index = bisect_right(self.sample_offsets, index)
@@ -127,7 +138,11 @@ class SASRecTrainDataset(Dataset):
         target_position = index - previous_offset + 1
         items = self.histories[history_index]
         start = max(0, target_position - self.max_seq_len)
-        return list(items[start:target_position]), items[target_position]
+        return (
+            self.user_ids[history_index],
+            list(items[start:target_position]),
+            items[target_position],
+        )
 
 
 class SASRecEvalDataset(Dataset):
@@ -155,10 +170,15 @@ class SASRecEvalDataset(Dataset):
 
 
 def _collate_train(
-    batch: list[tuple[list[int], int]],
+    batch: list[tuple[Any, list[int], int]],
     padding_item_id: int,
 ) -> dict[str, torch.Tensor]:
-    histories, targets = zip(*batch)
+    uids, histories, targets = zip(*batch)
+    user_group_by_id: dict[Any, int] = {}
+    user_groups = [
+        user_group_by_id.setdefault(uid, len(user_group_by_id))
+        for uid in uids
+    ]
     tensors = [torch.tensor(history, dtype=torch.long) for history in histories]
     return {
         "history": pad_sequence(
@@ -168,6 +188,7 @@ def _collate_train(
         ),
         "length": torch.tensor([len(history) for history in histories]),
         "target": torch.tensor(targets, dtype=torch.long),
+        "user_group": torch.tensor(user_groups, dtype=torch.long),
     }
 
 
@@ -489,6 +510,155 @@ def _sample_negative_item_ids(
     return sampled + sampled.ge(targets)
 
 
+def _sample_in_batch_negative_item_ids(
+    histories: torch.Tensor,
+    targets: torch.Tensor,
+    user_groups: torch.Tensor,
+    *,
+    padding_item_id: int,
+    count: int,
+    generator: torch.Generator,
+) -> torch.Tensor:
+    """Sample batch history and target items, excluding each positive item."""
+
+    if histories.ndim != 2:
+        raise ValueError("in-batch sampling requires a 2D history tensor")
+    if targets.ndim != 1 or targets.numel() == 0:
+        raise ValueError("in-batch sampling requires a non-empty 1D target tensor")
+    if histories.shape[0] != targets.shape[0]:
+        raise ValueError("history and target batch sizes differ")
+    if user_groups.ndim != 1 or user_groups.shape != targets.shape:
+        raise ValueError("user groups and targets must have matching 1D shapes")
+    if count <= 0:
+        raise ValueError("in-batch negative count must be positive")
+
+    histories = histories.cpu()
+    targets = targets.cpu()
+    user_groups = user_groups.cpu()
+    batch_size = targets.shape[0]
+    history_mask = histories.ne(padding_item_id)
+    history_owner_rows = (
+        torch.arange(batch_size)
+        .unsqueeze(1)
+        .expand_as(histories)[history_mask]
+    )
+    item_pool = torch.cat(
+        (
+            histories[history_mask],
+            targets,
+        )
+    )
+    pool_owner_groups = torch.cat(
+        (
+            user_groups[history_owner_rows],
+            user_groups,
+        )
+    )
+
+    forbidden_items = torch.zeros(
+        (batch_size, padding_item_id),
+        dtype=torch.bool,
+    )
+    history_owner_grid = (
+        torch.arange(batch_size)
+        .unsqueeze(1)
+        .expand_as(histories)
+    )
+    forbidden_items[
+        history_owner_grid[history_mask],
+        histories[history_mask],
+    ] = True
+    forbidden_items[torch.arange(batch_size), targets] = True
+
+    allowed_positions = pool_owner_groups.unsqueeze(0).ne(
+        user_groups.unsqueeze(1)
+    )
+    allowed_positions &= ~forbidden_items[:, item_pool]
+    if not allowed_positions.any(dim=1).all():
+        raise ValueError(
+            "in-batch sampling requires another user's non-positive item"
+        )
+
+    positions = torch.randint(
+        item_pool.numel(),
+        (batch_size, count),
+        generator=generator,
+    )
+    row_indices = torch.arange(batch_size).unsqueeze(1)
+    invalid = ~allowed_positions[row_indices, positions]
+    while invalid.any():
+        positions[invalid] = torch.randint(
+            item_pool.numel(),
+            (int(invalid.sum().item()),),
+            generator=generator,
+        )
+        invalid = ~allowed_positions[row_indices, positions]
+    return item_pool[positions]
+
+
+def _build_in_batch_item_counts(
+    histories: dict[Any, list[int]],
+    *,
+    num_items: int,
+    max_seq_len: int,
+) -> torch.Tensor:
+    """Count items in every history-plus-target pool used during training."""
+
+    if max_seq_len <= 0:
+        raise ValueError("max_seq_len must be positive")
+    counts = torch.zeros(num_items, dtype=torch.float32)
+    for items in histories.values():
+        if len(items) < 2:
+            continue
+        item_ids = torch.tensor(items, dtype=torch.long)
+        if item_ids.min() < 0 or item_ids.max() >= num_items:
+            raise ValueError("item ids must be in [0, num_items)")
+
+        weights = torch.zeros(len(items), dtype=torch.float32)
+        history_repetitions = torch.arange(
+            len(items) - 1,
+            0,
+            -1,
+            dtype=torch.float32,
+        ).clamp_max(max_seq_len)
+        weights[:-1] += history_repetitions
+        weights[1:] += 1.0
+        counts.scatter_add_(0, item_ids, weights)
+    if counts.sum() == 0:
+        raise ValueError("in-batch counts require at least one train example")
+    return counts
+
+
+def _apply_negative_logq_correction(
+    logits: torch.Tensor,
+    negative_item_ids: torch.Tensor,
+    q_counts: torch.Tensor,
+    *,
+    eps: float = 1e-12,
+) -> torch.Tensor:
+    """Apply original sampled-softmax LogQ correction to negative logits."""
+
+    if logits.ndim != 2 or negative_item_ids.ndim != 2:
+        raise ValueError("logits and negative_item_ids must be 2D")
+    if logits.shape[0] != negative_item_ids.shape[0]:
+        raise ValueError("logits and negative_item_ids batch sizes differ")
+    if logits.shape[1] != negative_item_ids.shape[1] + 1:
+        raise ValueError("logits must contain one positive plus all negatives")
+    if q_counts.ndim != 1 or q_counts.numel() == 0:
+        raise ValueError("q_counts must be a non-empty 1D tensor")
+    if eps <= 0:
+        raise ValueError("eps must be positive")
+
+    log_total = torch.log(q_counts.sum().clamp_min(eps))
+    negative_logq = (
+        torch.log(q_counts[negative_item_ids].clamp_min(eps)) - log_total
+    )
+    return torch.cat(
+        (logits[:, :1], logits[:, 1:] - negative_logq),
+        dim=1,
+    )
+
+
 def run_sasrec(
     prepared: PreparedInteractions,
     config: SASRecConfig | None = None,
@@ -513,6 +683,15 @@ def run_sasrec(
     padding_item_id = prepared.catalog_size
     generator = torch.Generator().manual_seed(config.seed)
     negative_generator = torch.Generator().manual_seed(config.seed + 1)
+    q_counts = (
+        _build_in_batch_item_counts(
+            histories,
+            num_items=prepared.catalog_size,
+            max_seq_len=config.max_seq_len,
+        ).to(device)
+        if config.training_objective == "in-batch-logq"
+        else None
+    )
     common_loader_args = {
         "batch_size": config.batch_size,
         "num_workers": config.num_workers,
@@ -550,17 +729,28 @@ def run_sasrec(
         enabled=device.type == "cuda" and autocast_dtype == torch.float16,
     )
     train_losses: list[float] = []
-    for _ in range(config.epochs):
+    for epoch in range(config.epochs):
         model.train()
         total_loss = 0.0
         example_count = 0
         for batch in train_loader:
-            batch["negative_item_id"] = _sample_negative_item_ids(
-                batch["target"],
-                num_items=prepared.catalog_size,
-                count=config.training_negatives,
-                generator=negative_generator,
-            )
+            user_groups = batch.pop("user_group")
+            if config.training_objective in {"in-batch", "in-batch-logq"}:
+                batch["negative_item_id"] = _sample_in_batch_negative_item_ids(
+                    batch["history"],
+                    batch["target"],
+                    user_groups,
+                    padding_item_id=padding_item_id,
+                    count=config.training_negatives,
+                    generator=negative_generator,
+                )
+            else:
+                batch["negative_item_id"] = _sample_negative_item_ids(
+                    batch["target"],
+                    num_items=prepared.catalog_size,
+                    count=config.training_negatives,
+                    generator=negative_generator,
+                )
             batch = _move_tensor_batch(batch, device)
             optimizer.zero_grad(set_to_none=True)
             with torch.autocast(
@@ -574,6 +764,12 @@ def run_sasrec(
                     batch["target"],
                     batch["negative_item_id"],
                 )
+                if q_counts is not None:
+                    logits = _apply_negative_logq_correction(
+                        logits,
+                        batch["negative_item_id"],
+                        q_counts,
+                    )
                 labels = torch.zeros(
                     logits.shape[0],
                     dtype=torch.long,
@@ -586,9 +782,15 @@ def run_sasrec(
             batch_size = batch["target"].shape[0]
             total_loss += float(loss.detach().item()) * batch_size
             example_count += batch_size
-        train_losses.append(total_loss / example_count)
+        average_loss = total_loss / example_count
+        train_losses.append(average_loss)
+        print(
+            f"Epoch {epoch + 1}/{config.epochs}: loss={average_loss:.6f}",
+            flush=True,
+        )
 
     model.eval()
+    print("Evaluating exact top-k recommendations...", flush=True)
     candidates: dict[Any, list[int]] = {}
     with torch.inference_mode():
         for batch in eval_loader:
@@ -669,6 +871,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--learning-rate", type=float, default=1e-3)
     parser.add_argument("--weight-decay", type=float, default=0.0)
+    parser.add_argument(
+        "--training-objective",
+        choices=TRAINING_OBJECTIVES,
+        default="sampled-uniform",
+    )
     parser.add_argument("--training-negatives", type=int, default=100)
     parser.add_argument("--eval-item-chunk-size", type=int, default=20_000)
     parser.add_argument("--freeze-item-embeddings", action="store_true")
@@ -723,6 +930,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         epochs=args.epochs,
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
+        training_objective=args.training_objective,
         training_negatives=args.training_negatives,
         eval_item_chunk_size=args.eval_item_chunk_size,
         freeze_item_embeddings=args.freeze_item_embeddings,
