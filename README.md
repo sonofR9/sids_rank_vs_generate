@@ -96,6 +96,38 @@ Training uses sampled negatives instead of a full-catalog softmax. Exact top-k
 evaluation is computed in catalog chunks, so the experiment does not allocate a
 batch-by-catalog score matrix.
 
+The default `sampled-uniform` objective draws negatives uniformly from the
+catalog and reproduces the first full baseline. The `in-batch` objectives draw
+from all non-padding history items and targets in the current batch. For each
+example, candidates contributed by the same user, every item in its own prefix,
+and every occurrence of its positive item id are excluded from the negative
+pool. `in-batch-logq` additionally corrects only negative logits using base item
+frequencies in the aggregate history-plus-target pools produced by all train
+examples.
+
+```bash
+python run.py \
+  --epochs 10 \
+  --batch-size 128 \
+  --training-objective in-batch \
+  --training-negatives 100 \
+  --metrics-json reports/experiments/sasrec_yambda_50m_audio_inbatch_user_mask_seed42.json
+```
+
+```bash
+python run.py \
+  --epochs 10 \
+  --batch-size 128 \
+  --training-objective in-batch-logq \
+  --training-negatives 100 \
+  --metrics-json reports/experiments/sasrec_yambda_50m_audio_logq_user_mask_seed42.json
+```
+
+These objectives keep the model, audio initialization, data split, seed, and
+exact top-k evaluation unchanged. The 100-negative LogQ variant achieved the
+best Recall@100; increasing its negative count to 2,048 removed that gain. See
+`reports/experiments/sasrec_baseline.md` for the full controlled comparison.
+
 Useful overrides:
 
 ```bash
