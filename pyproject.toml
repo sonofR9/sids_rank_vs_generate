@@ -26,3 +26,5 @@ sasrec-train = "sids_rank_vs_generate.experiments.sasrec:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+
