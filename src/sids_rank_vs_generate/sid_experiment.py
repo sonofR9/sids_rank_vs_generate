@@ -20,6 +20,7 @@ from .evaluation.stages import (
 from .evaluation.sid_statistics import calculate_sid_statistics
 from .pipeline import PipelineConfig, run_pipeline
 from .plugins import load_plugin
+from .reproducibility import SID_EXPERIMENT_SEED, seed_everything
 from .sids.base import ISidPipeline
 
 
@@ -34,7 +35,6 @@ class SidExperimentConfig:
     test_days: float = 7.0
     timestamp_unit_seconds: float = 1.0
     latest_interactions: int | None = None
-    seed: int = 42
 
 
 def _load_item_features(path: Path) -> pl.DataFrame:
@@ -171,7 +171,6 @@ def run_sid_experiment(
             test_days=config.test_days,
             timestamp_unit_seconds=config.timestamp_unit_seconds,
             latest_interactions=config.latest_interactions,
-            seed=config.seed,
         ),
         eligible_items=raw_item_features.select("item_id"),
     )
@@ -186,6 +185,7 @@ def run_sid_experiment(
         sid_reference = config.sid_spec
     else:
         raise ValueError("sid_pipeline is required")
+    seed_everything(SID_EXPERIMENT_SEED)
     sid.train(item_features)
     sid_output = sid.update(item_features)
     sid_columns = _validate_sid_output(item_features, sid_output)
@@ -221,7 +221,6 @@ def run_sid_experiment(
             prepared=prepared,
             items_with_sids=items_with_sids,
             dataset=config.dataset,
-            seed=config.seed,
             artifact_dir=stage_artifact_dir,
             max_rows=config.latest_interactions,
         )
@@ -259,9 +258,9 @@ def run_sid_experiment(
                 "test_days": config.test_days,
                 "timestamp_unit_seconds": config.timestamp_unit_seconds,
                 "latest_interactions": config.latest_interactions,
-                "seed": config.seed,
                 "enabled_stages": list(config.enabled_stages),
             },
+            "reproducibility": {"seed": SID_EXPERIMENT_SEED},
             "artifacts": {
                 "run_id": run_id,
                 "directory": run_dir,

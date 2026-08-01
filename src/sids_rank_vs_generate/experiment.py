@@ -79,7 +79,6 @@ class ExperimentConfig:
     dataset: YambdaDatasetConfig = YambdaDatasetConfig()
     training: TrainingConfig = TrainingConfig()
     reports_dir: Path = Path("reports/experiments")
-    seed: int = 42
 
     def __post_init__(self) -> None:
         if not isinstance(self.sid_pipeline, ISidPipeline):
@@ -159,7 +158,6 @@ def run_experiment(
             test_days=config.dataset.test_days,
             timestamp_unit_seconds=config.dataset.timestamp_unit_seconds,
             latest_interactions=max_rows,
-            seed=config.seed,
         ),
         stage_resolver=resolve_stage,
     )

@@ -3,13 +3,13 @@ import polars as pl
 
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.metrics import pairwise_distances_argmin
+from ..reproducibility import SID_EXPERIMENT_SEED
 
 class RQKMeans:
     def __init__(
         self,
         num_levels=None,
         codebook_size=None,
-        random_state=42,
         kmeans_batch_size=1024 * 16,
         predict_batch_size=65536,
         codebook_sizes=None,
@@ -25,7 +25,6 @@ class RQKMeans:
                     "Нужно передать num_levels и codebook_size")
             self.num_levels = num_levels
             self.codebook_sizes = (codebook_size,) * num_levels
-        self.random_state = random_state
         self.kmeans_batch_size = kmeans_batch_size
         self.predict_batch_size = predict_batch_size
         self.codebooks = []
@@ -48,7 +47,7 @@ class RQKMeans:
                 batch_size = self.kmeans_batch_size,
                 init='k-means++',
                 tol=10**(-5),
-                random_state=self.random_state
+                random_state=SID_EXPERIMENT_SEED
             )
             classes = kmeans.fit_predict(residual)
             codebook = kmeans.cluster_centers_

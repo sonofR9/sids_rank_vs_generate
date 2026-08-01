@@ -54,9 +54,11 @@ EXPERIMENT = ExperimentConfig(
     sid_pipeline=RQKMeansPipeline(
         RQKMeansConfig(num_levels=3, codebook_size=256),
     ),
-    seed=42,
 )
 ```
+
+The common runner always uses the fixed seed `42`; experiments cannot override
+it, so SID construction and downstream model initialization are comparable.
 
 Run the included configuration with:
 

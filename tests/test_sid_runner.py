@@ -122,7 +122,6 @@ class SidRunnerTest(unittest.TestCase):
                     reports_dir=directory / "reports",
                     core_min_interactions_per_item=2,
                     test_days=1,
-                    seed=7,
                 ),
                 stage_resolver=self._stage_resolver,
             )

@@ -8,6 +8,7 @@ from pathlib import Path
 import polars as pl
 
 from sids_rank_vs_generate.pipeline import PipelineConfig, run_pipeline
+from sids_rank_vs_generate.reproducibility import SID_EXPERIMENT_SEED
 
 from tests.test_preprocessing import sample_interactions
 
@@ -23,12 +24,11 @@ class PipelineTest(unittest.TestCase):
                     interactions_path=parquet_path,
                     core_min_interactions_per_item=2,
                     test_days=1,
-                    seed=7,
                 )
             )
             self.assertEqual(prepared.catalog_size, 3)
 
-    def test_pipeline_seed_is_applied(self) -> None:
+    def test_pipeline_always_applies_the_fixed_seed(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             parquet_path = Path(tmpdir) / "interactions.parquet"
             sample_interactions().write_parquet(parquet_path)
@@ -36,7 +36,6 @@ class PipelineTest(unittest.TestCase):
                 interactions_path=parquet_path,
                 core_min_interactions_per_item=2,
                 test_days=1,
-                seed=17,
             )
 
             run_pipeline(config)
@@ -44,6 +43,7 @@ class PipelineTest(unittest.TestCase):
             run_pipeline(config)
             second = random.random()
             self.assertEqual(first, second)
+            self.assertEqual(first, random.Random(SID_EXPERIMENT_SEED).random())
 
     def test_pipeline_can_restrict_the_eligible_item_catalog(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -54,7 +54,6 @@ class PipelineTest(unittest.TestCase):
                     interactions_path=parquet_path,
                     core_min_interactions_per_item=2,
                     test_days=1,
-                    seed=7,
                 ),
                 eligible_items=pl.DataFrame({"item_id": [10, 20]}),
             )

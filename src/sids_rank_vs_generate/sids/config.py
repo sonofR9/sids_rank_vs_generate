@@ -7,7 +7,6 @@ from dataclasses import dataclass
 class RQKMeansConfig:
     num_levels: int | None = 3
     codebook_size: int | None = 512
-    random_state: int = 42
     kmeans_batch_size: int = 16_384
     predict_batch_size: int = 65_536
     codebook_sizes: tuple[int, ...] | None = None

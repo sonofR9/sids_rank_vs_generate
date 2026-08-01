@@ -13,7 +13,7 @@ from ..data.generation import (
     prepare_generation_examples,
 )
 from ..models.semantic_transformer_model import SemanticTransformerModel
-from ..reproducibility import seed_everything
+from ..reproducibility import SID_EXPERIMENT_SEED, seed_everything
 from ..sids.collision_resolution import add_collision_resolving_sid, get_sid_cols
 from ..training.semantic_trainer import train_semantic
 from .semantic_validation_with_collision import (
@@ -53,7 +53,6 @@ class GenerationConfig:
     num_levels: int = 0
     codebook_size: int = 0
     rq_num_levels: int = 0
-    seed: int = 42
 
     def __post_init__(self) -> None:
         if self.d_model % self.num_heads:
@@ -93,7 +92,7 @@ class GenerationStage(IEvaluationStage):
         return "generation"
 
     def evaluate(self, context: EvaluationContext) -> dict[str, Any]:
-        seed_everything(context.seed)
+        seed_everything(SID_EXPERIMENT_SEED)
         base_semantic_df = context.items_with_sids.select(
             "item_id", *get_sid_cols(context.items_with_sids)
         )
@@ -120,7 +119,6 @@ class GenerationStage(IEvaluationStage):
             codebook_size=codebook_size,
             device=_resolve_device(self.config.device),
             checkpoint_path=context.artifact_dir / "best_model.pt",
-            seed=context.seed,
         )
 
         train_examples, validation_examples, item2idx = (
@@ -131,10 +129,12 @@ class GenerationStage(IEvaluationStage):
             )
         )
         train_examples = limit_examples(
-            train_examples, runtime.max_train_examples, context.seed
+            train_examples, runtime.max_train_examples, SID_EXPERIMENT_SEED
         )
         validation_examples = limit_examples(
-            validation_examples, runtime.max_validation_examples, context.seed
+            validation_examples,
+            runtime.max_validation_examples,
+            SID_EXPERIMENT_SEED,
         )
         if not train_examples or not validation_examples:
             raise ValueError("generation train and validation examples must be non-empty")

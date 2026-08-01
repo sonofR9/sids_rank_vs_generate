@@ -19,6 +19,15 @@ from sids_rank_vs_generate.sids import RQKMeansConfig, RQKMeansPipeline
 
 
 class FullRQKMeansExperimentTest(unittest.TestCase):
+    def test_sid_and_experiment_configs_do_not_accept_seed_overrides(self) -> None:
+        with self.assertRaises(TypeError):
+            RQKMeansConfig(random_state=7)
+        with self.assertRaises(TypeError):
+            ExperimentConfig(
+                sid_pipeline=RQKMeansPipeline(RQKMeansConfig()),
+                seed=7,
+            )
+
     def test_rqkmeans_runs_ranking_and_generation(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -92,7 +101,7 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                     timestamp_unit_seconds=1,
                 ),
                 sid_pipeline=RQKMeansPipeline(
-                    RQKMeansConfig(num_levels=2, codebook_size=2, random_state=7)
+                    RQKMeansConfig(num_levels=2, codebook_size=2)
                 ),
                 training=TrainingConfig(
                     ranking=RankingConfig(
@@ -133,7 +142,6 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                     ),
                 ),
                 reports_dir=root / "reports",
-                seed=7,
             )
 
             result = run_experiment(config)

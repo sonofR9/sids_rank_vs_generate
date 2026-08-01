@@ -10,8 +10,6 @@ EXPERIMENT = ExperimentConfig(
         RQKMeansConfig(
             num_levels=3,
             codebook_size=256,
-            random_state=42,
         )
     ),
-    seed=42,
 )

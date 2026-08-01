@@ -19,7 +19,6 @@ class EvaluationContext:
     prepared: PreparedInteractions
     items_with_sids: pl.DataFrame
     dataset: DatasetFiles
-    seed: int
     artifact_dir: Path
     max_rows: int | None = None
 
