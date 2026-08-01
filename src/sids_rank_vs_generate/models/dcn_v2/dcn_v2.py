@@ -101,30 +101,33 @@ class DCNV2(
         #####################
         ### (づ•̀ᴗ•́)づ──☆*:・ﾟ
         #####################
-        full_input = []
-        if self.dense_encoder is not None:
-            full_input.append(self.dense_encoder(inputs["dense_features"]))
+        if "precomputed_features" in inputs:
+            x = inputs["precomputed_features"]
+        else:
+            full_input = []
+            if self.dense_encoder is not None:
+                full_input.append(self.dense_encoder(inputs["dense_features"]))
 
-        for sparse_feature in self.sparse_feature_names:
-            full_input.append(
-                self.categorical_encoder(
-                    inputs["sparse_features"][sparse_feature]
-                ).flatten(start_dim=1)
-            )
+            for sparse_feature in self.sparse_feature_names:
+                full_input.append(
+                    self.categorical_encoder(
+                        inputs["sparse_features"][sparse_feature]
+                    ).flatten(start_dim=1)
+                )
 
-        for multivalent_feature in self.multivalent_feature_names:
-            full_input.append(
-                self.multivalent_encoder(
-                    inputs["multivalent_features"][multivalent_feature][
-                        "values"
-                    ],
-                    inputs["multivalent_features"][multivalent_feature][
-                        "lengths"
-                    ],
-                ).flatten(start_dim=1)
-            )
+            for multivalent_feature in self.multivalent_feature_names:
+                full_input.append(
+                    self.multivalent_encoder(
+                        inputs["multivalent_features"][multivalent_feature][
+                            "values"
+                        ],
+                        inputs["multivalent_features"][multivalent_feature][
+                            "lengths"
+                        ],
+                    ).flatten(start_dim=1)
+                )
 
-        x = torch.cat(full_input, dim=1)
+            x = torch.cat(full_input, dim=1)
 
         cross_out = self.cross_network(x)
         deep_out = self.deep(x)

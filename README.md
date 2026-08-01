@@ -87,8 +87,9 @@ For each run, the runner:
 
 Ranking examples pair each positive next interaction with sampled catalog
 negatives. The plain DCNv2 consumes the user and candidate SID levels. The
-TransAct-like model uses the same semantic-code embedding for both the candidate
-and item history.
+TransAct variant encodes the candidate-conditioned item history, concatenates
+that history vector with the user embedding, every candidate SID-level
+embedding, and candidate features, then applies the same DCNv2 cross/deep head.
 
 Generation predicts the target item's SID autoregressively from item history.
 Collision resolution can append a final disambiguation level; without it, beams

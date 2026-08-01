@@ -5,9 +5,14 @@ import unittest
 from pathlib import Path
 
 import polars as pl
+import torch
+from torch import nn
 
 from sids_rank_vs_generate.evaluation.generation_stage import GenerationConfig
-from sids_rank_vs_generate.evaluation.ranking_stage import RankingConfig
+from sids_rank_vs_generate.evaluation.ranking_stage import (
+    RankingConfig,
+    TransActRankingAdapter,
+)
 from sids_rank_vs_generate.experiment import (
     ExperimentConfig,
     YambdaDatasetConfig,
@@ -17,6 +22,30 @@ from sids_rank_vs_generate.sids import RQKMeansConfig, RQKMeansPipeline
 
 
 class FullRQKMeansExperimentTest(unittest.TestCase):
+    def test_transact_uses_dcnv2_instead_of_mlp_head(self) -> None:
+        config = RankingConfig(
+            embedding_dim=4,
+            dcn_cross_layers=1,
+            dcn_deep_units=(16, 8),
+            dcn_low_rank=4,
+            transact_d_model=8,
+            transact_heads=2,
+            transact_ff_dim=16,
+        )
+        model = TransActRankingAdapter(
+            num_users=3,
+            sid_codes=torch.tensor([[0, 0], [1, 1]], dtype=torch.long),
+            sid_cardinalities=(2, 2),
+            config=config,
+        )
+
+        self.assertIsInstance(model.history_encoder.mlp, nn.Identity)
+        expected_input_size = 4 + 2 * 4 + 3 + 8
+        self.assertEqual(
+            model.ranker.cross_network.layers[0].input_dim,
+            expected_input_size,
+        )
+
     def test_rqkmeans_runs_ranking_and_generation(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

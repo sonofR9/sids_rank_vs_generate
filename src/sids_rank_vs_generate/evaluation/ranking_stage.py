@@ -93,8 +93,11 @@ class SemanticItemEmbedding(nn.Module):
         init_embedding(self.embedding, padding_idx=0)
 
     def forward(self, item_ids: torch.Tensor) -> torch.Tensor:
+        return self.token_embeddings(item_ids).mean(dim=-2)
+
+    def token_embeddings(self, item_ids: torch.Tensor) -> torch.Tensor:
         tokens = self.item_to_tokens[item_ids]
-        return self.embedding(tokens).mean(dim=-2)
+        return self.embedding(tokens)
 
 
 class DCNRankingAdapter(nn.Module):
@@ -168,7 +171,32 @@ class TransActRankingAdapter(nn.Module):
         model.item_emb = SemanticItemEmbedding(
             sid_codes, sid_cardinalities, config.embedding_dim
         )
-        self.model = model
+        model.mlp = nn.Identity()
+        self.history_encoder = model
+
+        dcn_input_size = (
+            config.embedding_dim
+            + len(sid_cardinalities) * config.embedding_dim
+            + 3
+            + config.transact_d_model
+        )
+        self.ranker = DCNV2(
+            embedding_size=config.embedding_dim,
+            cross_layers=config.dcn_cross_layers,
+            deep_units=list(config.dcn_deep_units),
+            input_size=dcn_input_size,
+            dense_train_df=None,
+            n_bins=2,
+            train_df_slice=0,
+            cardinality=1,
+            num_experts=config.dcn_num_experts,
+            low_rank=min(config.dcn_low_rank, dcn_input_size),
+            deep_network="mlp",
+            output_size=1,
+            full_input_size_provided=True,
+            sparse_feature_names=(),
+            multivalent_feature_names=(),
+        )
 
     def forward(self, batch: dict[str, torch.Tensor]) -> torch.Tensor:
         inputs = {
@@ -176,7 +204,22 @@ class TransActRankingAdapter(nn.Module):
             for key, value in batch.items()
             if key not in {"target", "candidate_sids", "candidate_timestamp"}
         }
-        return self.model(**inputs)
+        features = self.history_encoder(**inputs, return_features=True)
+        sid_embeddings = self.history_encoder.item_emb.token_embeddings(
+            batch["candidate_item_idx"]
+        ).flatten(start_dim=1)
+        dcn_features = torch.cat(
+            [
+                features["user_embedding"],
+                sid_embeddings,
+                features["candidate_context"],
+                features["history_embedding"],
+            ],
+            dim=1,
+        )
+        return self.ranker(
+            {"precomputed_features": dcn_features}
+        ).squeeze(-1)
 
 
 def _move_batch(

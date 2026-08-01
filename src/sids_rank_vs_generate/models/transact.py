@@ -646,6 +646,8 @@ class CandidateTokenTransformer(nn.Module):
 
         history_lengths,
 
+        return_features=False,
+
         **kwargs,
     ):
         batch_size = user_idx.size(0)
@@ -866,6 +868,15 @@ class CandidateTokenTransformer(nn.Module):
             ],
             dim=-1,
         )
+
+        if return_features:
+            return {
+                "user_embedding": user_vec,
+                "candidate_embedding": candidate_vec,
+                "candidate_context": candidate_context,
+                "history_embedding": candidate_history_vec,
+                "concatenated": final_features,
+            }
 
         logits = self.mlp(
             final_features
