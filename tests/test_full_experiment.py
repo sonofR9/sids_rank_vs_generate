@@ -151,12 +151,21 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                 set(result["evaluations"]["ranking"]["models"]),
                 {"dcnv2", "transact"},
             )
+            self.assertNotIn(
+                "history",
+                result["evaluations"]["ranking"]["models"]["dcnv2"],
+            )
+            self.assertNotIn(
+                "history",
+                result["evaluations"]["ranking"]["models"]["transact"],
+            )
             ranking_features = result["evaluations"]["ranking"]["features"]
             self.assertEqual(ranking_features["dense"], list(DENSE_COLUMNS))
             self.assertEqual(
                 ranking_features["multivalent"], ["artist_ids", "album_ids"]
             )
             self.assertIn("statistics", result["sid"])
+            self.assertNotIn("history", result["evaluations"]["generation"])
             self.assertTrue(Path(result["artifacts"]["semantic_ids"]).is_file())
             self.assertTrue(
                 Path(result["evaluations"]["generation"]["checkpoint"]).is_file()

@@ -147,7 +147,7 @@ class GenerationStage(IEvaluationStage):
             else _build_sid_to_items(semantic_df, item2idx)
         )
         model = SemanticTransformerModel(len(item2idx), runtime).to(runtime.device)
-        history = train_semantic(
+        train_semantic(
             model,
             train_loader,
             validation_loader,
@@ -170,6 +170,5 @@ class GenerationStage(IEvaluationStage):
                 "validation": len(validation_examples),
             },
             "metrics": metrics,
-            "history": history,
             "checkpoint": runtime.checkpoint_path,
         }

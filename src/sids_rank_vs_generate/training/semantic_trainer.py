@@ -41,7 +41,6 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
     metric_name = f"recall@{cfg.recall_k}"
     best_metric = float("-inf")
     epochs_without_improvement = 0
-    history = []
 
     for epoch in range(1, cfg.max_epochs + 1):
         model.train()
@@ -79,14 +78,6 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
         )
 
         current_metric = metrics[metric_name]
-
-        history.append(
-            {
-                "epoch": epoch,
-                "train_loss": train_loss,
-                **metrics,
-            }
-        )
 
         print(
             f"epoch={epoch} | loss={train_loss:.6f} | "
@@ -129,5 +120,3 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
     )
 
     model.load_state_dict(checkpoint["model_state_dict"])
-
-    return history

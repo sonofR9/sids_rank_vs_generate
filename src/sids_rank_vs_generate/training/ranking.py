@@ -59,12 +59,9 @@ def train_ranking_model(
     criterion = nn.BCEWithLogitsLoss()
     best_state = None
     best_auc = float("-inf")
-    history = []
 
     for epoch in range(1, config.epochs + 1):
         model.train()
-        loss_sum = 0.0
-        count = 0
         progress = tqdm(
             train_loader,
             desc=f"ranking epoch {epoch}/{config.epochs}",
@@ -80,9 +77,6 @@ def train_ranking_model(
             nn.utils.clip_grad_norm_(model.parameters(), config.grad_clip)
             optimizer.step()
 
-            batch_size = batch["target"].size(0)
-            loss_sum += loss.item() * batch_size
-            count += batch_size
             progress.set_postfix(loss=f"{loss.item():.4f}")
 
         validation = evaluate_ranking_model(
@@ -90,13 +84,6 @@ def train_ranking_model(
             validation_loader,
             device,
             use_bf16=config.use_bf16,
-        )
-        history.append(
-            {
-                "epoch": epoch,
-                "train_loss": loss_sum / max(count, 1),
-                "validation": validation,
-            }
         )
         if validation["roc_auc"] > best_auc:
             best_auc = validation["roc_auc"]
@@ -108,7 +95,6 @@ def train_ranking_model(
     torch.save(best_state, artifact_path)
     return {
         "device": str(device),
-        "history": history,
         "test": evaluate_ranking_model(
             model,
             test_loader,
