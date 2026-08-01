@@ -13,7 +13,7 @@ from sids_rank_vs_generate.evaluation.semantic_validation_with_collision import 
 from sids_rank_vs_generate.evaluation.semantic_validation_without_collision import (
     validate_semantic_model_without_collisions,
 )
-from sids_rank_vs_generate.training.utils import move_to_device
+from sids_rank_vs_generate.training.utils import autocast, move_to_device
 
 
 def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
@@ -50,12 +50,13 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
         for batch in train_loader:
             batch = move_to_device(batch, cfg.device)
 
-            output = model(
-                batch["history"],
-                batch["positions"],
-                batch["mask"],
-                batch["sid"],
-            )
+            with autocast(batch["history"].device, cfg.use_bf16):
+                output = model(
+                    batch["history"],
+                    batch["positions"],
+                    batch["mask"],
+                    batch["sid"],
+                )
 
             loss = output["loss"]
 

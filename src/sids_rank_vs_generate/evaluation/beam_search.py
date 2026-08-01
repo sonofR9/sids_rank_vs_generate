@@ -1,6 +1,8 @@
 import torch
 import torch.nn.functional as F
 
+from ..training.utils import autocast
+
 
 @torch.inference_mode()
 def semantic_beam_search(
@@ -9,8 +11,26 @@ def semantic_beam_search(
     positions,
     mask,
     beam_size: int = 150,
+    use_bf16: bool = False,
 ):
     model.eval()
+    with autocast(history.device, use_bf16):
+        return _semantic_beam_search(
+            model,
+            history,
+            positions,
+            mask,
+            beam_size,
+        )
+
+
+def _semantic_beam_search(
+    model,
+    history,
+    positions,
+    mask,
+    beam_size,
+):
     memory, _ = model.encoder(
         history,
         positions,

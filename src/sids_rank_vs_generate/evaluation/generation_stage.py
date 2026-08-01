@@ -48,6 +48,7 @@ class GenerationConfig:
     resolve_collisions: bool = True
     max_train_examples: int | None = None
     max_validation_examples: int | None = 50_000
+    use_bf16: bool = True
     device: str = "auto"
     checkpoint_path: Path = Path("best_model.pt")
     num_levels: int = 0

@@ -3,7 +3,7 @@ from typing import Any
 
 import torch
 
-from ..training.utils import move_to_device
+from ..training.utils import autocast, move_to_device
 from .beam_search import semantic_beam_search
 
 
@@ -40,12 +40,13 @@ def validate_semantic_model_with_collisions(
     for batch in val_loader:
         batch = move_to_device(batch, cfg.device)
 
-        out = model(
-            batch["history"],
-            batch["positions"],
-            batch["mask"],
-            batch["sid"],
-        )
+        with autocast(batch["history"].device, cfg.use_bf16):
+            out = model(
+                batch["history"],
+                batch["positions"],
+                batch["mask"],
+                batch["sid"],
+            )
 
         preds = out["preds"]
 
@@ -59,6 +60,7 @@ def validate_semantic_model_with_collisions(
             positions=batch["positions"],
             mask=batch["mask"],
             beam_size=cfg.num_beams,
+            use_bf16=cfg.use_bf16,
         )
 
         for user_beams, target_item in zip(beams, batch["target"]):

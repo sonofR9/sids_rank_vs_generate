@@ -10,36 +10,7 @@ from ..data.ranking import (
     RankingData,
 )
 from .dcn_v2.dcn_v2 import DCNV2
-from .transact import CandidateTokenTransformer, init_embedding
-
-
-class SidEmbedding(nn.Module):
-    """Item embedding obtained from the item's semantic-ID tokens."""
-
-    def __init__(
-        self,
-        sid_codes: torch.Tensor,
-        cardinalities: tuple[int, ...],
-        embedding_dim: int,
-    ) -> None:
-        super().__init__()
-        offsets = []
-        offset = 1
-        for cardinality in cardinalities:
-            offsets.append(offset)
-            offset += cardinality
-        padded_codes = torch.zeros(
-            sid_codes.size(0) + 1,
-            sid_codes.size(1),
-            dtype=torch.long,
-        )
-        padded_codes[1:] = sid_codes + torch.tensor(offsets, dtype=torch.long)
-        self.register_buffer("item_to_tokens", padded_codes)
-        self.embedding = nn.Embedding(offset, embedding_dim, padding_idx=0)
-        init_embedding(self.embedding, padding_idx=0)
-
-    def forward(self, item_ids: torch.Tensor) -> torch.Tensor:
-        return self.embedding(self.item_to_tokens[item_ids]).mean(dim=-2)
+from .transact import CandidateTokenTransformer
 
 
 def _dcn_input_size(
@@ -79,13 +50,6 @@ def _base_dcn(
         sparse_feature_names=("uid", *data.sid_columns),
         multivalent_feature_names=MULTIVALENT_COLUMNS,
     )
-    for layer in model.cross_network.layers:
-        for expert in range(layer.num_experts):
-            nn.init.xavier_uniform_(layer.U[expert])
-            nn.init.xavier_uniform_(layer.V[expert])
-        nn.init.zeros_(layer.bias)
-        nn.init.xavier_uniform_(layer.gate.weight)
-        nn.init.zeros_(layer.gate.bias)
     return model
 
 
@@ -105,7 +69,7 @@ class TransActDcnV2Ranker(nn.Module):
         super().__init__()
         self.history_encoder = CandidateTokenTransformer(
             num_users=data.num_users,
-            num_items=data.sid_codes.size(0) + 1,
+            num_items=data.num_history_items,
             num_event_types=3,
             user_emb_dim=config.embedding_dim,
             item_emb_dim=config.embedding_dim,
@@ -117,11 +81,6 @@ class TransActDcnV2Ranker(nn.Module):
             hidden_dim=config.hidden_dim,
             dropout=config.dropout,
             max_history_len=config.max_history_len,
-        )
-        self.history_encoder.item_emb = SidEmbedding(
-            data.sid_codes,
-            data.sid_cardinalities,
-            config.embedding_dim,
         )
         self.history_encoder.mlp = nn.Identity()
         self.ranker = _base_dcn(

@@ -40,10 +40,9 @@ class RankingData:
     validation: pl.DataFrame
     test: pl.DataFrame
     dense_train: pl.DataFrame
-    sid_codes: torch.Tensor
-    sid_cardinalities: tuple[int, ...]
     sid_columns: tuple[str, ...]
     num_users: int
+    num_history_items: int
 
 
 def _require_file(path: Path | None, description: str) -> Path:
@@ -66,11 +65,12 @@ def _sid_columns(frame: pl.DataFrame) -> tuple[str, ...]:
 
 def _history_snapshots(
     prepared: PreparedInteractions,
+    history_item_mapping: pl.DataFrame,
     max_history_len: int,
 ) -> pl.DataFrame:
     item_history = pl.concat_list(
         [
-            pl.col("item_id").shift(offset).over("uid")
+            pl.col("history_item_idx").shift(offset).over("uid")
             for offset in range(max_history_len - 1, -1, -1)
         ]
     ).list.drop_nulls()
@@ -81,7 +81,9 @@ def _history_snapshots(
         ]
     ).list.drop_nulls()
     return (
-        prepared.data.sort(["uid", "timestamp"])
+        prepared.data.join(history_item_mapping, on="item_id", how="inner").sort(
+            ["uid", "timestamp"]
+        )
         .with_columns(
             item_history.alias("history_item_idxs"),
             time_history.alias("history_timestamps"),
@@ -93,6 +95,36 @@ def _history_snapshots(
             "history_timestamps",
         )
     )
+
+
+def _hash_expression(expression: pl.Expr, salt: int) -> pl.Expr:
+    return (
+        (expression.cast(pl.Int64) * 2_654_435_761 + salt)
+        % (HASH_CARDINALITY - 1)
+    ) + 1
+
+
+def _add_hashed_features(
+    frame: pl.DataFrame,
+    sid_columns: tuple[str, ...],
+) -> pl.DataFrame:
+    expressions = [_hash_expression(pl.col("uid"), 17).alias("uid_hash")]
+    expressions.extend(
+        _hash_expression(pl.col(column), 1_009 + level * 9_973).alias(
+            f"{column}_hash"
+        )
+        for level, column in enumerate(sid_columns)
+    )
+    for column, salt in (("artist_ids", 20_011), ("album_ids", 40_009)):
+        expressions.extend(
+            pl.col(column)
+            .list.eval(
+                _hash_expression(pl.element(), salt + hash_index * 104_729)
+            )
+            .alias(f"{column}_hash_{hash_index}")
+            for hash_index in range(NUM_HASHES)
+        )
+    return frame.with_columns(expressions)
 
 
 def _load_multivalent_mapping(
@@ -185,10 +217,25 @@ def prepare_ranking_data(
     if sid_frame.height != prepared.catalog_size:
         raise ValueError("ranking requires SIDs for the full prepared catalog")
 
+    sid_paths = (
+        sid_frame.select(sid_columns)
+        .unique()
+        .sort(sid_columns)
+        .with_row_index("history_item_idx", offset=1)
+    )
+    history_item_mapping = sid_frame.join(
+        sid_paths,
+        on=sid_columns,
+        how="inner",
+    ).select("item_id", "history_item_idx")
     candidates = _load_dcn_candidates(
         dataset, prepared, items_with_sids, max_rows
-    ).sort(["uid", "timestamp"])
-    histories = _history_snapshots(prepared, max_history_len)
+    ).join(sid_paths, on=sid_columns, how="inner").sort(["uid", "timestamp"])
+    histories = _history_snapshots(
+        prepared,
+        history_item_mapping,
+        max_history_len,
+    )
     merged = candidates.join_asof(
         histories,
         left_on="timestamp",
@@ -202,7 +249,10 @@ def prepare_ranking_data(
         raise ValueError("ranking data has no candidates with a preceding like history")
 
     user_mapping = merged.select("uid").unique().sort("uid").with_row_index("user_idx")
-    merged = merged.join(user_mapping, on="uid", how="inner")
+    merged = _add_hashed_features(
+        merged.join(user_mapping, on="uid", how="inner"),
+        sid_columns,
+    )
 
     train_pool = merged.filter(pl.col("timestamp") < prepared.test_start_timestamp)
     test = merged.filter(pl.col("timestamp") >= prepared.test_start_timestamp)
@@ -219,18 +269,14 @@ def prepare_ranking_data(
         if frame["target"].n_unique() < 2:
             raise ValueError(f"ranking {name} split must contain both labels")
 
-    sid_codes = torch.tensor(sid_frame.select(sid_columns).to_numpy(), dtype=torch.long)
     return RankingData(
         train=train,
         validation=validation,
         test=test,
         dense_train=train.select(DENSE_COLUMNS),
-        sid_codes=sid_codes,
-        sid_cardinalities=tuple(
-            int(sid_frame[column].max()) + 1 for column in sid_columns
-        ),
         sid_columns=sid_columns,
         num_users=user_mapping.height,
+        num_history_items=sid_paths.height + 1,
     )
 
 
@@ -245,23 +291,19 @@ class PolarsRankingDataset(Dataset):
         return self.frame.row(index, named=True)
 
 
-def _hash(values: torch.Tensor, salt: int) -> torch.Tensor:
-    return ((values * 2_654_435_761 + salt) % (HASH_CARDINALITY - 1)) + 1
-
-
-def _hash_multivalent(rows: list[list[int]], salt: int) -> dict[str, torch.Tensor]:
-    lengths = torch.tensor([len(row) for row in rows], dtype=torch.long)
-    flat = torch.tensor([value for row in rows for value in row], dtype=torch.long)
-    if flat.numel():
-        values = torch.stack(
-            [
-                _hash(flat, salt + hash_index * 104_729)
-                for hash_index in range(NUM_HASHES)
-            ],
-            dim=1,
-        )
-    else:
-        values = torch.empty((0, NUM_HASHES), dtype=torch.long)
+def _collate_multivalent(
+    batch: list[dict[str, Any]],
+    column: str,
+) -> dict[str, torch.Tensor]:
+    lengths = torch.tensor([len(row[column]) for row in batch], dtype=torch.long)
+    values = torch.tensor(
+        [
+            [row[f"{column}_hash_{index}"][position] for index in range(NUM_HASHES)]
+            for row in batch
+            for position in range(len(row[column]))
+        ],
+        dtype=torch.long,
+    ).reshape(-1, NUM_HASHES)
     return {"values": values, "lengths": lengths}
 
 
@@ -270,7 +312,7 @@ def collate_ranking(batch: list[dict[str, Any]]) -> dict[str, Any]:
         [len(row["history_item_idxs"]) for row in batch], dtype=torch.long
     )
     history_items = torch.tensor(
-        [item + 1 for row in batch for item in row["history_item_idxs"]],
+        [item for row in batch for item in row["history_item_idxs"]],
         dtype=torch.long,
     )
     history_deltas = (
@@ -287,17 +329,21 @@ def collate_ranking(batch: list[dict[str, Any]]) -> dict[str, Any]:
     )
     sid_columns = tuple(
         sorted(
-            (column for column in batch[0] if column.startswith("sid_")),
+            (
+                column
+                for column in batch[0]
+                if column.startswith("sid_") and column[4:].isdigit()
+            ),
             key=lambda column: int(column[4:]),
         )
     )
     sparse = {
-        "uid": _hash(torch.tensor([row["uid"] for row in batch], dtype=torch.long), 17)
+        "uid": torch.tensor([row["uid_hash"] for row in batch], dtype=torch.long)
     }
-    for level, column in enumerate(sid_columns):
-        sparse[column] = _hash(
-            torch.tensor([row[column] for row in batch], dtype=torch.long),
-            1_009 + level * 9_973,
+    for column in sid_columns:
+        sparse[column] = torch.tensor(
+            [row[f"{column}_hash"] for row in batch],
+            dtype=torch.long,
         )
 
     zeros = torch.zeros(history_items.numel(), dtype=torch.float32)
@@ -311,14 +357,12 @@ def collate_ranking(batch: list[dict[str, Any]]) -> dict[str, Any]:
         ),
         "sparse_features": sparse,
         "multivalent_features": {
-            "artist_ids": _hash_multivalent(
-                [row["artist_ids"] for row in batch], 20_011
-            ),
-            "album_ids": _hash_multivalent([row["album_ids"] for row in batch], 40_009),
+            "artist_ids": _collate_multivalent(batch, "artist_ids"),
+            "album_ids": _collate_multivalent(batch, "album_ids"),
         },
         "user_idx": torch.tensor([row["user_idx"] for row in batch], dtype=torch.long),
         "candidate_item_idx": torch.tensor(
-            [row["item_id"] + 1 for row in batch], dtype=torch.long
+            [row["history_item_idx"] for row in batch], dtype=torch.long
         ),
         "candidate_timestamp": torch.tensor(
             [row["timestamp"] for row in batch], dtype=torch.float64

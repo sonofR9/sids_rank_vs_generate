@@ -7,10 +7,19 @@ class MixtureLowRankCrossLayer(nn.Module):
         self.input_dim = input_dim
         self.num_experts = num_experts
         self.rank = rank
-        self.U = nn.Parameter(torch.randn(num_experts, input_dim, rank))
-        self.V = nn.Parameter(torch.rand(num_experts, input_dim, rank))
-        self.bias = nn.Parameter(torch.rand(input_dim))
+        self.U = nn.Parameter(torch.empty(num_experts, input_dim, rank))
+        self.V = nn.Parameter(torch.empty(num_experts, input_dim, rank))
+        self.bias = nn.Parameter(torch.empty(input_dim))
         self.gate = nn.Linear(input_dim, num_experts)
+        self.reset_parameters()
+
+    def reset_parameters(self) -> None:
+        for expert in range(self.num_experts):
+            nn.init.xavier_uniform_(self.U[expert])
+            nn.init.xavier_uniform_(self.V[expert])
+        nn.init.zeros_(self.bias)
+        nn.init.xavier_uniform_(self.gate.weight)
+        nn.init.zeros_(self.gate.bias)
 
     def forward(self, x0: torch.Tensor, xl: torch.Tensor) -> torch.Tensor:
         expert_outputs = []
