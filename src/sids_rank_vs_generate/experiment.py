@@ -21,7 +21,7 @@ class YambdaDatasetConfig:
     size: str = "50m"
     interactions_path: Path | None = None
     embeddings_path: Path | None = None
-    source_embeddings_path: Path | None = Path("embeddings.parquet")
+    source_embeddings_path: Path | None = None
     core_min_interactions_per_item: int = 5
     test_days: float = 7.0
     timestamp_unit_seconds: float = 5.0

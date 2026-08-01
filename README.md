@@ -22,8 +22,8 @@ pip install -e .
 ## Data
 
 The default dataset is the official `yandex/yambda` `flat/50m/likes.parquet`
-file. The runner prepares a compact item-embedding cache from the global
-precomputed embeddings supplied as `embeddings.parquet`:
+file. The runner downloads the official global precomputed embeddings once and
+prepares a compact item-embedding cache:
 
 ```text
 ~/.cache/sids_rank_vs_generate/datasets/yambda-50m/
@@ -41,8 +41,6 @@ An experiment file contains the instantiated SID pipeline and downstream
 configuration. SID statistics are always calculated by the runner.
 
 ```python
-from pathlib import Path
-
 from sids_rank_vs_generate.evaluation.generation_stage import GenerationConfig
 from sids_rank_vs_generate.evaluation.ranking_stage import RankingConfig
 from sids_rank_vs_generate.experiment import ExperimentConfig, YambdaDatasetConfig
@@ -51,7 +49,7 @@ from sids_rank_vs_generate.sids import RQKMeansConfig, RQKMeansPipeline
 
 EXPERIMENT = ExperimentConfig(
     dataset=YambdaDatasetConfig(
-        source_embeddings_path=Path("embeddings.parquet"),
+        latest_interactions=200_000,
     ),
     sid_pipeline=RQKMeansPipeline(
         RQKMeansConfig(num_levels=3, codebook_size=256),
@@ -70,7 +68,8 @@ python run.py experiments/rqkmeans_full.py
 
 Set `ranking=None` or `generation=None` to skip that downstream task. A config
 can also point `interactions_path` and `embeddings_path` at explicitly prepared
-Parquet files.
+Parquet files. `latest_interactions` limits the raw interactions to the newest
+rows before core filtering, which is useful for faster end-to-end experiments.
 
 ## Pipeline
 
