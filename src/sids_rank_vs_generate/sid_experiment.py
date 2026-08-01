@@ -220,8 +220,10 @@ def run_sid_experiment(
         context = EvaluationContext(
             prepared=prepared,
             items_with_sids=items_with_sids,
+            dataset=config.dataset,
             seed=config.seed,
             artifact_dir=stage_artifact_dir,
+            max_rows=config.latest_interactions,
         )
         metrics = evaluator.evaluate(context)
         if not isinstance(metrics, Mapping):
@@ -245,9 +247,7 @@ def run_sid_experiment(
                 "source_items": raw_item_features.height,
                 "catalog_items": item_features.height,
                 "columns": [
-                    column
-                    for column in item_features.columns
-                    if column != "item_id"
+                    column for column in item_features.columns if column != "item_id"
                 ],
             },
             "evaluations": evaluations,

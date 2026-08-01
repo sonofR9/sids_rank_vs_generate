@@ -127,6 +127,9 @@ class DCNV2(
                     ).flatten(start_dim=1)
                 )
 
+            if "additional_features" in inputs:
+                full_input.append(inputs["additional_features"])
+
             x = torch.cat(full_input, dim=1)
 
         cross_out = self.cross_network(x)

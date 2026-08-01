@@ -1,13 +1,7 @@
 import torch
 
+from ..training.utils import move_to_device
 from .beam_search import semantic_beam_search
-
-
-def to_device(batch, device):
-    return {
-        key: value.to(device, non_blocking=True)
-        for key, value in batch.items()
-    }
 
 
 @torch.inference_mode()
@@ -25,7 +19,7 @@ def validate_semantic_model_without_collisions(
     top1_exact = 0
 
     for batch in val_loader:
-        batch = to_device(batch, cfg.device)
+        batch = move_to_device(batch, cfg.device)
 
         out = model(
             batch["history"],
@@ -48,7 +42,7 @@ def validate_semantic_model_without_collisions(
             beam_size=cfg.num_beams,
         )
 
-        beams = beams[:, :cfg.recall_k]
+        beams = beams[:, : cfg.recall_k]
 
         hit = (beams == batch["sid"][:, None, :]).all(dim=-1).any(dim=1)
 

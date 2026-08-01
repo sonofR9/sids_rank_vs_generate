@@ -9,6 +9,7 @@ from typing import Any, Mapping
 import polars as pl
 
 from ..data import PreparedInteractions
+from ..datasets import DatasetFiles
 
 
 @dataclass(frozen=True)
@@ -17,8 +18,10 @@ class EvaluationContext:
 
     prepared: PreparedInteractions
     items_with_sids: pl.DataFrame
+    dataset: DatasetFiles
     seed: int
     artifact_dir: Path
+    max_rows: int | None = None
 
 
 class IEvaluationStage(ABC):
@@ -58,7 +61,5 @@ def create_evaluation_stage(name: str) -> IEvaluationStage:
             "expected IEvaluationStage"
         )
     if stage.name != name:
-        raise ValueError(
-            f"factory for {name!r} produced a stage named {stage.name!r}"
-        )
+        raise ValueError(f"factory for {name!r} produced a stage named {stage.name!r}")
     return stage

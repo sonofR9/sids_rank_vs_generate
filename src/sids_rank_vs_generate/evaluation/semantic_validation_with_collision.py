@@ -3,14 +3,9 @@ from typing import Any
 
 import torch
 
+from ..training.utils import move_to_device
 from .beam_search import semantic_beam_search
 
-
-def to_device(batch, device):
-    return {
-        key: value.to(device, non_blocking=True)
-        for key, value in batch.items()
-    }
 
 # просто беру иду по всем предсказанным сидам, если у кого-то коллизия, то их все выписываю все, беру топ-к айтемомов
 def beams_to_items(user_beams, sid_to_items, k):
@@ -43,7 +38,7 @@ def validate_semantic_model_with_collisions(
     top1_exact = 0
 
     for batch in val_loader:
-        batch = to_device(batch, cfg.device)
+        batch = move_to_device(batch, cfg.device)
 
         out = model(
             batch["history"],

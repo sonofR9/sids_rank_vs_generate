@@ -21,11 +21,13 @@ class YambdaDatasetConfig:
     size: str = "50m"
     interactions_path: Path | None = None
     embeddings_path: Path | None = None
+    ranking_interactions_path: Path | None = None
+    artist_mapping_path: Path | None = None
+    album_mapping_path: Path | None = None
     source_embeddings_path: Path | None = None
     core_min_interactions_per_item: int = 5
     test_days: float = 7.0
     timestamp_unit_seconds: float = 5.0
-    latest_interactions: int | None = None
 
     def resolve(self) -> DatasetFiles:
         if self.interactions_path is not None or self.embeddings_path is not None:
@@ -37,6 +39,21 @@ class YambdaDatasetConfig:
                 size=self.size,
                 interactions_path=Path(self.interactions_path),
                 embeddings_path=Path(self.embeddings_path),
+                ranking_interactions_path=(
+                    Path(self.ranking_interactions_path)
+                    if self.ranking_interactions_path is not None
+                    else None
+                ),
+                artist_mapping_path=(
+                    Path(self.artist_mapping_path)
+                    if self.artist_mapping_path is not None
+                    else None
+                ),
+                album_mapping_path=(
+                    Path(self.album_mapping_path)
+                    if self.album_mapping_path is not None
+                    else None
+                ),
             )
         return resolve_dataset(
             self.size,
@@ -49,19 +66,24 @@ class YambdaDatasetConfig:
 
 
 @dataclass(frozen=True)
+class TrainingConfig:
+    """Optional hyperparameter overrides; model and stage choices stay fixed."""
+
+    ranking: RankingConfig = RankingConfig()
+    generation: GenerationConfig = GenerationConfig()
+
+
+@dataclass(frozen=True)
 class ExperimentConfig:
     sid_pipeline: ISidPipeline
     dataset: YambdaDatasetConfig = YambdaDatasetConfig()
-    ranking: RankingConfig | None = None
-    generation: GenerationConfig | None = None
+    training: TrainingConfig = TrainingConfig()
     reports_dir: Path = Path("reports/experiments")
     seed: int = 42
 
     def __post_init__(self) -> None:
         if not isinstance(self.sid_pipeline, ISidPipeline):
             raise TypeError("sid_pipeline must implement ISidPipeline")
-        if self.ranking is None and self.generation is None:
-            raise ValueError("enable at least one of ranking or generation")
 
 
 def _load_module(path: Path) -> ModuleType:
@@ -97,13 +119,30 @@ def load_experiment_config(spec: str) -> ExperimentConfig:
     return config
 
 
-def run_experiment(config: ExperimentConfig) -> dict[str, Any]:
+def run_experiment(
+    config: ExperimentConfig,
+    *,
+    run_ranking: bool = True,
+    run_generation: bool = True,
+    max_rows: int | None = None,
+) -> dict[str, Any]:
+    if not run_ranking and not run_generation:
+        raise ValueError("at least one evaluation stage must run")
+    if max_rows is not None and max_rows <= 0:
+        raise ValueError("max_rows must be positive")
     dataset = config.dataset.resolve()
-    stages = {}
-    if config.ranking is not None:
-        stages["ranking"] = RankingStage(config.ranking)
-    if config.generation is not None:
-        stages["generation"] = GenerationStage(config.generation)
+    stages = {
+        "ranking": RankingStage(config.training.ranking),
+        "generation": GenerationStage(config.training.generation),
+    }
+    enabled_stages = tuple(
+        name
+        for name, enabled in (
+            ("ranking", run_ranking),
+            ("generation", run_generation),
+        )
+        if enabled
+    )
 
     def resolve_stage(name: str):
         return stages[name]
@@ -112,14 +151,14 @@ def run_experiment(config: ExperimentConfig) -> dict[str, Any]:
         SidExperimentConfig(
             dataset=dataset,
             sid_pipeline=config.sid_pipeline,
-            enabled_stages=tuple(stages),
+            enabled_stages=enabled_stages,
             reports_dir=config.reports_dir,
             core_min_interactions_per_item=(
                 config.dataset.core_min_interactions_per_item
             ),
             test_days=config.dataset.test_days,
             timestamp_unit_seconds=config.dataset.timestamp_unit_seconds,
-            latest_interactions=config.dataset.latest_interactions,
+            latest_interactions=max_rows,
             seed=config.seed,
         ),
         stage_resolver=resolve_stage,
@@ -134,12 +173,32 @@ def build_parser() -> argparse.ArgumentParser:
         "config",
         help="Python config path, optionally followed by :attribute.",
     )
+    parser.add_argument(
+        "--skip-ranking",
+        action="store_true",
+        help="Skip both fixed ranking models.",
+    )
+    parser.add_argument(
+        "--skip-generation",
+        action="store_true",
+        help="Skip TIGER-like generation.",
+    )
+    parser.add_argument(
+        "--max-rows",
+        type=int,
+        help="Use only the latest N rows from each interaction source.",
+    )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     config = load_experiment_config(args.config)
-    result = run_experiment(config)
+    result = run_experiment(
+        config,
+        run_ranking=not args.skip_ranking,
+        run_generation=not args.skip_generation,
+        max_rows=args.max_rows,
+    )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0

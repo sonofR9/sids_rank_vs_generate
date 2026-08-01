@@ -14,16 +14,23 @@ DEFAULT_CACHE_ROOT = Path.home() / ".cache" / "sids_rank_vs_generate" / "dataset
 HF_DATASET_REPO = "yandex/yambda"
 HF_LIKES_FILE = "flat/50m/likes.parquet"
 HF_EMBEDDINGS_FILE = "embeddings.parquet"
+HF_RANKING_REPO = "matfu21/yambda-50m-lag-features"
+HF_RANKING_FILE = "listens.parquet"
+HF_ARTIST_MAPPING_FILE = "artist_item_mapping.parquet"
+HF_ALBUM_MAPPING_FILE = "album_item_mapping.parquet"
 PREPARED_EMBEDDINGS_FILE = "embeddings.parquet"
 
 
 @dataclass(frozen=True)
 class DatasetFiles:
-    """Resolved Yambda-50M likes and its prepared content vectors."""
+    """Resolved inputs shared by SID, generation, and ranking stages."""
 
     size: str
     interactions_path: Path
     embeddings_path: Path
+    ranking_interactions_path: Path | None = None
+    artist_mapping_path: Path | None = None
+    album_mapping_path: Path | None = None
 
 
 def _hf_download(repo_id: str, *, filename: str, repo_type: str) -> str:
@@ -68,15 +75,9 @@ def prepare_embedding_subset(
         else "embed" if "embed" in schema else None
     )
     if vector_column is None:
-        raise ValueError(
-            "source embeddings must contain embed or normalized_embed"
-        )
+        raise ValueError("source embeddings must contain embed or normalized_embed")
 
-    liked_items = (
-        pl.scan_parquet(interactions_path)
-        .select("item_id")
-        .unique()
-    )
+    liked_items = pl.scan_parquet(interactions_path).select("item_id").unique()
     subset = (
         source_query.select("item_id", vector_column)
         .join(liked_items, on="item_id", how="inner")
@@ -161,4 +162,25 @@ def resolve_dataset(
         size=DEFAULT_DATASET_SIZE,
         interactions_path=interactions_path,
         embeddings_path=embeddings_path,
+        ranking_interactions_path=Path(
+            download(
+                HF_RANKING_REPO,
+                filename=HF_RANKING_FILE,
+                repo_type="dataset",
+            )
+        ).expanduser(),
+        artist_mapping_path=Path(
+            download(
+                HF_DATASET_REPO,
+                filename=HF_ARTIST_MAPPING_FILE,
+                repo_type="dataset",
+            )
+        ).expanduser(),
+        album_mapping_path=Path(
+            download(
+                HF_DATASET_REPO,
+                filename=HF_ALBUM_MAPPING_FILE,
+                repo_type="dataset",
+            )
+        ).expanduser(),
     )

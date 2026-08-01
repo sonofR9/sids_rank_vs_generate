@@ -1,14 +1,19 @@
-
 """ Модуль обучает семантик трансформер, проверяет его на валидационной выборке, 
 сохраняет лучшую модель по реколу и останавливает обучение, если качество долго не улучшается. 
 В конце берём лучшую модель по реколу
 Сейчас тут два режима валидации с коллизиями и без"""
+
 from pathlib import Path
 
 import torch
 
-from sids_rank_vs_generate.evaluation.semantic_validation_with_collision import validate_semantic_model_with_collisions
-from sids_rank_vs_generate.evaluation.semantic_validation_without_collision import to_device, validate_semantic_model_without_collisions
+from sids_rank_vs_generate.evaluation.semantic_validation_with_collision import (
+    validate_semantic_model_with_collisions,
+)
+from sids_rank_vs_generate.evaluation.semantic_validation_without_collision import (
+    validate_semantic_model_without_collisions,
+)
+from sids_rank_vs_generate.training.utils import move_to_device
 
 
 def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
@@ -27,7 +32,8 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
     else:
         if sid_to_items is None:
             raise ValueError(
-                "Для использования режима с коллизиями нужно передать маппер их сидов в айтемы: sid_to_items")
+                "Для использования режима с коллизиями нужно передать маппер их сидов в айтемы: sid_to_items"
+            )
 
         validate_fn = validate_semantic_model_with_collisions
         validation_kwargs = {"sid_to_items": sid_to_items}
@@ -43,7 +49,7 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
         sample_count = 0
 
         for batch in train_loader:
-            batch = to_device(batch, cfg.device)
+            batch = move_to_device(batch, cfg.device)
 
             output = model(
                 batch["history"],
@@ -74,11 +80,13 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
 
         current_metric = metrics[metric_name]
 
-        history.append({
-            "epoch": epoch,
-            "train_loss": train_loss,
-            **metrics,
-        })
+        history.append(
+            {
+                "epoch": epoch,
+                "train_loss": train_loss,
+                **metrics,
+            }
+        )
 
         print(
             f"epoch={epoch} | loss={train_loss:.6f} | "
@@ -89,13 +97,16 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
             best_metric = current_metric
             epochs_without_improvement = 0
 
-            torch.save({
-                "epoch": epoch,
-                "model_state_dict": model.state_dict(),
-                "optimizer_state_dict": optimizer.state_dict(),
-                "best_metric": best_metric,
-                "config": cfg,
-            }, checkpoint_path)
+            torch.save(
+                {
+                    "epoch": epoch,
+                    "model_state_dict": model.state_dict(),
+                    "optimizer_state_dict": optimizer.state_dict(),
+                    "best_metric": best_metric,
+                    "config": cfg,
+                },
+                checkpoint_path,
+            )
 
             print("Saved new best model")
             continue

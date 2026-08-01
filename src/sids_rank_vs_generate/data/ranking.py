@@ -1,271 +1,361 @@
 from __future__ import annotations
 
-import math
-import random
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 import polars as pl
 import torch
 from torch.utils.data import DataLoader, Dataset
 
+from ..datasets import DatasetFiles
 from .preprocessing import PreparedInteractions
 
 
-@dataclass(frozen=True)
-class RankingExample:
-    sequence_index: int
-    position: int
-    user_index: int
-    candidate_item: int
-    timestamp: Any
-    target: float
+DENSE_COLUMNS = (
+    "user_lag_listen_cnt",
+    "user_lag_like_cnt",
+    "user_lag_full_play_cnt",
+    "user_lag_skip_cnt",
+    "item_lag_listen_cnt",
+    "item_lag_like_cnt",
+    "item_lag_full_play_cnt",
+    "item_lag_skip_cnt",
+    "ui_lag_listen_cnt",
+    "ui_lag_like_cnt",
+    "ui_lag_full_play_cnt",
+    "ui_lag_skip_cnt",
+    "user_lag_avg_played_ratio",
+    "item_lag_avg_played_ratio",
+    "ui_lag_avg_played_ratio",
+)
+MULTIVALENT_COLUMNS = ("artist_ids", "album_ids")
+HASH_CARDINALITY = 65_536
+NUM_HASHES = 2
 
 
 @dataclass(frozen=True)
 class RankingData:
-    sequences: list[tuple[list[int], list[Any]]]
-    train_examples: list[RankingExample]
-    validation_examples: list[RankingExample]
-    test_examples: list[RankingExample]
+    train: pl.DataFrame
+    validation: pl.DataFrame
+    test: pl.DataFrame
+    dense_train: pl.DataFrame
     sid_codes: torch.Tensor
     sid_cardinalities: tuple[int, ...]
+    sid_columns: tuple[str, ...]
     num_users: int
 
 
-class SemanticRankingDataset(Dataset):
-    def __init__(
-        self,
-        sequences: list[tuple[list[int], list[Any]]],
-        examples: list[RankingExample],
-        sid_codes: torch.Tensor,
-        max_history_len: int,
-    ) -> None:
-        self.sequences = sequences
-        self.examples = examples
-        self.sid_codes = sid_codes
-        self.max_history_len = max_history_len
-
-    def __len__(self) -> int:
-        return len(self.examples)
-
-    def __getitem__(self, index: int) -> dict[str, Any]:
-        example = self.examples[index]
-        items, timestamps = self.sequences[example.sequence_index]
-        start = max(0, example.position - self.max_history_len)
-        history_items = items[start : example.position]
-        history_timestamps = timestamps[start : example.position]
-        time_deltas = [
-            math.log1p(max(float(example.timestamp - timestamp), 0.0))
-            for timestamp in history_timestamps
-        ]
-        candidate_index = example.candidate_item + 1
-        return {
-            "user_idx": example.user_index,
-            "candidate_item_idx": candidate_index,
-            "candidate_sids": self.sid_codes[example.candidate_item],
-            "candidate_timestamp": example.timestamp,
-            "candidate_is_organic": 0.0,
-            "candidate_track_length_z": 0.0,
-            "candidate_has_track_length": 0.0,
-            "history_item_idxs": [item + 1 for item in history_items],
-            "history_event_type_idxs": [2] * len(history_items),
-            "history_is_organic": [0.0] * len(history_items),
-            "history_played_ratio": [0.0] * len(history_items),
-            "history_has_played_ratio": [0.0] * len(history_items),
-            "history_track_length_z": [0.0] * len(history_items),
-            "history_has_track_length": [0.0] * len(history_items),
-            "history_time_delta_z": time_deltas,
-            "target": example.target,
-        }
+def _require_file(path: Path | None, description: str) -> Path:
+    if path is None:
+        raise ValueError(f"{description} is required for the ranking stage")
+    resolved = path.expanduser()
+    if not resolved.is_file():
+        raise FileNotFoundError(f"{description} not found: {resolved}")
+    return resolved
 
 
-def _flatten(batch: list[dict[str, Any]], field: str) -> list[Any]:
-    return [value for example in batch for value in example[field]]
-
-
-def collate_semantic_ranking(batch: list[dict[str, Any]]) -> dict[str, torch.Tensor]:
-    lengths = torch.tensor(
-        [len(example["history_item_idxs"]) for example in batch],
-        dtype=torch.long,
+def _sid_columns(frame: pl.DataFrame) -> tuple[str, ...]:
+    columns = (
+        column
+        for column in frame.columns
+        if column.startswith("sid_") and column[4:].isdigit()
     )
-    result = {
-        "user_idx": torch.tensor([x["user_idx"] for x in batch], dtype=torch.long),
-        "candidate_item_idx": torch.tensor(
-            [x["candidate_item_idx"] for x in batch], dtype=torch.long
-        ),
-        "candidate_sids": torch.stack([x["candidate_sids"] for x in batch]),
-        "candidate_timestamp": torch.tensor(
-            [x["candidate_timestamp"] for x in batch], dtype=torch.float64
-        ),
-        "candidate_is_organic": torch.tensor(
-            [x["candidate_is_organic"] for x in batch], dtype=torch.float32
-        ),
-        "candidate_track_length_z": torch.tensor(
-            [x["candidate_track_length_z"] for x in batch], dtype=torch.float32
-        ),
-        "candidate_has_track_length": torch.tensor(
-            [x["candidate_has_track_length"] for x in batch], dtype=torch.float32
-        ),
-        "history_lengths": lengths,
-        "target": torch.tensor([x["target"] for x in batch], dtype=torch.float32),
-    }
-    flat_fields = {
-        "history_item_idxs": torch.long,
-        "history_event_type_idxs": torch.long,
-        "history_is_organic": torch.float32,
-        "history_played_ratio": torch.float32,
-        "history_has_played_ratio": torch.float32,
-        "history_track_length_z": torch.float32,
-        "history_has_track_length": torch.float32,
-        "history_time_delta_z": torch.float32,
-    }
-    for field, dtype in flat_fields.items():
-        result[f"{field}_flat"] = torch.tensor(_flatten(batch, field), dtype=dtype)
-    return result
+    return tuple(sorted(columns, key=lambda column: int(column[4:])))
 
 
-def _negative_item(
-    rng: random.Random,
-    catalog_size: int,
-    positive: int,
-    history: list[int],
-) -> int:
-    excluded = set(history)
-    excluded.add(positive)
-    if len(excluded) >= catalog_size:
-        return (positive + 1) % catalog_size
-    while True:
-        candidate = rng.randrange(catalog_size)
-        if candidate not in excluded:
-            return candidate
+def _history_snapshots(
+    prepared: PreparedInteractions,
+    max_history_len: int,
+) -> pl.DataFrame:
+    item_history = pl.concat_list(
+        [
+            pl.col("item_id").shift(offset).over("uid")
+            for offset in range(max_history_len - 1, -1, -1)
+        ]
+    ).list.drop_nulls()
+    time_history = pl.concat_list(
+        [
+            pl.col("timestamp").shift(offset).over("uid")
+            for offset in range(max_history_len - 1, -1, -1)
+        ]
+    ).list.drop_nulls()
+    return (
+        prepared.data.sort(["uid", "timestamp"])
+        .with_columns(
+            item_history.alias("history_item_idxs"),
+            time_history.alias("history_timestamps"),
+        )
+        .select(
+            "uid",
+            pl.col("timestamp").alias("history_timestamp"),
+            "history_item_idxs",
+            "history_timestamps",
+        )
+    )
+
+
+def _load_multivalent_mapping(
+    path: Path,
+    id_column: str,
+    eligible_items: pl.LazyFrame,
+) -> pl.LazyFrame:
+    return (
+        pl.scan_parquet(path)
+        .join(eligible_items, on="item_id", how="inner")
+        .group_by("item_id")
+        .agg(pl.col(id_column).alias(f"{id_column}s"))
+    )
+
+
+def _load_dcn_candidates(
+    dataset: DatasetFiles,
+    prepared: PreparedInteractions,
+    items_with_sids: pl.DataFrame,
+    max_rows: int | None,
+) -> pl.DataFrame:
+    ranking_path = _require_file(
+        dataset.ranking_interactions_path,
+        "DCNv2 lag-feature interactions parquet",
+    )
+    artist_path = _require_file(dataset.artist_mapping_path, "artist mapping parquet")
+    album_path = _require_file(dataset.album_mapping_path, "album mapping parquet")
+
+    item_mapping = prepared.item_mapping.lazy()
+    eligible_items = item_mapping.select(
+        pl.col("original_item_id").cast(pl.UInt32).alias("item_id")
+    )
+    candidates = pl.scan_parquet(ranking_path)
+    required_columns = set(DENSE_COLUMNS) | {
+        "uid",
+        "timestamp",
+        "item_id",
+        "track_length_seconds",
+        "played_ratio_pct",
+        "is_like",
+    }
+    missing = required_columns - set(candidates.collect_schema().names())
+    if missing:
+        raise ValueError(f"ranking interactions are missing columns: {sorted(missing)}")
+
+    candidates = candidates.join(eligible_items, on="item_id", how="inner")
+    if max_rows is not None:
+        candidates = candidates.top_k(max_rows, by="timestamp")
+
+    artist_mapping = _load_multivalent_mapping(artist_path, "artist_id", eligible_items)
+    album_mapping = _load_multivalent_mapping(album_path, "album_id", eligible_items)
+    sids = (
+        items_with_sids.select("item_id", *_sid_columns(items_with_sids))
+        .rename({"item_id": "mapped_item_id"})
+        .lazy()
+    )
+
+    return (
+        candidates.join(artist_mapping, on="item_id", how="left")
+        .join(album_mapping, on="item_id", how="left")
+        .rename({"item_id": "original_item_id"})
+        .join(item_mapping, on="original_item_id", how="inner")
+        .join(sids, left_on="item_id", right_on="mapped_item_id", how="inner")
+        .with_columns(
+            pl.col("artist_ids").fill_null(pl.lit([], dtype=pl.List(pl.UInt32))),
+            pl.col("album_ids").fill_null(pl.lit([], dtype=pl.List(pl.UInt32))),
+            pl.col("is_like").cast(pl.Float32).alias("target"),
+            pl.col(DENSE_COLUMNS).cast(pl.Float32).fill_nan(0.0).fill_null(0.0),
+        )
+        .collect()
+    )
 
 
 def prepare_ranking_data(
     prepared: PreparedInteractions,
     items_with_sids: pl.DataFrame,
+    dataset: DatasetFiles,
     *,
+    max_history_len: int,
     min_history_len: int,
-    negatives_per_positive: int,
     validation_fraction: float,
-    max_train_examples: int | None,
-    max_eval_examples: int | None,
-    seed: int,
+    max_rows: int | None,
 ) -> RankingData:
-    sid_columns = sorted(
-        (column for column in items_with_sids.columns if column.startswith("sid_")),
-        key=lambda column: int(column.split("_")[1]),
-    )
+    """Merge DCNv2 features with the latest like history before each candidate."""
+
+    sid_columns = _sid_columns(items_with_sids)
+    if not sid_columns:
+        raise ValueError("ranking requires at least one semantic-ID column")
     sid_frame = items_with_sids.select("item_id", *sid_columns).sort("item_id")
     if sid_frame.height != prepared.catalog_size:
         raise ValueError("ranking requires SIDs for the full prepared catalog")
-    sid_codes = torch.tensor(
-        sid_frame.select(sid_columns).to_numpy(),
-        dtype=torch.long,
-    )
-    sid_cardinalities = tuple(
-        int(sid_frame[column].max()) + 1 for column in sid_columns
-    )
 
-    grouped = (
-        prepared.data.sort(["uid", "timestamp"])
-        .group_by("uid", maintain_order=True)
-        .agg(pl.col("item_id"), pl.col("timestamp"))
-    )
-    sequences: list[tuple[list[int], list[Any]]] = []
-    train_examples: list[RankingExample] = []
-    validation_examples: list[RankingExample] = []
-    test_examples: list[RankingExample] = []
-    rng = random.Random(seed)
-    validation_start = prepared.train["timestamp"].quantile(
+    candidates = _load_dcn_candidates(
+        dataset, prepared, items_with_sids, max_rows
+    ).sort(["uid", "timestamp"])
+    histories = _history_snapshots(prepared, max_history_len)
+    merged = candidates.join_asof(
+        histories,
+        left_on="timestamp",
+        right_on="history_timestamp",
+        by="uid",
+        strategy="backward",
+        allow_exact_matches=False,
+        check_sortedness=False,
+    ).filter(pl.col("history_item_idxs").list.len() >= min_history_len)
+    if merged.is_empty():
+        raise ValueError("ranking data has no candidates with a preceding like history")
+
+    user_mapping = merged.select("uid").unique().sort("uid").with_row_index("user_idx")
+    merged = merged.join(user_mapping, on="uid", how="inner")
+
+    train_pool = merged.filter(pl.col("timestamp") < prepared.test_start_timestamp)
+    test = merged.filter(pl.col("timestamp") >= prepared.test_start_timestamp)
+    if train_pool.is_empty() or test.is_empty():
+        raise ValueError("ranking chronological train/test split is empty")
+    validation_start = train_pool["timestamp"].quantile(
         1.0 - validation_fraction, interpolation="nearest"
     )
+    train = train_pool.filter(pl.col("timestamp") < validation_start)
+    validation = train_pool.filter(pl.col("timestamp") >= validation_start)
+    for name, frame in (("train", train), ("validation", validation), ("test", test)):
+        if frame.is_empty():
+            raise ValueError(f"ranking {name} split is empty")
+        if frame["target"].n_unique() < 2:
+            raise ValueError(f"ranking {name} split must contain both labels")
 
-    for user_index, row in enumerate(grouped.iter_rows(named=True), start=1):
-        items = list(row["item_id"])
-        timestamps = list(row["timestamp"])
-        sequence_index = len(sequences)
-        sequences.append((items, timestamps))
-        for position in range(min_history_len, len(items)):
-            timestamp = timestamps[position]
-            if timestamp >= prepared.test_start_timestamp:
-                destination = test_examples
-                limit = max_eval_examples
-            elif timestamp >= validation_start:
-                destination = validation_examples
-                limit = max_eval_examples
-            else:
-                destination = train_examples
-                limit = max_train_examples
-            if limit is not None and len(destination) >= limit:
-                continue
-
-            positive = items[position]
-            history = items[:position]
-            candidates = [(positive, 1.0)]
-            candidates.extend(
-                (
-                    _negative_item(rng, prepared.catalog_size, positive, history),
-                    0.0,
-                )
-                for _ in range(negatives_per_positive)
-            )
-            for candidate, target in candidates:
-                if limit is not None and len(destination) >= limit:
-                    break
-                destination.append(
-                    RankingExample(
-                        sequence_index=sequence_index,
-                        position=position,
-                        user_index=user_index,
-                        candidate_item=candidate,
-                        timestamp=timestamp,
-                        target=target,
-                    )
-                )
-
-    for name, examples in (
-        ("train", train_examples),
-        ("validation", validation_examples),
-        ("test", test_examples),
-    ):
-        if not examples:
-            raise ValueError(f"ranking {name} examples are empty")
+    sid_codes = torch.tensor(sid_frame.select(sid_columns).to_numpy(), dtype=torch.long)
     return RankingData(
-        sequences=sequences,
-        train_examples=train_examples,
-        validation_examples=validation_examples,
-        test_examples=test_examples,
+        train=train,
+        validation=validation,
+        test=test,
+        dense_train=train.select(DENSE_COLUMNS),
         sid_codes=sid_codes,
-        sid_cardinalities=sid_cardinalities,
-        num_users=grouped.height + 1,
+        sid_cardinalities=tuple(
+            int(sid_frame[column].max()) + 1 for column in sid_columns
+        ),
+        sid_columns=sid_columns,
+        num_users=user_mapping.height,
     )
+
+
+class PolarsRankingDataset(Dataset):
+    def __init__(self, frame: pl.DataFrame) -> None:
+        self.frame = frame
+
+    def __len__(self) -> int:
+        return self.frame.height
+
+    def __getitem__(self, index: int) -> dict[str, Any]:
+        return self.frame.row(index, named=True)
+
+
+def _hash(values: torch.Tensor, salt: int) -> torch.Tensor:
+    return ((values * 2_654_435_761 + salt) % (HASH_CARDINALITY - 1)) + 1
+
+
+def _hash_multivalent(rows: list[list[int]], salt: int) -> dict[str, torch.Tensor]:
+    lengths = torch.tensor([len(row) for row in rows], dtype=torch.long)
+    flat = torch.tensor([value for row in rows for value in row], dtype=torch.long)
+    if flat.numel():
+        values = torch.stack(
+            [
+                _hash(flat, salt + hash_index * 104_729)
+                for hash_index in range(NUM_HASHES)
+            ],
+            dim=1,
+        )
+    else:
+        values = torch.empty((0, NUM_HASHES), dtype=torch.long)
+    return {"values": values, "lengths": lengths}
+
+
+def collate_ranking(batch: list[dict[str, Any]]) -> dict[str, Any]:
+    history_lengths = torch.tensor(
+        [len(row["history_item_idxs"]) for row in batch], dtype=torch.long
+    )
+    history_items = torch.tensor(
+        [item + 1 for row in batch for item in row["history_item_idxs"]],
+        dtype=torch.long,
+    )
+    history_deltas = (
+        torch.tensor(
+            [
+                float(row["timestamp"] - timestamp)
+                for row in batch
+                for timestamp in row["history_timestamps"]
+            ],
+            dtype=torch.float32,
+        )
+        .clamp_min_(0.0)
+        .log1p_()
+    )
+    sid_columns = tuple(
+        sorted(
+            (column for column in batch[0] if column.startswith("sid_")),
+            key=lambda column: int(column[4:]),
+        )
+    )
+    sparse = {
+        "uid": _hash(torch.tensor([row["uid"] for row in batch], dtype=torch.long), 17)
+    }
+    for level, column in enumerate(sid_columns):
+        sparse[column] = _hash(
+            torch.tensor([row[column] for row in batch], dtype=torch.long),
+            1_009 + level * 9_973,
+        )
+
+    zeros = torch.zeros(history_items.numel(), dtype=torch.float32)
+    candidate_track_length = torch.tensor(
+        [row["track_length_seconds"] for row in batch], dtype=torch.float32
+    )
+    return {
+        "dense_features": torch.tensor(
+            [[row[column] for column in DENSE_COLUMNS] for row in batch],
+            dtype=torch.float32,
+        ),
+        "sparse_features": sparse,
+        "multivalent_features": {
+            "artist_ids": _hash_multivalent(
+                [row["artist_ids"] for row in batch], 20_011
+            ),
+            "album_ids": _hash_multivalent([row["album_ids"] for row in batch], 40_009),
+        },
+        "user_idx": torch.tensor([row["user_idx"] for row in batch], dtype=torch.long),
+        "candidate_item_idx": torch.tensor(
+            [row["item_id"] + 1 for row in batch], dtype=torch.long
+        ),
+        "candidate_timestamp": torch.tensor(
+            [row["timestamp"] for row in batch], dtype=torch.float64
+        ),
+        "candidate_is_organic": torch.zeros(len(batch), dtype=torch.float32),
+        "candidate_track_length_z": (
+            candidate_track_length - candidate_track_length.mean()
+        )
+        / candidate_track_length.std().clamp_min(1.0),
+        "candidate_has_track_length": (candidate_track_length > 0).float(),
+        "history_item_idxs_flat": history_items,
+        "history_event_type_idxs_flat": torch.full_like(history_items, 2),
+        "history_is_organic_flat": zeros,
+        "history_played_ratio_flat": zeros,
+        "history_has_played_ratio_flat": zeros,
+        "history_track_length_z_flat": zeros,
+        "history_has_track_length_flat": zeros,
+        "history_time_delta_z_flat": history_deltas,
+        "history_lengths": history_lengths,
+        "target": torch.tensor([row["target"] for row in batch], dtype=torch.float32),
+    }
 
 
 def build_ranking_loaders(
     data: RankingData,
     *,
-    max_history_len: int,
     batch_size: int,
     num_workers: int,
 ) -> tuple[DataLoader, DataLoader, DataLoader]:
     common = {
         "batch_size": batch_size,
         "num_workers": num_workers,
-        "collate_fn": collate_semantic_ranking,
+        "collate_fn": collate_ranking,
+        "pin_memory": torch.cuda.is_available(),
     }
-    datasets = [
-        SemanticRankingDataset(
-            data.sequences, examples, data.sid_codes, max_history_len
-        )
-        for examples in (
-            data.train_examples,
-            data.validation_examples,
-            data.test_examples,
-        )
-    ]
     return (
-        DataLoader(datasets[0], shuffle=True, **common),
-        DataLoader(datasets[1], shuffle=False, **common),
-        DataLoader(datasets[2], shuffle=False, **common),
+        DataLoader(PolarsRankingDataset(data.train), shuffle=True, **common),
+        DataLoader(PolarsRankingDataset(data.validation), shuffle=False, **common),
+        DataLoader(PolarsRankingDataset(data.test), shuffle=False, **common),
     )

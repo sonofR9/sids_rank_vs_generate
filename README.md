@@ -21,9 +21,11 @@ pip install -e .
 
 ## Data
 
-The default dataset is the official `yandex/yambda` `flat/50m/likes.parquet`
-file. The runner downloads the official global precomputed embeddings once and
-prepares a compact item-embedding cache:
+The generation history comes from the official `yandex/yambda`
+`flat/50m/likes.parquet` file. Ranking uses the prepared
+`matfu21/yambda-50m-lag-features` DCNv2 listens together with the official
+Yambda artist and album mappings. The runner also downloads the global
+precomputed embeddings once and prepares a compact item-embedding cache:
 
 ```text
 ~/.cache/sids_rank_vs_generate/datasets/yambda-50m/
@@ -37,25 +39,21 @@ views of this same prepared data and catalog.
 
 ## Experiment configuration
 
-An experiment file contains the instantiated SID pipeline and downstream
-configuration. SID statistics are always calculated by the runner.
+An experiment file contains the instantiated SID pipeline. The two ranking
+models and the generation model are fixed across experiments; only training
+hyperparameters can optionally be overridden. SID statistics are always
+calculated by the runner.
 
 ```python
-from sids_rank_vs_generate.evaluation.generation_stage import GenerationConfig
-from sids_rank_vs_generate.evaluation.ranking_stage import RankingConfig
 from sids_rank_vs_generate.experiment import ExperimentConfig, YambdaDatasetConfig
 from sids_rank_vs_generate.sids import RQKMeansConfig, RQKMeansPipeline
 
 
 EXPERIMENT = ExperimentConfig(
-    dataset=YambdaDatasetConfig(
-        latest_interactions=200_000,
-    ),
+    dataset=YambdaDatasetConfig(),
     sid_pipeline=RQKMeansPipeline(
         RQKMeansConfig(num_levels=3, codebook_size=256),
     ),
-    ranking=RankingConfig(models=("dcnv2", "transact")),
-    generation=GenerationConfig(),
     seed=42,
 )
 ```
@@ -66,10 +64,17 @@ Run the included configuration with:
 python run.py experiments/rqkmeans_full.py
 ```
 
-Set `ranking=None` or `generation=None` to skip that downstream task. A config
-can also point `interactions_path` and `embeddings_path` at explicitly prepared
-Parquet files. `latest_interactions` limits the raw interactions to the newest
-rows before core filtering, which is useful for faster end-to-end experiments.
+Both tasks run by default. Runtime flags skip stages or bound both interaction
+sources for a faster end-to-end check:
+
+```bash
+python run.py experiments/rqkmeans_full.py --max-rows 200000
+python run.py experiments/rqkmeans_full.py --skip-generation
+python run.py experiments/rqkmeans_full.py --skip-ranking
+```
+
+A config can also point at explicitly prepared Parquet files for tests or local
+development.
 
 ## Pipeline
 
@@ -85,11 +90,10 @@ For each run, the runner:
 6. trains and evaluates the generation model when enabled;
 7. writes one unified `metrics.json`.
 
-Ranking examples pair each positive next interaction with sampled catalog
-negatives. The plain DCNv2 consumes the user and candidate SID levels. The
-TransAct variant encodes the candidate-conditioned item history, concatenates
-that history vector with the user embedding, every candidate SID-level
-embedding, and candidate features, then applies the same DCNv2 cross/deep head.
+Ranking uses the existing listen labels and all prepared DCNv2 lag features.
+Both models consume the same dense counters, user and candidate SID features,
+and multivalent artist/album IDs. The TransAct variant adds the latest like
+history strictly preceding each ranking timestamp to that same DCNv2 input.
 
 Generation predicts the target item's SID autoregressively from item history.
 Collision resolution can append a final disambiguation level; without it, beams
