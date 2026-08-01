@@ -58,7 +58,7 @@ def _base_dcn(
     *,
     additional_size: int = 0,
 ) -> DCNV2:
-    return DCNV2(
+    model = DCNV2(
         embedding_size=config.embedding_dim,
         cross_layers=config.dcn_cross_layers,
         deep_units=list(config.dcn_deep_units),
@@ -79,6 +79,14 @@ def _base_dcn(
         sparse_feature_names=("uid", *data.sid_columns),
         multivalent_feature_names=MULTIVALENT_COLUMNS,
     )
+    for layer in model.cross_network.layers:
+        for expert in range(layer.num_experts):
+            nn.init.xavier_uniform_(layer.U[expert])
+            nn.init.xavier_uniform_(layer.V[expert])
+        nn.init.zeros_(layer.bias)
+        nn.init.xavier_uniform_(layer.gate.weight)
+        nn.init.zeros_(layer.gate.bias)
+    return model
 
 
 class DcnV2Ranker(nn.Module):
