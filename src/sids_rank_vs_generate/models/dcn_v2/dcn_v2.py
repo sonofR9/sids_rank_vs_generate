@@ -44,6 +44,8 @@ class DCNV2(
         deep_network: str = "mlp",
         output_size: int = 2,
         full_input_size_provided: bool = True,
+        sparse_feature_names: tuple[str, ...] = ("uid", "item_id"),
+        multivalent_feature_names: tuple[str, ...] = ("artist_ids", "album_ids"),
     ):
         #####################
         ### (づ•̀ᴗ•́)づ──☆*:・ﾟ
@@ -55,15 +57,21 @@ class DCNV2(
         self.categorical_encoder = CategoricalEncoder(self.embedding)
         self.multivalent_encoder = MultivalentEncoder(self.embedding)
 
-        self.dense_encoder = PiecewiseLinearEncoder.from_dataset(
-            dense_train_df,
-            n_bins=n_bins,
-            train_df_slice=train_df_slice,
+        self.sparse_feature_names = sparse_feature_names
+        self.multivalent_feature_names = multivalent_feature_names
+        self.dense_encoder = (
+            PiecewiseLinearEncoder.from_dataset(
+                dense_train_df,
+                n_bins=n_bins,
+                train_df_slice=train_df_slice,
+            )
+            if dense_train_df is not None and dense_train_df.width
+            else None
         )
 
         total_input_size = (
             input_size + sum(self.dense_encoder.n_bins)
-            if not full_input_size_provided
+            if not full_input_size_provided and self.dense_encoder is not None
             else input_size
         )
 
@@ -94,16 +102,17 @@ class DCNV2(
         ### (づ•̀ᴗ•́)づ──☆*:・ﾟ
         #####################
         full_input = []
-        full_input.append(self.dense_encoder(inputs["dense_features"]))
+        if self.dense_encoder is not None:
+            full_input.append(self.dense_encoder(inputs["dense_features"]))
 
-        for sparse_feature in ["uid", "item_id"]:
+        for sparse_feature in self.sparse_feature_names:
             full_input.append(
                 self.categorical_encoder(
                     inputs["sparse_features"][sparse_feature]
                 ).flatten(start_dim=1)
             )
 
-        for multivalent_feature in ["artist_ids", "album_ids"]:
+        for multivalent_feature in self.multivalent_feature_names:
             full_input.append(
                 self.multivalent_encoder(
                     inputs["multivalent_features"][multivalent_feature][

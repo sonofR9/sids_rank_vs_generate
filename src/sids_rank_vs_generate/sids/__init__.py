@@ -5,5 +5,17 @@ a bit different from regular training).
 """
 
 from .base import ISidPipeline
+from .config import PlumRQVAEConfig, RQKMeansConfig, RQVAEConfig
+from .plum_rq_vae_pipeline import PlumRQVAEPipeline
+from .rq_kmeans_pipeline import RQKMeansPipeline
+from .rq_vae_pipeline import RQVAEPipeline
 
-__all__ = ["ISidPipeline"]
+__all__ = [
+    "ISidPipeline",
+    "PlumRQVAEPipeline",
+    "PlumRQVAEConfig",
+    "RQKMeansConfig",
+    "RQKMeansPipeline",
+    "RQVAEConfig",
+    "RQVAEPipeline",
+]

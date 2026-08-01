@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import math
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, is_dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -17,6 +17,7 @@ from .evaluation.stages import (
     IEvaluationStage,
     create_evaluation_stage,
 )
+from .evaluation.sid_statistics import calculate_sid_statistics
 from .pipeline import PipelineConfig, run_pipeline
 from .plugins import load_plugin
 from .sids.base import ISidPipeline
@@ -25,11 +26,14 @@ from .sids.base import ISidPipeline
 @dataclass(frozen=True)
 class SidExperimentConfig:
     dataset: DatasetFiles
-    sid_spec: str
+    sid_spec: str | None = None
+    sid_pipeline: ISidPipeline | None = None
     enabled_stages: tuple[str, ...] = ()
     reports_dir: Path = Path("reports/experiments")
     core_min_interactions_per_item: int = 5
     test_days: float = 7.0
+    timestamp_unit_seconds: float = 1.0
+    latest_interactions: int | None = None
     seed: int = 42
 
 
@@ -131,12 +135,27 @@ def _to_builtin(value: Any) -> Any:
     raise TypeError(f"experiment result is not JSON serializable: {value_type}")
 
 
+def _sid_configuration(sid: ISidPipeline) -> Any:
+    configuration = getattr(sid, "config", None)
+    if configuration is None:
+        return None
+    if is_dataclass(configuration):
+        configuration = asdict(configuration)
+    elif hasattr(configuration, "__dict__"):
+        configuration = vars(configuration)
+    return _to_builtin(configuration)
+
+
 def run_sid_experiment(
     config: SidExperimentConfig,
     *,
     stage_resolver: Callable[[str], IEvaluationStage] = create_evaluation_stage,
 ) -> dict[str, Any]:
-    unknown_stages = set(config.enabled_stages) - {"ranking", "candgen"}
+    unknown_stages = set(config.enabled_stages) - {
+        "ranking",
+        "generation",
+        "candgen",
+    }
     if unknown_stages:
         raise ValueError(
             f"unknown evaluation stages: {', '.join(sorted(unknown_stages))}"
@@ -150,12 +169,23 @@ def run_sid_experiment(
             interactions_path=config.dataset.interactions_path,
             core_min_interactions_per_item=config.core_min_interactions_per_item,
             test_days=config.test_days,
+            timestamp_unit_seconds=config.timestamp_unit_seconds,
+            latest_interactions=config.latest_interactions,
             seed=config.seed,
         ),
         eligible_items=raw_item_features.select("item_id"),
     )
     item_features = _map_item_features(raw_item_features, prepared)
-    sid = load_plugin(config.sid_spec, ISidPipeline)
+    if config.sid_pipeline is not None and config.sid_spec is not None:
+        raise ValueError("provide sid_pipeline or sid_spec, not both")
+    if config.sid_pipeline is not None:
+        sid = config.sid_pipeline
+        sid_reference = f"{type(sid).__module__}:{type(sid).__name__}"
+    elif config.sid_spec is not None:
+        sid = load_plugin(config.sid_spec, ISidPipeline)
+        sid_reference = config.sid_spec
+    else:
+        raise ValueError("sid_pipeline is required")
     sid.train(item_features)
     sid_output = sid.update(item_features)
     sid_columns = _validate_sid_output(item_features, sid_output)
@@ -163,6 +193,9 @@ def run_sid_experiment(
         sid_output.select("item_id", *sid_columns),
         on="item_id",
         how="inner",
+    )
+    sid_statistics = calculate_sid_statistics(
+        sid_output.select("item_id", *sid_columns)
     )
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
@@ -173,6 +206,8 @@ def run_sid_experiment(
         / run_id
     )
     run_dir.mkdir(parents=True, exist_ok=True)
+    semantic_ids_path = run_dir / "semantic_ids.parquet"
+    sid_output.select("item_id", *sid_columns).write_parquet(semantic_ids_path)
     evaluations: dict[str, Any] = {}
     for stage_name in config.enabled_stages:
         evaluator = stage_resolver(stage_name)
@@ -199,10 +234,12 @@ def run_sid_experiment(
             "experiment": "sid_evaluation",
             "data": prepared.summary(),
             "sid": {
-                "plugin": config.sid_spec,
+                "pipeline": sid_reference,
                 "class": type(sid).__name__,
+                "config": _sid_configuration(sid),
                 "item_count": items_with_sids.height,
                 "columns": sid_columns,
+                "statistics": sid_statistics,
             },
             "item_features": {
                 "source_items": raw_item_features.height,
@@ -220,6 +257,8 @@ def run_sid_experiment(
                     config.core_min_interactions_per_item
                 ),
                 "test_days": config.test_days,
+                "timestamp_unit_seconds": config.timestamp_unit_seconds,
+                "latest_interactions": config.latest_interactions,
                 "seed": config.seed,
                 "enabled_stages": list(config.enabled_stages),
             },
@@ -227,6 +266,7 @@ def run_sid_experiment(
                 "run_id": run_id,
                 "directory": run_dir,
                 "metrics_json": metrics_path,
+                "semantic_ids": semantic_ids_path,
             },
         }
     )

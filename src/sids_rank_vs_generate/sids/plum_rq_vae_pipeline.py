@@ -2,13 +2,13 @@ import polars as pl
 
 from dataclasses import asdict
 from .base import ISidPipeline
-from .rq_vae import RQVAE
+from .plum_rq_vae import RQVAE
 import torch
 from torch.utils.data import DataLoader
 from ..data.embedding_dataset import EmbeddingDataset
 from .rq_kmeans import RQKMeans
 
-class RQVAEPipeline(ISidPipeline):
+class PlumRQVAEPipeline(ISidPipeline):
     def __init__(self, config):
         self.config = config
         self.model = None
@@ -33,7 +33,7 @@ class RQVAEPipeline(ISidPipeline):
         with torch.no_grad():
             X_tensor = torch.tensor(X, device=self.model.device)
             Z = self.model.encoder(X_tensor).cpu().numpy()
-        rq = RQKMeans(num_levels=self.config.num_levels, codebooks_sizes=self.config.codebooks_sizes)
+        rq = RQKMeans(codebook_sizes=tuple(self.model.codebooks_sizes))
         rq.fit(Z)
         # инитим через rqkmeans
         self.model.init_codebooks(rq.codebooks)

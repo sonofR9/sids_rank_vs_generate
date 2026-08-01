@@ -19,6 +19,7 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
     )
 
     checkpoint_path = Path(cfg.checkpoint_path)
+    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
 
     if cfg.resolve_collisions:
         validate_fn = validate_semantic_model_without_collisions

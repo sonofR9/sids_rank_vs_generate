@@ -58,6 +58,6 @@ def validate_semantic_model_without_collisions(
     return {
         "top1_sid_token_acc": token_correct / max(token_total, 1),
         "top1_sid_exact": top1_exact / max(total, 1),
-        f"recallt@{cfg.recall_k}": exact_hits / max(total, 1),
+        f"recall@{cfg.recall_k}": exact_hits / max(total, 1),
         "beam_size": cfg.num_beams,
     }

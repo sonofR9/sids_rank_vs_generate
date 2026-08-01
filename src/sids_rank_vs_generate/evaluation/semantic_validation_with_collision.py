@@ -66,21 +66,19 @@ def validate_semantic_model_with_collisions(
             beam_size=cfg.num_beams,
         )
 
-        for user_beams, target_items in zip(beams, batch["target"]):
+        for user_beams, target_item in zip(beams, batch["target"]):
             predicted_items = beams_to_items(
                 user_beams=user_beams,
                 sid_to_items=sid_to_items,
                 k=cfg.recall_k,
             )
 
-            target_items = set(target_items[target_items >= 0].tolist())
-            hits = len(set(predicted_items) & target_items)
-            recall_sum += hits / len(target_items)
+            recall_sum += float(int(target_item.item()) in set(predicted_items))
             total += 1
 
     return {
         "top1_sid_token_acc": token_correct / max(token_total, 1),
         "top1_sid_exact": top1_exact / max(total, 1),
-        f"recallt@{cfg.recall_k}": recall_sum / max(total, 1),
+        f"recall@{cfg.recall_k}": recall_sum / max(total, 1),
         "beam_size": cfg.num_beams,
     }

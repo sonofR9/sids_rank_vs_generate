@@ -10,10 +10,14 @@ dependencies = [
     "huggingface_hub>=0.30",
     "numpy>=1.26",
     "polars>=1.0",
+    "scikit-learn>=1.4",
+    "scipy>=1.12",
     "torch>=2.2",
+    "tqdm>=4.66",
 ]
 
 [project.scripts]
+sids-run = "sids_rank_vs_generate.experiment:main"
 sasrec-baseline = "sids_rank_vs_generate.experiments.sasrec:main"
 sasrec-train = "sids_rank_vs_generate.experiments.sasrec:main"
 

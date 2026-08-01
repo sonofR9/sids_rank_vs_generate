@@ -10,7 +10,11 @@ class RQKMeansPipeline(ISidPipeline):
         self.model = None
 
     def train(self, df: pl.DataFrame) -> None:
-        self.model = RQKMeans(**asdict(self.config))
+        parameters = asdict(self.config)
+        if parameters.get("codebook_sizes") is not None:
+            parameters.pop("num_levels", None)
+            parameters.pop("codebook_size", None)
+        self.model = RQKMeans(**parameters)
         self.model.fit(df)
 
     def update(self, df: pl.DataFrame) -> pl.DataFrame:
