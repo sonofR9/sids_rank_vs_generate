@@ -3,7 +3,6 @@ import polars as pl
 from dataclasses import asdict
 from .base import ISidPipeline
 from .rq_vae import RQVAE
-from experiments.Config_rqvae_rqkmeans import RQVAEConfig
 import torch
 from torch.utils.data import DataLoader
 from ..data.embedding_dataset import EmbeddingDataset
@@ -11,7 +10,7 @@ from .rq_kmeans import RQKMeans
 
 class RQVAEPipeline(ISidPipeline):
     def __init__(self, config):
-        self.config = config or RQVAEConfig()
+        self.config = config
         self.model = None
 
     def train(self, df: pl.DataFrame) -> None:

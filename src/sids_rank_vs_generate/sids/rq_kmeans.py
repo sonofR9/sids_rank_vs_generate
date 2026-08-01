@@ -7,14 +7,24 @@ from sklearn.metrics import pairwise_distances_argmin
 class RQKMeans:
     def __init__(
         self,
-        num_levels=3,
-        codebook_size=512,
+        num_levels=None,
+        codebook_size=None,
         random_state=42,
         kmeans_batch_size=1024 * 16,
         predict_batch_size=65536,
-    ):
-        self.num_levels = num_levels
-        self.codebook_size = codebook_size
+        codebook_sizes=None,
+    ):  
+        if codebook_sizes is not None:
+            if num_levels is not None or codebook_size is not None:
+                raise ValueError('Передай либо codebook_sizes, либо num_levels и codebook_size')
+            self.codebook_sizes = tuple(codebook_sizes)
+            self.num_levels = len(codebook_sizes)
+        else:
+            if num_levels is None or codebook_size is None:
+                raise ValueError(
+                    "Нужно передать num_levels и codebook_size")
+            self.num_levels = num_levels
+            self.codebook_sizes = (codebook_size,) * num_levels
         self.random_state = random_state
         self.kmeans_batch_size = kmeans_batch_size
         self.predict_batch_size = predict_batch_size
@@ -32,9 +42,9 @@ class RQKMeans:
         X= self.converter(X)
         residual = X.copy()
         self.codebooks = []
-        for level in range(self.num_levels):
+        for current_codebook_size in self.codebook_sizes:
             kmeans = MiniBatchKMeans(
-                n_clusters = self.codebook_size,
+                n_clusters = current_codebook_size,
                 batch_size = self.kmeans_batch_size,
                 init='k-means++',
                 tol=10**(-5),

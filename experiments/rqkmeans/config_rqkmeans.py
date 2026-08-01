@@ -7,3 +7,4 @@ class RQKMeansConfig:
     random_state: int = 42
     kmeans_batch_size: int = 1024 * 16
     predict_batch_size: int = 65536
+    codebook_sizes: tuple[int, ...] | None = None

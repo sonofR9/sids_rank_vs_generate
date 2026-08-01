@@ -1,13 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from experiments.config_SemanticTransformerModel import SemanticTransformerConfig
 from .history_transformer_encoder import HistoryTransformerEncoder
 
 class SemanticTransformerModel(nn.Module):
     def __init__(self, num_items, cfg):
         super().__init__()
-        self.cfg = cfg or SemanticTransformerConfig()
+        self.cfg = cfg
         self.num_levels = self.cfg.num_levels
         self.codebook_size = self.cfg.codebook_size
         self.bos_id = self.codebook_size * self.num_levels

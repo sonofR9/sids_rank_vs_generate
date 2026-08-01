@@ -6,9 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "sids-rank-vs-generate"
 version = "0.1.0"
 requires-python = ">=3.10"
-dependencies = [
-    "polars>=1.0",
-]
+dependencies = [ "numpy", "polars", "scikit-learn", "kagglehub", ]
 
 [project.scripts]
 sids-run = "sids_rank_vs_generate.cli:main"

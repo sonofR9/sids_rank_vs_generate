@@ -1,11 +1,10 @@
 import torch
 import torch.nn as nn
-from experiments.config_SemanticTransformer import SemanticTransformerConfig
 
 class HistoryTransformerEncoder(nn.Module):
     def __init__(self, num_items, cfg):
         super().__init__()
-        self.cfg = cfg or HistoryTransformerEncoderConfig()
+        self.cfg = cfg
         self.item_emb = nn.Embedding(num_items + 1, self.cfg.d_model, padding_idx=0)
         self.pos_emb = nn.Embedding(self.cfg.max_history_len, self.cfg.d_model)
 

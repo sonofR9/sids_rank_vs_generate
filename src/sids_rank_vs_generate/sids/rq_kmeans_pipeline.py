@@ -3,12 +3,10 @@ from dataclasses import asdict
 import polars as pl
 from .base import ISidPipeline
 from .rq_kmeans import RQKMeans
-from experiments.Config_rqvae_rqkmeans import RQKMeansConfig
-
 
 class RQKMeansPipeline(ISidPipeline):
     def __init__(self, config):
-        self.config = config or RQKMeansConfig()
+        self.config = config
         self.model = None
 
     def train(self, df: pl.DataFrame) -> None:

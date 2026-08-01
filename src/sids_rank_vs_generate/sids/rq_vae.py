@@ -5,7 +5,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from ..data.embedding_dataset import EmbeddingDataset
-from .rq_kmeans import RQKMeans
 
 
 class RQVAE(nn.Module):
@@ -17,23 +16,29 @@ class RQVAE(nn.Module):
         num_levels=3,
         codebook_size=512,
         batch_size=256,
-        num_epochs=50,
         lr=1e-3,
         beta=0.25,
         num_workers=4,
         device=None,
         pretrain_epochs=3,
         pretrain_lr=5e-3,
+        max_epochs=100,
+        patience=5,
+        min_delta=1e-5,
+        val_part=0.05,
     ):
         super().__init__()
         self.num_levels = num_levels
         self.codebook_size = codebook_size
         self.batch_size = batch_size
-        self.num_epochs = num_epochs
         self.lr = lr
         self.beta = beta
         self.num_workers = num_workers
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.max_epochs = max_epochs
+        self.patience = patience
+        self.min_delta = min_delta
+        self.val_part = val_part
         # TODO: encoder: x -> z
         self.encoder = nn.Sequential(
             nn.Linear(dim, hidden_dim),
@@ -69,6 +74,34 @@ class RQVAE(nn.Module):
 
         return np.asarray(X, dtype=np.float32)
 
+    def compute_loss(self, x):
+        out = self(x)
+        recon_loss = F.mse_loss(out["x_hat"], x)
+        codebook_loss = 0.0
+        commit_loss = 0.0
+        for q, residual in zip(out["quantized_all"], out["residuals_all"]):
+            codebook_loss += F.mse_loss(q,residual.detach())
+            commit_loss += F.mse_loss(residual, q.detach())
+        codebook_loss /= self.num_levels
+        commit_loss /= self.num_levels
+        loss = (recon_loss + codebook_loss + self.beta * commit_loss)
+
+        return loss, recon_loss, codebook_loss, commit_loss
+
+    @torch.no_grad()
+    def evaluate(self, loader):
+        self.eval()
+        total_loss = 0.0
+        total_count = 0
+        for x in loader:
+            x = x.to(self.device, non_blocking=True)
+            loss, _, _, _ = self.compute_loss(x)
+            batch_size = x.size(0)
+            total_loss += loss.item() * batch_size
+            total_count += batch_size
+
+        return total_loss / max(total_count, 1)
+
     def pretrain_autoencoder(self, loader):
         # Оптимизируем только параметры энкодера и декодера, не заходим в кодбук
         opt = torch.optim.AdamW(list(self.encoder.parameters()) + list(self.decoder.parameters()), lr=self.pretrain_lr)
@@ -89,8 +122,7 @@ class RQVAE(nn.Module):
                 total_count += bs
             print(
                 f"pretrain epoch={epoch + 1}/{self.pretrain_epochs} | "
-                f"recon={total_loss / total_count:.6f}"
-            )
+                f"recon_loss={total_loss/total_count}")
 
 
     @torch.no_grad()
@@ -145,66 +177,87 @@ class RQVAE(nn.Module):
             "residuals_all": residuals_all,
         }
     
-    def fit(self, X: pl.Series | pl.DataFrame | np.ndarray):
+    def fit(self, X):
         X = self.converter(X)
-    
-        loader = DataLoader(
-            EmbeddingDataset(X),
+
+        rng = np.random.default_rng(42)
+        indices = rng.permutation(len(X))
+        val_size = int(len(X) * self.val_part)
+        val_indices = indices[:val_size]
+        train_indices = indices[val_size:]
+
+        train_loader = DataLoader(
+            EmbeddingDataset(X[train_indices]),
             batch_size=self.batch_size,
             shuffle=True,
             drop_last=False,
             pin_memory=True,
             num_workers=self.num_workers,
         )
-        opt = torch.optim.AdamW(self.parameters(), lr=self.lr)
-    
-        for epoch in range(self.num_epochs):
+
+        val_loader = DataLoader(
+            EmbeddingDataset(X[val_indices]),
+            batch_size=self.batch_size,
+            shuffle=False,
+            drop_last=False,
+            pin_memory=True,
+            num_workers=self.num_workers,
+        )
+
+        optimizer = torch.optim.AdamW(
+            self.parameters(),
+            lr=self.lr,
+        )
+
+        best_val_loss = float("inf")
+        epochs_without_improvement = 0
+        best_state = None
+
+        for epoch in range(self.max_epochs):
+            self.train()
+
             total_loss = 0.0
-            total_recon = 0.0
-            total_codebook = 0.0
-            total_commit = 0.0
             total_count = 0
-    
-            for x in loader:
+
+            for x in train_loader:
                 x = x.to(self.device, non_blocking=True)
-    
-                out = self(x)
-    
-                x_hat = out["x_hat"]
-                quantized_all = out["quantized_all"]
-                residuals_all = out["residuals_all"]
-    
-                recon_loss = F.mse_loss(x, x_hat)
-                codebook_loss = 0.0
-                commit_loss = 0.0
-    
-                for q, residual in zip(quantized_all, residuals_all):
-                    codebook_loss += F.mse_loss(q, residual.detach())
-                    commit_loss += F.mse_loss(residual, q.detach())
-    
-                codebook_loss /= self.num_levels
-                commit_loss /= self.num_levels
-                loss = recon_loss + codebook_loss + self.beta * commit_loss
-    
-                opt.zero_grad()
+
+                loss, recon, codebook, commit = (
+                    self.compute_loss(x)
+                )
+
+                optimizer.zero_grad(set_to_none=True)
                 loss.backward()
-                opt.step()
-    
-                bs = x.size(0)
-                total_loss += loss.item() * bs
-                total_recon += recon_loss.item() * bs
-                total_codebook += codebook_loss.item() * bs
-                total_commit += commit_loss.item() * bs
-                total_count += bs
-    
+                optimizer.step()
+
+                batch_size = x.size(0)
+                total_loss += loss.item() * batch_size
+                total_count += batch_size
+
+            train_loss = total_loss / max(total_count, 1)
+            val_loss = self.evaluate(val_loader)
+
             print(
-                f"epoch={epoch + 1}/{self.num_epochs} | "
-                f"loss={total_loss / total_count:.6f} | "
-                f"recon={total_recon / total_count:.6f} | "
-                f"codebook={total_codebook / total_count:.6f} | "
-                f"commit={total_commit / total_count:.6f}"
+                f"epoch={epoch + 1}/{self.max_epochs} | "
+                f"train={train_loss} | "
+                f"val={val_loss} | "
+                f"best={best_val_loss}"
             )
-    
+
+            if val_loss < best_val_loss - self.min_delta:
+                best_val_loss = val_loss
+                epochs_without_improvement = 0
+                best_state = {
+                    key: value.detach().cpu().clone()
+                    for key, value in self.state_dict().items()
+                }
+            else:
+                epochs_without_improvement += 1
+                if epochs_without_improvement >= self.patience:
+                    print("Перестало улучшаться")
+                    break
+        if best_state is not None:
+            self.load_state_dict(best_state)
         return self
 
     @torch.no_grad()
