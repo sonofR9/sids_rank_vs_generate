@@ -1,0 +1,58 @@
+{
+  "experiment": "sasrec_baseline",
+  "data": {
+    "interactions": 634642,
+    "train_interactions": 630095,
+    "test_interactions": 4547,
+    "users": 8032,
+    "catalog_size": 33148,
+    "test_start_timestamp": "25878770.0"
+  },
+  "config": {
+    "embedding_dim": 128,
+    "max_seq_len": 100,
+    "num_layers": 2,
+    "num_heads": 2,
+    "dropout": 0.1,
+    "batch_size": 128,
+    "epochs": 10,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "training_objective": "in-batch-logq",
+    "training_negatives": 100,
+    "eval_item_chunk_size": 20000,
+    "freeze_item_embeddings": false,
+    "topk": 100,
+    "seed": 42,
+    "num_workers": 0,
+    "device": "cuda"
+  },
+  "device": "cuda",
+  "train_examples": 622076,
+  "eval_users": 1406,
+  "content_initialized": true,
+  "train_losses": [
+    13.006876864384935,
+    12.476331262048438,
+    12.173324071014743,
+    11.921020841784623,
+    11.69902695483563,
+    11.496559685484426,
+    11.322198351086033,
+    11.159761585841972,
+    11.009388703014432,
+    10.875181955146898
+  ],
+  "metrics": {
+    "hitrate": 0.22617354196301565,
+    "recall": 0.11668384436504307,
+    "ndcg": 0.03668256664685009,
+    "coverage": 0.7779956558465065
+  },
+  "dataset": {
+    "name": "Yambda-50M",
+    "event_type": "likes",
+    "interactions_path": "/home/k.ryadinskiy/.cache/huggingface/hub/datasets--yandex--yambda/snapshots/dd6f3a19eef5866e346c3270e098baa641a44948/flat/50m/likes.parquet",
+    "embeddings_path": "/home/k.ryadinskiy/.cache/sids_rank_vs_generate/datasets/yambda-50m/embeddings.parquet"
+  }
+}
