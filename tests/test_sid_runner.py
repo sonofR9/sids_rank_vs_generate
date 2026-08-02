@@ -20,7 +20,6 @@ from sids_rank_vs_generate.sid_experiment import (
     run_sid_experiment,
 )
 from sids_rank_vs_generate.sids import ISidPipeline
-
 from tests.test_preprocessing import sample_interactions
 
 
@@ -128,6 +127,14 @@ class SidRunnerTest(unittest.TestCase):
 
             self.assertEqual(result["sid"]["columns"], ["sid_0", "sid_1"])
             self.assertEqual(result["sid"]["item_count"], 3)
+            statistics = result["sid"]["statistics"]
+            self.assertIsNone(statistics["path_average_similarity"])
+            self.assertEqual(
+                statistics["codebook_quality"][
+                    "codebook_utilization_rate_at_1_layer"
+                ],
+                1.0,
+            )
             self.assertEqual(set(result["evaluations"]), {"ranking", "candgen"})
             self.assertEqual(result["evaluations"]["ranking"]["roc_auc"], 0.75)
             self.assertEqual(result["evaluations"]["candgen"]["recall"], 0.5)

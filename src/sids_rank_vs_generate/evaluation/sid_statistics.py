@@ -27,7 +27,7 @@ def calculate_sid_statistics(
     percentiles = {}
     for percentile, label in ((0.9, "p90"), (0.99, "p99"), (0.999, "p999")):
         value = collision_stats["collision_size"].quantile(
-            percentile, interpolation="higher"
+            percentile, interpolation="nearest"
         )
         percentiles[label] = int(value) if value is not None else 0
 

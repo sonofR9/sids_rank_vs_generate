@@ -12,12 +12,17 @@ import polars as pl
 
 from .data import PreparedInteractions
 from .datasets import DatasetFiles
+from .evaluation.collision_quality import (
+    codebook_quality,
+    infer_codebook_sizes,
+    path_average_similarity,
+)
+from .evaluation.sid_statistics import calculate_sid_statistics
 from .evaluation.stages import (
     EvaluationContext,
     IEvaluationStage,
     create_evaluation_stage,
 )
-from .evaluation.sid_statistics import calculate_sid_statistics
 from .pipeline import PipelineConfig, run_pipeline
 from .plugins import load_plugin
 from .reproducibility import SID_EXPERIMENT_SEED, seed_everything
@@ -196,6 +201,20 @@ def run_sid_experiment(
     )
     sid_statistics = calculate_sid_statistics(
         sid_output.select("item_id", *sid_columns)
+    )
+    codebook_sizes = infer_codebook_sizes(getattr(sid, "config", None), sid_output)
+    sid_statistics["path_average_similarity"] = path_average_similarity(
+        sid_output,
+        item_features,
+        embedding_col=(
+            "normalized_embed"
+            if "normalized_embed" in item_features.columns
+            else "embed"
+        ),
+    )
+    sid_statistics["codebook_quality"] = codebook_quality(
+        sid_output,
+        codebook_sizes,
     )
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
