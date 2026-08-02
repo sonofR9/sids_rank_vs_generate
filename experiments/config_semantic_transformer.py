@@ -35,7 +35,7 @@ class SemanticTransformerConfig:
     rq_num_levels: int = 3
     num_levels: int = 4
     codebook_size: int = 512
-
+    codebook_sizes: list[int] | None = None    
     num_beams: int = 150
     recall_k: int = 100
 

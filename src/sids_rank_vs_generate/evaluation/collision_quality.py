@@ -41,9 +41,8 @@ Codebook Load Balance (P25, P75, P90) = перцентили отклонени�
 на каждый кодбук по отдельности для полной картины. 
 Не должна иметь слишком сильные перекосы от 100% на каждом перцентиле (из OxygenREC)
 '''
-def codebook_load_balance_and_coverage_and_utitlization(sids: pl.DataFrame, cfg):
+def codebook_load_balance_and_coverage_and_utitlization(sids: pl.DataFrame, codebook_sizes: list[int]):
     sid_cols = get_sid_cols(sids)
-    codebook_sizes = cfg.codebook_sizes
     n = sids.height
     metrics = {}
     load_balance_values = {"p25": [], "p75": [], "p90": []}

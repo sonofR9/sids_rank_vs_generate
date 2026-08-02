@@ -19,7 +19,7 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
     )
 
     checkpoint_path = Path(cfg.checkpoint_path)
-
+    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
     if cfg.resolve_collisions:
         validate_fn = validate_semantic_model_without_collisions
         validation_kwargs = {}
@@ -95,8 +95,6 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
                 "best_metric": best_metric,
                 "config": cfg,
             }, checkpoint_path)
-
-            print("Saved new best model")
             continue
 
         epochs_without_improvement += 1

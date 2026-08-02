@@ -18,6 +18,10 @@ from sids_rank_vs_generate.datasets_for_sem_transform import load_yambda_data
 from sids_rank_vs_generate.evaluation.sid_statistics import (
     tests_semantic_ids,
 )
+from sids_rank_vs_generate.evaluation.collision_quality import (
+    codebook_load_balance_and_coverage_and_utitlization,
+    PAS,
+)
 from sids_rank_vs_generate.models.semantic_transformer_model import (
     SemanticTransformerModel,
 )
@@ -121,14 +125,17 @@ def run_single_experiment(
         rqvae_config=rqvae_config,
         rqkmeans_config=rqkmeans_config
     )
-
-    # 2. Считаем статистики
-    raw_sid_metrics = tests_semantic_ids(
+    sid_metrics=dict()
+    sid_metrics["sid_statistics"] = tests_semantic_ids(
         raw_semantic_df,
         num_levels=rq_num_levels,
-    )
-
-    # 3. Выбираем режим работы с коллизиями, если работаем без коллизий считаем новый набор статистик
+    ) 
+    sid_metrics['PAS'] = PAS(raw_semantic_df, embeddings)
+    codebook_sizes = base_transformer_cfg.codebook_sizes
+    if codebook_sizes is None:
+        codebook_sizes = [codebook_size]*rq_num_levels
+    sid_metrics["codebook_load_balance_and_coverage_and_utitlization"] = codebook_load_balance_and_coverage_and_utitlization(raw_semantic_df, codebook_sizes)
+    # 2. Выбираем режим работы с коллизиями 
     if resolve_collisions:
         semantic_df = add_collision_resolving_sid(
             semantic_df=raw_semantic_df,
@@ -136,18 +143,12 @@ def run_single_experiment(
         )
         # добавляем слой resolution токена 
         transformer_num_levels = rq_num_levels + 1
-
-        resolved_sid_metrics = tests_semantic_ids(
-            semantic_df,
-            num_levels=transformer_num_levels,
-        )
-
     else:
         semantic_df = raw_semantic_df
         transformer_num_levels = rq_num_levels
-        resolved_sid_metrics = None
 
     # 4. Создаём отдельный конфиг для конкретного эксперимента
+
     cfg = replace(
         base_transformer_cfg,
         rq_num_levels=rq_num_levels,
@@ -221,8 +222,7 @@ def run_single_experiment(
         "rq_num_levels": rq_num_levels,
         "transformer_num_levels": transformer_num_levels,
         "codebook_size": codebook_size,
-        "raw_sid_metrics": raw_sid_metrics,
-        "resolved_sid_metrics": resolved_sid_metrics,
+        "sid_metrics": sid_metrics,
         "training_history": training_history,
     }
 

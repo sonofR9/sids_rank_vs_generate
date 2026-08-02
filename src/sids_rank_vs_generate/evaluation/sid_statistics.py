@@ -22,11 +22,10 @@ def tests_semantic_ids(df: pl.DataFrame, num_levels=3, codebook_size=512, item_c
     collision_stats = path_stats.filter(pl.col("collision_size") > 1)
 
     p90, p99, p999 = collision_stats.select(
-        pl.col("collision_size").quantile(0.9, interpolation="higher").fill_null(0),
-        pl.col("collision_size").quantile(0.99, interpolation="higher").fill_null(0),
-        pl.col("collision_size").quantile(0.999, interpolation="higher").fill_null(0),
+        pl.quantile("collision_size", 0.9).alias("p90"),
+        pl.quantile("collision_size", 0.99).alias("p99"),
+        pl.quantile("collision_size", 0.999).alias("p999"),
     ).row(0)
-
     return {
         "ICR": n_unique_codes / n_items,
         "n_unique_codes": n_unique_codes,
