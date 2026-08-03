@@ -15,6 +15,7 @@ from ..data.generation import (
 from ..models.semantic_transformer_model import SemanticTransformerModel
 from ..reproducibility import SID_EXPERIMENT_SEED, seed_everything
 from ..sids.collision_resolution import add_collision_resolving_sid, get_sid_cols
+from ..tracking import flatten_parameters
 from ..training.semantic_trainer import train_semantic
 from .semantic_validation_with_collision import (
     validate_semantic_model_with_collisions,
@@ -149,20 +150,40 @@ class GenerationStage(IEvaluationStage):
             else _build_sid_to_items(semantic_df, item2idx)
         )
         model = SemanticTransformerModel(len(item2idx), runtime).to(runtime.device)
-        train_semantic(
-            model,
-            train_loader,
-            validation_loader,
-            runtime,
-            sid_to_items=sid_to_items,
-        )
-        if runtime.resolve_collisions:
-            metrics = validate_semantic_model_without_collisions(
-                model, validation_loader, runtime
+        with context.tracker.start_run(
+            "generation",
+            nested=True,
+            tags={"stage": "generation", "model": "semantic_transformer"},
+        ) as tracker:
+            tracker.log_params(
+                flatten_parameters(
+                    {
+                        "config": asdict(runtime),
+                        "examples": {
+                            "train": len(train_examples),
+                            "validation": len(validation_examples),
+                        },
+                    }
+                )
             )
-        else:
-            metrics = validate_semantic_model_with_collisions(
-                model, validation_loader, runtime, sid_to_items
+            train_semantic(
+                model,
+                train_loader,
+                validation_loader,
+                runtime,
+                sid_to_items=sid_to_items,
+                tracker=tracker,
+            )
+            if runtime.resolve_collisions:
+                metrics = validate_semantic_model_without_collisions(
+                    model, validation_loader, runtime
+                )
+            else:
+                metrics = validate_semantic_model_with_collisions(
+                    model, validation_loader, runtime, sid_to_items
+                )
+            tracker.log_metrics(
+                {f"final.{name}": value for name, value in metrics.items()}
             )
         semantic_df.write_parquet(context.artifact_dir / "semantic_ids.parquet")
         return {

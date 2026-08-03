@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import math
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import asdict, dataclass, is_dataclass
+from dataclasses import asdict, dataclass, field, is_dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -27,6 +27,12 @@ from .pipeline import PipelineConfig, run_pipeline
 from .plugins import load_plugin
 from .reproducibility import SID_EXPERIMENT_SEED, seed_everything
 from .sids.base import ISidPipeline
+from .tracking import (
+    ExperimentTracker,
+    NullTracker,
+    flatten_metrics,
+    flatten_parameters,
+)
 
 
 @dataclass(frozen=True)
@@ -40,6 +46,7 @@ class SidExperimentConfig:
     test_days: float = 7.0
     timestamp_unit_seconds: float = 1.0
     latest_interactions: int | None = None
+    tracker: ExperimentTracker = field(default_factory=NullTracker)
 
 
 def _load_item_features(path: Path) -> pl.DataFrame:
@@ -191,8 +198,23 @@ def run_sid_experiment(
     else:
         raise ValueError("sid_pipeline is required")
     seed_everything(SID_EXPERIMENT_SEED)
-    sid.train(item_features)
-    sid_output = sid.update(item_features)
+    with config.tracker.start_run(
+        "sid",
+        nested=True,
+        tags={"stage": "sid", "pipeline": type(sid).__name__},
+    ) as sid_tracker:
+        sid.set_tracker(sid_tracker)
+        sid_tracker.log_params(
+            flatten_parameters(
+                {
+                    "pipeline": sid_reference,
+                    "config": _sid_configuration(sid) or {},
+                    "catalog_items": item_features.height,
+                }
+            )
+        )
+        sid.train(item_features)
+        sid_output = sid.update(item_features)
     sid_columns = _validate_sid_output(item_features, sid_output)
     items_with_sids = item_features.join(
         sid_output.select("item_id", *sid_columns),
@@ -242,6 +264,7 @@ def run_sid_experiment(
             dataset=config.dataset,
             artifact_dir=stage_artifact_dir,
             max_rows=config.latest_interactions,
+            tracker=config.tracker,
         )
         metrics = evaluator.evaluate(context)
         if not isinstance(metrics, Mapping):
@@ -280,6 +303,7 @@ def run_sid_experiment(
                 "enabled_stages": list(config.enabled_stages),
             },
             "reproducibility": {"seed": SID_EXPERIMENT_SEED},
+            "tracking": config.tracker.info(),
             "artifacts": {
                 "run_id": run_id,
                 "directory": run_dir,
@@ -292,4 +316,22 @@ def run_sid_experiment(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+    evaluation_metrics: dict[str, Any] = {}
+    for stage_name, stage_result in evaluations.items():
+        if isinstance(stage_result, Mapping) and "metrics" in stage_result:
+            evaluation_metrics[stage_name] = stage_result["metrics"]
+        elif isinstance(stage_result, Mapping) and "models" in stage_result:
+            evaluation_metrics[stage_name] = stage_result["models"]
+        else:
+            evaluation_metrics[stage_name] = stage_result
+    config.tracker.log_metrics(
+        flatten_metrics(
+            {
+                "data": result["data"],
+                "sid": result["sid"]["statistics"],
+                "evaluations": evaluation_metrics,
+            }
+        )
+    )
+    config.tracker.log_artifacts(run_dir, artifact_path="run")
     return result

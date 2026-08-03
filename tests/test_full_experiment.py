@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from contextlib import contextmanager
 from pathlib import Path
+from unittest.mock import patch
 
 import polars as pl
 
@@ -16,6 +18,45 @@ from sids_rank_vs_generate.experiment import (
     run_experiment,
 )
 from sids_rank_vs_generate.sids import RQKMeansConfig, RQKMeansPipeline
+from sids_rank_vs_generate.tracking import ExperimentTracker
+
+
+class RecordingTracker(ExperimentTracker):
+    def __init__(self) -> None:
+        self.runs = {}
+        self.stack = []
+
+    @contextmanager
+    def start_run(self, run_name, *, nested=False, tags=None):
+        self.runs[run_name] = {
+            "nested": nested,
+            "tags": dict(tags or {}),
+            "params": {},
+            "metrics": [],
+            "artifacts": [],
+        }
+        self.stack.append(run_name)
+        try:
+            yield self
+        finally:
+            self.stack.pop()
+
+    def log_params(self, params) -> None:
+        self.runs[self.stack[-1]]["params"].update(params)
+
+    def log_metrics(self, metrics, *, step=None) -> None:
+        self.runs[self.stack[-1]]["metrics"].append((step, dict(metrics)))
+
+    def log_artifacts(self, directory, *, artifact_path=None) -> None:
+        self.runs[self.stack[-1]]["artifacts"].append(
+            (Path(directory), artifact_path)
+        )
+
+    def info(self):
+        return {
+            "enabled": True,
+            "run_id": self.stack[0] if self.stack else None,
+        }
 
 
 class FullRQKMeansExperimentTest(unittest.TestCase):
@@ -144,7 +185,12 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                 reports_dir=root / "reports",
             )
 
-            result = run_experiment(config)
+            tracker = RecordingTracker()
+            with patch(
+                "sids_rank_vs_generate.experiment.create_tracker",
+                return_value=tracker,
+            ):
+                result = run_experiment(config)
 
             self.assertEqual(set(result["evaluations"]), {"ranking", "generation"})
             self.assertEqual(
@@ -170,6 +216,24 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
             self.assertTrue(
                 Path(result["evaluations"]["generation"]["checkpoint"]).is_file()
             )
+            self.assertEqual(
+                set(tracker.runs),
+                {
+                    "RQKMeansPipeline",
+                    "sid",
+                    "ranking.dcnv2",
+                    "ranking.transact",
+                    "generation",
+                },
+            )
+            for run_name in ("ranking.dcnv2", "ranking.transact", "generation"):
+                metric_names = {
+                    name
+                    for _step, metrics in tracker.runs[run_name]["metrics"]
+                    for name in metrics
+                }
+                self.assertIn("train.loss", metric_names)
+            self.assertTrue(tracker.runs["RQKMeansPipeline"]["artifacts"])
 
 
 if __name__ == "__main__":

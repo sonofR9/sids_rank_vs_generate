@@ -14,9 +14,18 @@ from sids_rank_vs_generate.evaluation.semantic_validation_without_collision impo
     validate_semantic_model_without_collisions,
 )
 from sids_rank_vs_generate.training.utils import autocast, move_to_device
+from sids_rank_vs_generate.tracking import ExperimentTracker, NullTracker
 
 
-def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
+def train_semantic(
+    model,
+    train_loader,
+    val_loader,
+    cfg,
+    sid_to_items=None,
+    tracker: ExperimentTracker | None = None,
+):
+    tracker = tracker or NullTracker()
     optimizer = torch.optim.AdamW(
         model.parameters(),
         lr=cfg.lr,
@@ -79,6 +88,17 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
         )
 
         current_metric = metrics[metric_name]
+        tracker.log_metrics(
+            {
+                "train.loss": train_loss,
+                **{
+                    f"validation.{name}": value
+                    for name, value in metrics.items()
+                },
+                f"validation.best_{metric_name}": max(best_metric, current_metric),
+            },
+            step=epoch,
+        )
 
         print(
             f"epoch={epoch} | loss={train_loss:.6f} | "
