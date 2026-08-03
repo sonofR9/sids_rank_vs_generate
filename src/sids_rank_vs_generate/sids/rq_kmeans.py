@@ -4,6 +4,8 @@ import polars as pl
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.metrics import pairwise_distances_argmin
 
+from .codebook_sizes import resolve_codebook_sizes
+
 class RQKMeans:
     def __init__(
         self,
@@ -14,17 +16,12 @@ class RQKMeans:
         predict_batch_size=65536,
         codebook_sizes=None,
     ):  
-        if codebook_sizes is not None:
-            if num_levels is not None or codebook_size is not None:
-                raise ValueError('Передай либо codebook_sizes, либо num_levels и codebook_size')
-            self.codebook_sizes = tuple(codebook_sizes)
-            self.num_levels = len(codebook_sizes)
-        else:
-            if num_levels is None or codebook_size is None:
-                raise ValueError(
-                    "Нужно передать num_levels и codebook_size")
-            self.num_levels = num_levels
-            self.codebook_sizes = (codebook_size,) * num_levels
+        self.codebook_sizes = resolve_codebook_sizes(
+            codebook_sizes=codebook_sizes,
+            num_levels=num_levels,
+            codebook_size=codebook_size,
+        )
+        self.num_levels = len(self.codebook_sizes)
         self.random_state = random_state
         self.kmeans_batch_size = kmeans_batch_size
         self.predict_batch_size = predict_batch_size

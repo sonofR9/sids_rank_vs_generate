@@ -2,13 +2,11 @@ import torch
 
 from .beam_search import semantic_beam_search
 
-
 def to_device(batch, device):
     return {
         key: value.to(device, non_blocking=True)
         for key, value in batch.items()
     }
-
 
 @torch.inference_mode()
 def validate_semantic_model_without_collisions(

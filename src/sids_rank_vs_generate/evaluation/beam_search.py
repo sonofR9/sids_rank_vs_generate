@@ -47,11 +47,7 @@ def semantic_beam_search(
             sid_tokens = flat_tokens[:, 1:]
 
             offsets = (
-                torch.arange(
-                    sid_tokens.size(1),
-                    device=device,
-                )
-                * model.codebook_size
+                model.codebook_offsets[:sid_tokens.size(1)]
             ).unsqueeze(0)
 
             flat_tokens = torch.cat(
@@ -95,7 +91,7 @@ def semantic_beam_search(
         log_probs = log_probs.reshape(
             batch_size,
             current_beam_size,
-            model.codebook_size,
+            model.codebook_sizes[level],
         )
 
         candidate_scores = (
@@ -114,11 +110,11 @@ def semantic_beam_search(
         )
 
         previous_beam = (
-            best_indices // model.codebook_size
+            best_indices // model.codebook_sizes[level]
         )
 
         next_token = (
-            best_indices % model.codebook_size
+            best_indices % model.codebook_sizes[level]
         )
 
         selected_beams = beams.gather(

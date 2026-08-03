@@ -24,31 +24,25 @@ def prepare_examples(
 ):
     sid_cols = get_sid_cols(semantic_df)
 
-    if len(sid_cols) != cfg.num_levels:
+    codebook_sizes = getattr(cfg, "codebook_sizes", None)
+    if codebook_sizes is None:
+        codebook_sizes = (cfg.codebook_size,) * cfg.num_levels
+    if len(codebook_sizes) != len(sid_cols):
         raise ValueError(
-            f"Expected {cfg.num_levels} SID levels, "
-            f"received {len(sid_cols)}"
+            "Количество codebook_sizes должно совпадать с количеством SID уровней"
         )
 
-    df = (
-        data
-        .with_columns(
-            (
-                pl.col("timestamp") // cfg.seconds_per_day
+    df = (data.with_columns((pl.col("timestamp") // cfg.seconds_per_day
             ).alias("day")
         )
-        .join(
-            semantic_df,
-            on="item_id",
-            how="inner",
-        )
+        .join(semantic_df, on="item_id", how="inner")
         .sort(["uid", "timestamp"])
     )
 
     item_ids = sorted(df["item_id"].unique().to_list())
-
+    
     item2idx = {
-        item_id: index + 1
+        item_id: index + 1 # нулевой индекс для падинга
         for index, item_id in enumerate(item_ids)
     }
 
@@ -139,11 +133,6 @@ def collate_fn(
         [example["sid"] for example in batch],
         dtype=torch.long,
     )
-
-    if sid.shape != (batch_size, num_levels):
-        raise ValueError(
-            f"Unexpected SID shape: {tuple(sid.shape)}"
-        )
 
     for index, example in enumerate(batch):
         values = torch.tensor(

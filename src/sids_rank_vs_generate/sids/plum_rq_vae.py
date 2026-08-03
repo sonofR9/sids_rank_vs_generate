@@ -5,10 +5,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from ..data.embedding_dataset import EmbeddingDataset
-from .rq_kmeans import RQKMeans
 
 
-class RQVAE(nn.Module):
+class PLUMRQVAE(nn.Module):
     def __init__(
         self,
         dim,
@@ -16,7 +15,7 @@ class RQVAE(nn.Module):
         latent_dim=128,
         num_levels=3,
         codebook_size=2048,
-        codebooks_sizes=None,
+        codebook_sizes=None,
         batch_size=256,
         num_epochs=50,
         lr=5e-4,
@@ -31,7 +30,7 @@ class RQVAE(nn.Module):
         self.codebook_size = codebook_size
         self.batch_size = batch_size
         self.num_epochs = num_epochs
-        self.codebooks_sizes = codebooks_sizes
+        self.codebook_sizes = codebook_sizes
         self.lr = lr
         self.beta = beta
         self.num_workers = num_workers
@@ -48,12 +47,16 @@ class RQVAE(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_dim, dim),
         )
-        if self.codebooks_sizes  is None:
-            self.codebooks_sizes = [self.codebook_size//2**i for i in range(num_levels)]
+        if self.codebook_sizes is None:
+            self.codebook_sizes = [self.codebook_size // 2**i for i in range(num_levels)]
+        if len(self.codebook_sizes) != self.num_levels:
+            raise ValueError(
+                "Количество уровней должно совпадать с количеством codebook_sizes"
+            )
         # TODO: residual quantization codebooks
         self.codebooks = nn.ParameterList([
             nn.Parameter(torch.empty(size, latent_dim))
-            for size in self.codebooks_sizes  
+            for size in self.codebook_sizes
         ])
 
         for codebook in self.codebooks:
@@ -62,6 +65,7 @@ class RQVAE(nn.Module):
         self.to(self.device)
         self.pretrain_epochs = pretrain_epochs
         self.pretrain_lr = pretrain_lr
+        self.metric_logger = None
 
     @staticmethod
     def converter(X) -> np.ndarray:
@@ -91,6 +95,11 @@ class RQVAE(nn.Module):
                 bs = x.size(0)
                 total_loss += loss.item() * bs
                 total_count += bs
+            epoch_metrics = {
+                "plum/pretrain_reconstruction_loss": total_loss / total_count,
+            }
+            if self.metric_logger is not None:
+                self.metric_logger(epoch_metrics, step=epoch + 1)
             print(
                 f"pretrain epoch={epoch + 1}/{self.pretrain_epochs} | "
                 f"recon={total_loss / total_count:.6f}"
@@ -239,6 +248,14 @@ class RQVAE(nn.Module):
                 total_commit += commit_loss.item() * bs
                 total_count += bs
     
+            epoch_metrics = {
+                "plum/loss": total_loss / total_count,
+                "plum/reconstruction_loss": total_recon / total_count,
+                "plum/codebook_loss": total_codebook / total_count,
+                "plum/commitment_loss": total_commit / total_count,
+            }
+            if self.metric_logger is not None:
+                self.metric_logger(epoch_metrics, step=epoch + 1)
             print(
                 f"epoch={epoch + 1}/{self.num_epochs} | "
                 f"loss={total_loss / total_count:.6f} | "

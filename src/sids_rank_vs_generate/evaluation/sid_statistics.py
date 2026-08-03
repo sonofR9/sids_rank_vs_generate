@@ -33,7 +33,7 @@ def tests_semantic_ids(df: pl.DataFrame, num_levels=3, codebook_size=512, item_c
         "Collisions rate": 1 - n_unique_codes / n_items,
         "n_singletons": n_singletons,
         "SIDs uniqueness": n_singletons / n_items,
-        "SID Collision P90": int(p90),
-        "SID Collision P99": int(p99),
-        "SID Collision P999": int(p999),
+        "SID Collision P90": int(p90 or 0),
+        "SID Collision P99": int(p99 or 0),
+        "SID Collision P999": int(p999 or 0),
     }

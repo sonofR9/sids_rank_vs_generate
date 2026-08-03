@@ -2,13 +2,19 @@
 from experiments.config_semantic_transformer import (
     SemanticTransformerConfig,
 )
-from experiments.rqkmeans.config_rqkmeans import RQKMeansConfig
-from experiments.rqvae.config_rqvae import RQVAEConfig
+SID_Methods = ("plum",)
 
-SID_Methods = ("rqkmeans", "rqvae")
+COLLISION_RESOLUTION_MODES = (False, True)
+
+MLFLOW_EXPERIMENT_NAME = "sid-comparison"
+
+MLFLOW_TRACKING_URI = "http://51.250.47.231:5000"
 
 SID_Hyperparametrs = (
-    {"num_levels": 3, "codebook_size": 256},
+    {"codebook_sizes": (256, 128, 64)},
+    {"codebook_sizes": (512, 256, 128)},
+    {"codebook_sizes": (256, 128, 64, 32)},
+    {"codebook_sizes": (1024, 512)},
 )
 
 def make_transformer_config() -> SemanticTransformerConfig:
@@ -21,27 +27,5 @@ def make_transformer_config() -> SemanticTransformerConfig:
     cfg.max_epochs = 30
     cfg.early_stopping_patience = 3
     cfg.early_stopping_min_delta = 1e-4
-
-    return cfg
-
-def make_rqkmeans_config(
-    num_levels: int,
-    codebook_size: int,
-) -> RQKMeansConfig:
-    cfg = RQKMeansConfig()
-
-    cfg.num_levels = num_levels
-    cfg.codebook_size = codebook_size
-
-    return cfg
-
-def make_rqvae_config(
-    num_levels: int,
-    codebook_size: int,
-) -> RQVAEConfig:
-    cfg = RQVAEConfig()
-
-    cfg.num_levels = num_levels
-    cfg.codebook_size = codebook_size
 
     return cfg

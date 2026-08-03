@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "sids-rank-vs-generate"
 version = "0.1.0"
 requires-python = ">=3.10"
-dependencies = [ "numpy", "polars", "scikit-learn", "kagglehub", ]
+dependencies = [ "numpy", "polars", "scikit-learn", "kagglehub", "mlflow", ]
 
 [project.scripts]
 sasrec-baseline = "sids_rank_vs_generate.experiments.sasrec:main"

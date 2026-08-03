@@ -35,13 +35,14 @@ class SemanticTransformerConfig:
     rq_num_levels: int = 3
     num_levels: int = 4
     codebook_size: int = 512
-    codebook_sizes: list[int] | None = None    
+    codebook_sizes: tuple[int, ...] | None = None
     num_beams: int = 150
     recall_k: int = 100
 
     log_every_n_steps: int = 100
     val_subset_size: int | None = 50_000
-    resolve_collisions: bool = True
+    resolve_collisions: bool = False
+    collision_codebook_size: int | None = None
     seed: int = 42
     device: str = (
         "cuda"

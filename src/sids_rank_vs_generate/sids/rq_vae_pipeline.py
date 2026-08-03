@@ -33,7 +33,7 @@ class RQVAEPipeline(ISidPipeline):
         with torch.no_grad():
             X_tensor = torch.tensor(X, device=self.model.device)
             Z = self.model.encoder(X_tensor).cpu().numpy()
-        rq = RQKMeans(num_levels=self.config.num_levels, codebook_size=self.config.codebook_size)
+        rq = RQKMeans(codebook_sizes=self.model.codebook_sizes)
         rq.fit(Z)
         # инитим через rqkmeans
         self.model.init_codebooks(rq.codebooks)

@@ -11,7 +11,21 @@ from sids_rank_vs_generate.evaluation.semantic_validation_with_collision import 
 from sids_rank_vs_generate.evaluation.semantic_validation_without_collision import to_device, validate_semantic_model_without_collisions
 
 
-def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
+def train_semantic(
+    model,
+    train_loader,
+    val_loader,
+    cfg,
+    sid_to_items=None,
+    metric_logger=None,
+):
+    configured_sizes = cfg.codebook_sizes
+    if configured_sizes is None:
+        configured_sizes = (cfg.codebook_size,) * cfg.num_levels
+    if tuple(model.codebook_sizes) != tuple(configured_sizes):
+        raise ValueError(
+            "Модель и конфиг обучения должны использовать одинаковые codebook_sizes"
+        )
     optimizer = torch.optim.AdamW(
         model.parameters(),
         lr=cfg.lr,
@@ -78,6 +92,18 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
             "train_loss": train_loss,
             **metrics,
         })
+
+        if metric_logger is not None:
+            metric_logger(
+                {
+                    "transformer/train_loss": train_loss,
+                    **{
+                        f"transformer/validation/{name}": value
+                        for name, value in metrics.items()
+                    },
+                },
+                step=epoch,
+            )
 
         print(
             f"epoch={epoch} | loss={train_loss:.6f} | "

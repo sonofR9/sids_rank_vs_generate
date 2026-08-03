@@ -8,7 +8,6 @@ def get_sid_cols(semantic_df):
 
 def add_collision_resolving_sid(
     semantic_df: pl.DataFrame,
-    codebook_size: int,
     item_col: str = "item_id",
     new_col: str | None = None,
 ):
@@ -25,7 +24,4 @@ def add_collision_resolving_sid(
     )
 
     max_token = int(result[new_col].max())
-
-    if max_token >= codebook_size:
-        raise ValueError("колизий больше чем размер кодбука")
-    return result
+    return result, max_token

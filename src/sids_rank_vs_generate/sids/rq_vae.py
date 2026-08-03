@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from ..data.embedding_dataset import EmbeddingDataset
+from .codebook_sizes import resolve_codebook_sizes
 
 
 class RQVAE(nn.Module):
@@ -15,6 +16,7 @@ class RQVAE(nn.Module):
         latent_dim=128,
         num_levels=3,
         codebook_size=512,
+        codebook_sizes=None,
         batch_size=256,
         lr=1e-3,
         beta=0.25,
@@ -26,16 +28,22 @@ class RQVAE(nn.Module):
         patience=5,
         min_delta=1e-5,
         val_part=0.05,
+        num_epochs=None,
     ):
         super().__init__()
-        self.num_levels = num_levels
+        self.codebook_sizes = resolve_codebook_sizes(
+            codebook_sizes=codebook_sizes,
+            num_levels=num_levels,
+            codebook_size=codebook_size,
+        )
+        self.num_levels = len(self.codebook_sizes)
         self.codebook_size = codebook_size
         self.batch_size = batch_size
         self.lr = lr
         self.beta = beta
         self.num_workers = num_workers
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.max_epochs = max_epochs
+        self.max_epochs = max_epochs if num_epochs is None else num_epochs
         self.patience = patience
         self.min_delta = min_delta
         self.val_part = val_part
@@ -53,8 +61,8 @@ class RQVAE(nn.Module):
         )
         # TODO: residual quantization codebooks
         self.codebooks = nn.ParameterList([
-            nn.Parameter(torch.empty(codebook_size, latent_dim))
-            for _ in range(num_levels)
+            nn.Parameter(torch.empty(size, latent_dim))
+            for size in self.codebook_sizes
         ])
 
         for codebook in self.codebooks:

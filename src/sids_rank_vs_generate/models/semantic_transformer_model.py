@@ -8,12 +8,26 @@ class SemanticTransformerModel(nn.Module):
         super().__init__()
         self.cfg = cfg
         self.num_levels = self.cfg.num_levels
-        self.codebook_size = self.cfg.codebook_size
-        self.bos_id = self.codebook_size * self.num_levels
+        configured_sizes = getattr(self.cfg, "codebook_sizes", None)
+        if configured_sizes is None:
+            configured_sizes = (self.cfg.codebook_size,) * self.num_levels
+        self.codebook_sizes = tuple(configured_sizes)
+        if len(self.codebook_sizes) != self.num_levels:
+            raise ValueError(
+                "Количество уровней должно совпадать с количеством codebook_sizes"
+            )
+
+        offsets = torch.tensor(
+            [0, *self.codebook_sizes[:-1]],
+            dtype=torch.long,
+        ).cumsum(dim=0)
+        self.register_buffer("codebook_offsets", offsets, persistent=False)
+        self.codebook_size = self.codebook_sizes[0]
+        self.bos_id = sum(self.codebook_sizes)
         self.encoder = HistoryTransformerEncoder(num_items, self.cfg)
 
         # TODO: embeddings for decoder input tokens
-        self.decoder_embed = nn.Embedding(self.codebook_size*self.num_levels+1,self.cfg.d_model)
+        self.decoder_embed = nn.Embedding(self.bos_id + 1, self.cfg.d_model)
         # TODO: embeddings for semantic positions / levels
         self.positions_embed = nn.Embedding(self.num_levels,self.cfg.d_model)
         # TODO: TransformerDecoder
@@ -24,7 +38,10 @@ class SemanticTransformerModel(nn.Module):
             batch_first=True)
         self.decoder = nn.TransformerDecoder(decoder_layer, num_layers=self.cfg.num_layers)
         # TODO: prediction heads for each semantic level
-        self.heads = nn.ModuleList([nn.Linear(self.cfg.d_model, self.codebook_size) for _ in range(self.num_levels)])
+        self.heads = nn.ModuleList([
+            nn.Linear(self.cfg.d_model, size)
+            for size in self.codebook_sizes
+        ])
 
     def make_decoder_input(self, sid):
         # sid: [B, M]
@@ -39,13 +56,13 @@ class SemanticTransformerModel(nn.Module):
 
     def add_sid_offset(self, sid):
         T = sid.size(1)
-        offsets = torch.arange(T, device=sid.device) * self.codebook_size
-        return sid + offsets.unsqueeze(0)
+        return sid + self.codebook_offsets[:T].unsqueeze(0)
 
 
     def forward(self, history, positions, mask, sid):
         # history: [B, L]
         # sid: [B, M]
+
         # TODO: encode history
         memory, _ = self.encoder(history, positions, mask)
 
