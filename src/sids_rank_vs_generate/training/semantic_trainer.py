@@ -141,5 +141,6 @@ def train_semantic(
     )
 
     model.load_state_dict(checkpoint["model_state_dict"])
+    checkpoint_path.unlink() # очень много весит, давайте будем её удалять
 
     return history

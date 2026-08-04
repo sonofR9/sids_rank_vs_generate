@@ -95,7 +95,7 @@ def build_raw_semantic_ids(
             codebook_sizes=codebook_sizes,
         )
     else:
-        raise ValueError(f"Unknown SID method: {method}")
+        raise ValueError(f"Неизвестрный метод построения семантиков: {method}")
 
     raw_semantic_df = build_semantic_ids(
         method=method,
@@ -248,8 +248,7 @@ def run_single_experiment(
 def run_all_experiments(data, embeddings, transformer_cfg):
     all_results = []
 
-    if MLFLOW_TRACKING_URI:
-        mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
     mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 
     for method in SID_Methods:
