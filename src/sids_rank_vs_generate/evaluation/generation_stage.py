@@ -54,6 +54,7 @@ class GenerationConfig:
     num_levels: int = 0
     codebook_size: int = 0
     rq_num_levels: int = 0
+    
 
     def __post_init__(self) -> None:
         if self.d_model % self.num_heads:

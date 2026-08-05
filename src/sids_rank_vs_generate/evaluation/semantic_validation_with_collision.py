@@ -1,6 +1,6 @@
 from typing import Any
 
-
+import numpy as np
 import torch
 
 from ..training.utils import autocast, move_to_device
@@ -36,7 +36,7 @@ def validate_semantic_model_with_collisions(
     token_correct = 0
     token_total = 0
     top1_exact = 0
-
+    all_predictions = []
     for batch in val_loader:
         batch = move_to_device(batch, cfg.device)
 
@@ -69,13 +69,21 @@ def validate_semantic_model_with_collisions(
                 sid_to_items=sid_to_items,
                 k=cfg.recall_k,
             )
-
+            all_predictions.extend(predicted_items)
             recall_sum += float(int(target_item.item()) in set(predicted_items))
             total += 1
-
+    _, counts = np.unique(all_predictions, return_counts=True)
+    idx = np.argsort(counts)[::-1]  
+    sorted_counts = counts[idx]
+    cumsum = np.cumsum(sorted_counts)
+    total = np.sum(counts)
+    coverage_ratio = cumsum / total
+    threshold = 0.95
+    idx_95 = np.searchsorted(coverage_ratio, threshold) + 1  # +1 для количества элементов
     return {
         "top1_sid_token_acc": token_correct / max(token_total, 1),
         "top1_sid_exact": top1_exact / max(total, 1),
         f"recall@{cfg.recall_k}": recall_sum / max(total, 1),
         "beam_size": cfg.num_beams,
+        "Effective vocab size": idx_95,
     }
