@@ -46,6 +46,7 @@ def validate_semantic_model_with_collisions(
                 batch["positions"],
                 batch["mask"],
                 batch["sid"],
+                target=batch["target"],
             )
 
         preds = out["preds"]
@@ -73,13 +74,17 @@ def validate_semantic_model_with_collisions(
             recall_sum += float(int(target_item.item()) in set(predicted_items))
             total += 1
     _, counts = np.unique(all_predictions, return_counts=True)
-    idx = np.argsort(counts)[::-1]  
+    idx = np.argsort(counts)[::-1]
     sorted_counts = counts[idx]
     cumsum = np.cumsum(sorted_counts)
-    total = np.sum(counts)
-    coverage_ratio = cumsum / total
+    prediction_total = np.sum(counts)
+    coverage_ratio = cumsum / max(prediction_total, 1)
     threshold = 0.95
-    idx_95 = np.searchsorted(coverage_ratio, threshold) + 1  # +1 для количества элементов
+    idx_95 = (
+        np.searchsorted(coverage_ratio, threshold) + 1
+        if prediction_total
+        else 0
+    )
     return {
         "top1_sid_token_acc": token_correct / max(token_total, 1),
         "top1_sid_exact": top1_exact / max(total, 1),

@@ -27,6 +27,7 @@ def validate_semantic_model_without_collisions(
                 batch["positions"],
                 batch["mask"],
                 batch["sid"],
+                target=batch["target"],
             )
 
         preds = out["preds"]

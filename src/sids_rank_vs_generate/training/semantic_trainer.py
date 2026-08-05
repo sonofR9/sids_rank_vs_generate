@@ -65,6 +65,7 @@ def train_semantic(
                     batch["positions"],
                     batch["mask"],
                     batch["sid"],
+                    target=batch["target"],
                 )
 
             loss = output["loss"]
