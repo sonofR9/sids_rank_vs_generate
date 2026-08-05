@@ -33,7 +33,6 @@ class RecordingTracker(ExperimentTracker):
             "tags": dict(tags or {}),
             "params": {},
             "metrics": [],
-            "artifacts": [],
         }
         self.stack.append(run_name)
         try:
@@ -46,11 +45,6 @@ class RecordingTracker(ExperimentTracker):
 
     def log_metrics(self, metrics, *, step=None) -> None:
         self.runs[self.stack[-1]]["metrics"].append((step, dict(metrics)))
-
-    def log_artifacts(self, directory, *, artifact_path=None) -> None:
-        self.runs[self.stack[-1]]["artifacts"].append(
-            (Path(directory), artifact_path)
-        )
 
     def info(self):
         return {
@@ -233,7 +227,6 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                     for name in metrics
                 }
                 self.assertIn("train.loss", metric_names)
-            self.assertTrue(tracker.runs["RQKMeansPipeline"]["artifacts"])
 
 
 if __name__ == "__main__":

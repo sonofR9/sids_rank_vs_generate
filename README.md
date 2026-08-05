@@ -86,8 +86,8 @@ python run.py experiments/rqkmeans_full.py --skip-ranking
 Enable MLflow for the complete experiment with `--mlflow`. The runner creates
 one parent run and child runs for SID training, DCNv2, TransAct, and semantic
 generation. Custom PyTorch loops log their train and validation metrics once per
-epoch; the parent run stores final SID/downstream metrics and the complete run
-artifact directory.
+epoch; the parent run stores final SID and downstream metrics. Checkpoints and
+other generated files remain in the local report directory printed by the run.
 
 ```bash
 python run.py experiments/rqkmeans_full.py \

@@ -333,5 +333,4 @@ def run_sid_experiment(
             }
         )
     )
-    config.tracker.log_artifacts(run_dir, artifact_path="run")
     return result

@@ -112,9 +112,6 @@ class ExperimentTracker:
     ) -> None:
         del metrics, step
 
-    def log_artifacts(self, directory: Path, *, artifact_path: str | None = None) -> None:
-        del directory, artifact_path
-
     def info(self) -> dict[str, Any]:
         return {"enabled": False}
 
@@ -177,9 +174,6 @@ class MlflowTracker(ExperimentTracker):
         }
         if finite_metrics:
             self._mlflow.log_metrics(finite_metrics, step=step)
-
-    def log_artifacts(self, directory: Path, *, artifact_path: str | None = None) -> None:
-        self._mlflow.log_artifacts(str(directory), artifact_path=artifact_path)
 
     def info(self) -> dict[str, Any]:
         active_run = self._mlflow.active_run()
