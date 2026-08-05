@@ -21,8 +21,14 @@ class HistoryTransformerEncoder(nn.Module):
         self.encoder = nn.TransformerEncoder(layer, num_layers=self.cfg.num_layers)
         self.norm = nn.LayerNorm(self.cfg.d_model)
 
-    def forward(self, history, positions, mask):
+    def forward(self, history, positions, mask, additional_item_embeddings=None):
         x = self.item_emb(history) + self.pos_emb(positions)
+        if additional_item_embeddings is not None:
+            if additional_item_embeddings.shape != x.shape:
+                raise ValueError(
+                    "additional item embeddings must match encoded history shape"
+                )
+            x = x + additional_item_embeddings
 
         x = self.encoder(
             x,

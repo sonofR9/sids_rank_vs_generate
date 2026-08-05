@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -10,6 +10,7 @@ import polars as pl
 
 from ..data import PreparedInteractions
 from ..datasets import DatasetFiles
+from ..tracking import ExperimentTracker, NullTracker
 
 
 @dataclass(frozen=True)
@@ -21,6 +22,7 @@ class EvaluationContext:
     dataset: DatasetFiles
     artifact_dir: Path
     max_rows: int | None = None
+    tracker: ExperimentTracker = field(default_factory=NullTracker)
 
 
 class IEvaluationStage(ABC):

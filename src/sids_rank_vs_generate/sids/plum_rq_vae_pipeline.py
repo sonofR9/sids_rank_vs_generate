@@ -28,7 +28,7 @@ class PlumRQVAEPipeline(ISidPipeline):
             num_workers=self.model.num_workers,
         )
         # претрейнем тут
-        self.model.pretrain_autoencoder(loader)
+        self.model.pretrain_autoencoder(loader, tracker=self.tracker)
         # получаем выход энкодера предобуечнного
         with torch.no_grad():
             X_tensor = torch.tensor(X, device=self.model.device)
@@ -37,7 +37,7 @@ class PlumRQVAEPipeline(ISidPipeline):
         rq.fit(Z)
         # инитим через rqkmeans
         self.model.init_codebooks(rq.codebooks)
-        self.model.fit(X)
+        self.model.fit(X, tracker=self.tracker)
 
     def update(self, df: pl.DataFrame) -> pl.DataFrame:
         if self.model is None:

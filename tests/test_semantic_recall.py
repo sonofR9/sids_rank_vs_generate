@@ -1,5 +1,6 @@
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import torch
 from torch import nn
@@ -7,6 +8,9 @@ from torch import nn
 from sids_rank_vs_generate.evaluation.beam_search import (
     SemanticIDCatalog,
     semantic_beam_search,
+)
+from sids_rank_vs_generate.evaluation.semantic_validation_with_collision import (
+    validate_semantic_model_with_collisions,
 )
 from sids_rank_vs_generate.models.semantic_transformer_model import (
     SemanticTransformerModel,
@@ -145,6 +149,54 @@ class SemanticTransformerRecallFeaturesTest(unittest.TestCase):
         self.assertTrue(torch.isfinite(output["loss"]))
         self.assertIsNotNone(output["ranking_loss"])
         self.assertEqual(output["preds"].shape, (2, 2))
+
+
+class _PerfectSemanticModel(nn.Module):
+    def forward(self, history, positions, mask, sid, target=None):
+        return {"preds": sid}
+
+
+class SemanticValidationMetricsTest(unittest.TestCase):
+    def test_user_metrics_are_not_divided_by_prediction_count(self):
+        batch = {
+            "history": torch.tensor([[1], [2]]),
+            "positions": torch.zeros(2, 1, dtype=torch.long),
+            "mask": torch.ones(2, 1, dtype=torch.bool),
+            "sid": torch.tensor([[0, 0], [0, 0]]),
+            "target": torch.tensor([1, 2]),
+        }
+        beams = torch.tensor([
+            [[0, 0], [1, 1]],
+            [[0, 0], [1, 1]],
+        ])
+        cfg = SimpleNamespace(
+            device="cpu",
+            use_bf16=False,
+            num_beams=2,
+            recall_k=2,
+        )
+        catalog = SemanticIDCatalog(
+            semantic_ids=[(0, 0), (1, 1)],
+            codebook_sizes=(2, 2),
+        )
+
+        with patch(
+            "sids_rank_vs_generate.evaluation."
+            "semantic_validation_with_collision.semantic_beam_search",
+            return_value=(beams, torch.zeros(2, 2)),
+        ) as beam_search:
+            metrics = validate_semantic_model_with_collisions(
+                model=_PerfectSemanticModel(),
+                val_loader=[batch],
+                cfg=cfg,
+                sid_to_items={(0, 0): [1, 2]},
+                sid_catalog=catalog,
+            )
+
+        self.assertIs(beam_search.call_args.kwargs["sid_catalog"], catalog)
+        self.assertEqual(metrics["top1_sid_exact"], 1.0)
+        self.assertEqual(metrics["recall@2"], 1.0)
+        self.assertEqual(metrics["Effective vocab size"], 2)
 
 
 if __name__ == "__main__":

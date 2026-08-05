@@ -16,6 +16,9 @@ dependencies = [
     "tqdm>=4.66",
 ]
 
+[project.optional-dependencies]
+mlflow = ["mlflow>=3.0"]
+
 [project.scripts]
 sids-run = "sids_rank_vs_generate.experiment:main"
 sasrec-baseline = "sids_rank_vs_generate.experiments.sasrec:main"

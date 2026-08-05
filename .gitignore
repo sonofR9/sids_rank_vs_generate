@@ -211,6 +211,8 @@ tempCodeRunnerFile.py
 *.pt
 *.pth
 reports/experiments/*.json
+mlflow.db
+mlartifacts/
 
 # Ruff stuff:
 .ruff_cache/
