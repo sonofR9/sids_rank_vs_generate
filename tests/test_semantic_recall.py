@@ -175,19 +175,25 @@ class SemanticValidationMetricsTest(unittest.TestCase):
             num_beams=2,
             recall_k=2,
         )
+        catalog = SemanticIDCatalog(
+            semantic_ids=[(0, 0), (1, 1)],
+            codebook_sizes=(2, 2),
+        )
 
         with patch(
             "sids_rank_vs_generate.evaluation."
             "semantic_validation_with_collision.semantic_beam_search",
             return_value=(beams, torch.zeros(2, 2)),
-        ):
+        ) as beam_search:
             metrics = validate_semantic_model_with_collisions(
                 model=_PerfectSemanticModel(),
                 val_loader=[batch],
                 cfg=cfg,
                 sid_to_items={(0, 0): [1, 2]},
+                sid_catalog=catalog,
             )
 
+        self.assertIs(beam_search.call_args.kwargs["sid_catalog"], catalog)
         self.assertEqual(metrics["top1_sid_exact"], 1.0)
         self.assertEqual(metrics["recall@2"], 1.0)
         self.assertEqual(metrics["Effective vocab size"], 2)

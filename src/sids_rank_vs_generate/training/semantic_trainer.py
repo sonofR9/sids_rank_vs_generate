@@ -23,6 +23,7 @@ def train_semantic(
     val_loader,
     cfg,
     sid_to_items=None,
+    sid_catalog=None,
     tracker: ExperimentTracker | None = None,
 ):
     tracker = tracker or NullTracker()
@@ -37,7 +38,7 @@ def train_semantic(
 
     if cfg.resolve_collisions:
         validate_fn = validate_semantic_model_without_collisions
-        validation_kwargs = {}
+        validation_kwargs = {"sid_catalog": sid_catalog}
     else:
         if sid_to_items is None:
             raise ValueError(
@@ -45,7 +46,10 @@ def train_semantic(
             )
 
         validate_fn = validate_semantic_model_with_collisions
-        validation_kwargs = {"sid_to_items": sid_to_items}
+        validation_kwargs = {
+            "sid_to_items": sid_to_items,
+            "sid_catalog": sid_catalog,
+        }
 
     metric_name = f"recall@{cfg.recall_k}"
     best_metric = float("-inf")

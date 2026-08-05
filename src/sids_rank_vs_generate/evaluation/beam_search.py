@@ -203,18 +203,23 @@ def _semantic_beam_search(
 
         valid_counts = None
         if sid_catalog is not None:
-            valid_mask = torch.zeros_like(log_probs, dtype=torch.bool)
-            for batch_index in range(batch_size):
-                for beam_index in range(current_beam_size):
-                    prefix = beams[batch_index, beam_index, 1:].tolist()
+            beam_prefixes = beams[:, :, 1:].detach().cpu().tolist()
+            valid_mask_cpu = torch.zeros(
+                batch_size,
+                current_beam_size,
+                codebook_sizes[level],
+                dtype=torch.bool,
+            )
+            for batch_index, batch_prefixes in enumerate(beam_prefixes):
+                for beam_index, prefix in enumerate(batch_prefixes):
                     valid_tokens = sid_catalog.valid_next_tokens(prefix)
                     if valid_tokens:
-                        token_indices = torch.tensor(
-                            tuple(valid_tokens),
-                            device=device,
-                            dtype=torch.long,
-                        )
-                        valid_mask[batch_index, beam_index, token_indices] = True
+                        valid_mask_cpu[
+                            batch_index,
+                            beam_index,
+                            list(valid_tokens),
+                        ] = True
+            valid_mask = valid_mask_cpu.to(device=device)
             valid_counts = valid_mask.flatten(1).sum(dim=1)
             if torch.any(valid_counts == 0):
                 raise RuntimeError("beam search reached a prefix outside the SID catalog")

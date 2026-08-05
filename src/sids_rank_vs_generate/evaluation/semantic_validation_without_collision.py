@@ -9,6 +9,7 @@ def validate_semantic_model_without_collisions(
     model,
     val_loader,
     cfg,
+    sid_catalog=None,
 ):
     model.eval()
 
@@ -43,6 +44,7 @@ def validate_semantic_model_without_collisions(
             mask=batch["mask"],
             beam_size=cfg.num_beams,
             use_bf16=cfg.use_bf16,
+            sid_catalog=sid_catalog,
         )
 
         beams = beams[:, : cfg.recall_k]

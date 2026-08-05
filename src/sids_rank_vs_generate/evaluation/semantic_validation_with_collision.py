@@ -27,6 +27,7 @@ def validate_semantic_model_with_collisions(
     val_loader,
     cfg,
     sid_to_items,
+    sid_catalog=None,
 ):
     model.eval()
 
@@ -62,6 +63,7 @@ def validate_semantic_model_with_collisions(
             mask=batch["mask"],
             beam_size=cfg.num_beams,
             use_bf16=cfg.use_bf16,
+            sid_catalog=sid_catalog,
         )
 
         for user_beams, target_item in zip(beams, batch["target"]):
