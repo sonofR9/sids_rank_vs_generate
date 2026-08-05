@@ -3,6 +3,9 @@ from __future__ import annotations
 import random
 
 
+SID_EXPERIMENT_SEED = 42
+
+
 def seed_everything(seed: int) -> None:
     """Seed Python and optional numerical runtimes when they are installed."""
 

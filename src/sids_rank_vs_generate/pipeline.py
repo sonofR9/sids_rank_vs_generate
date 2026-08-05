@@ -11,7 +11,7 @@ from .data import (
     load_interactions,
     prepare_interactions,
 )
-from .reproducibility import seed_everything
+from .reproducibility import SID_EXPERIMENT_SEED, seed_everything
 
 
 @dataclass(frozen=True)
@@ -21,7 +21,6 @@ class PipelineConfig:
     test_days: float = 7.0
     timestamp_unit_seconds: float = 1.0
     latest_interactions: int | None = None
-    seed: int = 42
 
     @property
     def preprocessing(self) -> PreprocessingConfig:
@@ -38,7 +37,7 @@ def run_pipeline(
 ) -> PreparedInteractions:
     """Run the deterministic common part used by every experiment."""
 
-    seed_everything(config.seed)
+    seed_everything(SID_EXPERIMENT_SEED)
     interactions = load_interactions(
         config.interactions_path,
         latest_interactions=config.latest_interactions,

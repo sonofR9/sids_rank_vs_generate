@@ -1,48 +1,13 @@
-# SIDS rank vs generate
+# SIDs: rank vs generate
 
-The repository contains the shared preprocessing and evaluation runner used by
-SID experiments.
-It also contains a SASRec baseline trained on the official Yambda-50M
-**likes** split.
-Semantic IDs are not created or used in this stage.
+This repository compares semantic item IDs on the same Yambda catalog in two
+downstream tasks:
 
-## Data
+- ranking with DCNv2 and a history-aware TransAct-like transformer;
+- autoregressive candidate generation with a TIGER-like semantic transformer.
 
-The single supported interaction source is:
-
-```text
-Hugging Face: yandex/yambda
-file: flat/50m/likes.parquet
-rows: 881,456
-```
-
-Yambda timestamps are integer bins of five seconds. The preprocessing uses a
-5-core item filter and the final seven days as the test interval.
-
-The official global audio-embedding file is 13.8 GB. The first run therefore
-uses the repository's existing `embeddings.parquet` once to create a compact
-Yambda-50M-only cache:
-
-```text
-~/.cache/sids_rank_vs_generate/datasets/yambda-50m/
-  embeddings.parquet
-```
-
-That cache contains 170,787 liked tracks with L2-normalized 128-dimensional
-audio vectors. The experiment first restricts likes to that catalog and then
-applies the 5-core filter. With the current data this leaves:
-
-```text
-interactions: 634,642
-users:          8,032
-items:         33,148
-train:        630,095
-test:           4,547
-```
-
-The course Kaggle `embeddings_small.parquet` is intentionally not used: it
-covers only 144,670 of the 181,304 tracks liked in Yambda-50M, versus 170,787
-covered by the prepared official vectors.
+Every experiment is defined by a Python file and launched through the single
+repository entry point, `run.py`.
 
 ## Installation
 
@@ -54,175 +19,130 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-Datasets, archives, checkpoints, and generated metric files are local artifacts
-and must not be committed.
+## Data
 
-## Shared SID runner
-
-The common runner selects the Yambda scale and keeps dataset paths, the 5-core
-item filter, the final 7-day split, and the random seed shared by SID
-experiments.
-
-Prepared files live in one cache:
+The generation history comes from the official `yandex/yambda`
+`flat/50m/likes.parquet` file. Ranking uses the prepared
+`matfu21/yambda-50m-lag-features` DCNv2 listens together with the official
+Yambda artist and album mappings. The runner also downloads the global
+precomputed embeddings once and prepares a compact item-embedding cache:
 
 ```text
-~/.cache/sids_rank_vs_generate/datasets/
-  yambda-50m/
-    interactions.parquet
-    embeddings.parquet
-  yambda-500m/
-    interactions.parquet
-    embeddings.parquet
-  yambda-5b/
-    interactions.parquet
-    embeddings.parquet
+~/.cache/sids_rank_vs_generate/datasets/yambda-50m/
+  embeddings.parquet
 ```
 
-For backward compatibility, the first 50m run automatically extracts these two
-files from `dataset.zip` in the repository root when the cache is empty. The
-public Kaggle Yambda archives currently have a different schema, so a remote
-dataset reference must be agreed on before automatic downloading can safely be
-enabled.
+The common preparation filters interactions to items with embeddings, applies
+the configured item-core filter, creates one dense item mapping, and creates one
+chronological train/test boundary. Ranking and generation receive stage-specific
+views of this same prepared data and catalog.
 
-The same `PipelineConfig` and `PreparedInteractions` objects are used by every
-experiment, so item mapping and train/eval boundaries are not reimplemented in
-individual scripts.
+## Experiment configuration
 
-A SID implementation derives from `ISidPipeline`, accepts the prepared item
-feature frame in `train`, and appends integer `sid_0`, ..., `sid_n` columns in
-`update`. Load a class or zero-argument factory from a Python module or file:
+An experiment file contains the instantiated SID pipeline. The two ranking
+models and the generation model are fixed across experiments; only training
+hyperparameters can optionally be overridden. SID statistics are always
+calculated by the runner.
 
 ```python
-import polars as pl
+from sids_rank_vs_generate.experiment import ExperimentConfig, YambdaDatasetConfig
+from sids_rank_vs_generate.sids import RQKMeansConfig, RQKMeansPipeline
 
-from sids_rank_vs_generate.sids import ISidPipeline
 
-
-class TrainMySid(ISidPipeline):
-    def train(self, df: pl.DataFrame) -> None:
-        self.model.fit(df["embed"])
-
-    def update(self, df: pl.DataFrame) -> pl.DataFrame:
-        codes = self.model.transform(df["embed"])
-        return pl.DataFrame(
-            {"item_id": df["item_id"], "sid_0": codes[:, 0], "sid_1": codes[:, 1]}
-        )
+EXPERIMENT = ExperimentConfig(
+    dataset=YambdaDatasetConfig(),
+    sid_pipeline=RQKMeansPipeline(
+        RQKMeansConfig(num_levels=3, codebook_size=256),
+    ),
+)
 ```
+
+The common runner always uses the fixed seed `42`; experiments cannot override
+it, so SID construction and downstream model initialization are comparable.
+
+Run the included configuration with:
 
 ```bash
-python run.py \
-  --dataset-size 50m \
-  --sid experiments/my_sid.py:TrainMySid
+python run.py experiments/rqkmeans_full.py
 ```
 
-Baselines that do not produce semantic IDs, such as SASRec, are run separately.
+Both tasks run by default. Runtime flags skip stages or bound both interaction
+sources for a faster end-to-end check:
 
-The runner writes all machine-generated artifacts below one directory:
+```bash
+python run.py experiments/rqkmeans_full.py --max-rows 200000
+python run.py experiments/rqkmeans_full.py --skip-generation
+python run.py experiments/rqkmeans_full.py --skip-ranking
+```
+
+A config can also point at explicitly prepared Parquet files for tests or local
+development.
+
+## Pipeline
+
+For each run, the runner:
+
+1. prepares Yambda interactions and item embeddings;
+2. calls `sid_pipeline.train(item_features)`;
+3. calls `sid_pipeline.update(item_features)` and validates its `sid_0`, ...
+   integer columns;
+4. saves the semantic IDs and automatically computes utilization, uniqueness,
+   collision, singleton, and collision-percentile statistics;
+5. trains every enabled ranking model;
+6. trains and evaluates the generation model when enabled;
+7. writes one unified `metrics.json`.
+
+Ranking uses the existing listen labels and all prepared DCNv2 lag features.
+Both models consume the same dense counters, user and candidate SID features,
+and multivalent artist/album IDs. The TransAct variant adds the latest like
+history strictly preceding each ranking timestamp to that same DCNv2 input.
+
+Generation predicts the target item's SID autoregressively from item history.
+Collision resolution can append a final disambiguation level; without it, beams
+are expanded through the SID-to-items mapping for item recall.
+
+Artifacts use this layout:
 
 ```text
-reports/experiments/50m/TrainMySid/<UTC-run-id>/
+reports/experiments/50m/RQKMeansPipeline/<UTC-run-id>/
   metrics.json
+  semantic_ids.parquet
   ranking/
-  candgen/
+    dcnv2.pt
+    transact.pt
+  generation/
+    best_model.pt
+    semantic_ids.parquet
 ```
 
-Only `--reports-dir` changes the root. The generated UTC run id prevents repeated
-experiments from overwriting each other. The runner first restricts interactions
-to items covered by the supplied item feature cache, then applies the common core
-filter, chronological split, and dense item mapping.
+## Other SID pipelines
 
-Ranking and candidate generation are enabled independently:
+The package also exposes `RQVAEPipeline` and `PlumRQVAEPipeline`. New methods
+implement `ISidPipeline`:
 
-```bash
-python run.py \
-  --dataset-size 50m \
-  --sid experiments/my_sid.py:TrainMySid \
-  --ranking \
-  --candgen \
-  --reports-dir reports/experiments
+```python
+class MySidPipeline(ISidPipeline):
+    def train(self, df: pl.DataFrame) -> None:
+        ...
+
+    def update(self, df: pl.DataFrame) -> pl.DataFrame:
+        # item_id plus integer sid_0, ..., sid_n columns
+        ...
 ```
 
-Until their concrete implementations are merged into the common stage registry,
-enabling an unconnected stage fails with an explicit error. A SID-only smoke run
-works without either flag.
+## SASRec baseline
 
-## Train SASRec
-
-The first run downloads the 7 MB Yambda-50M likes file and prepares the compact
-embedding cache. Later runs reuse both caches.
+The earlier non-SID SASRec experiment remains available separately:
 
 ```bash
-python run.py \
-  --epochs 10 \
-  --batch-size 128 \
-  --metrics-json reports/experiments/sasrec_yambda_50m.json
-```
-
-The 128-dimensional normalized audio vectors initialize SASRec's item embedding
-table and remain trainable by default. Use `--freeze-item-embeddings` to keep
-them fixed.
-
-Training uses sampled negatives instead of a full-catalog softmax. Exact top-k
-evaluation is computed in catalog chunks, so the experiment does not allocate a
-batch-by-catalog score matrix.
-
-The default `sampled-uniform` objective draws negatives uniformly from the
-catalog and reproduces the first full baseline. The `in-batch` objectives draw
-from all non-padding history items and targets in the current batch. For each
-example, candidates contributed by the same user, every item in its own prefix,
-and every occurrence of its positive item id are excluded from the negative
-pool. `in-batch-logq` additionally corrects only negative logits using base item
-frequencies in the aggregate history-plus-target pools produced by all train
-examples.
-
-```bash
-python run.py \
-  --epochs 10 \
-  --batch-size 128 \
-  --training-objective in-batch \
-  --training-negatives 100 \
-  --metrics-json reports/experiments/sasrec_yambda_50m_audio_inbatch_user_mask_seed42.json
-```
-
-```bash
-python run.py \
-  --epochs 10 \
-  --batch-size 128 \
-  --training-objective in-batch-logq \
-  --training-negatives 100 \
-  --metrics-json reports/experiments/sasrec_yambda_50m_audio_logq_user_mask_seed42.json
-```
-
-These objectives keep the model, audio initialization, data split, seed, and
-exact top-k evaluation unchanged. The 100-negative LogQ variant achieved the
-best Recall@100; increasing its negative count to 2,048 removed that gain. See
-`reports/experiments/sasrec_baseline.md` for the full controlled comparison.
-
-Useful overrides:
-
-```bash
-python run.py \
-  --epochs 1 \
-  --device cpu \
-  --training-negatives 50 \
-  --eval-item-chunk-size 10000
-```
-
-To use explicitly prepared files:
-
-```bash
-python run.py \
-  --interactions /path/to/likes.parquet \
-  --embeddings /path/to/embeddings.parquet
+sasrec-baseline --epochs 10
 ```
 
 ## Verification
 
 ```bash
-python -m unittest discover -s tests -t . -v
+PYTHONPATH=src python -m unittest discover -s tests -t . -v
 ```
 
-The tests cover chronological preprocessing, five-second timestamp handling,
-content initialization, deterministic sampled-negative training, chunked
-ranking evaluation, metric output, the shared runner contract, SID validation,
-stage selection, and artifact output.
+The suite includes an end-to-end CPU run that creates RQKMeans IDs and evaluates
+both ranking models and generation in one experiment.

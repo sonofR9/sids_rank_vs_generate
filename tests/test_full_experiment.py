@@ -1,0 +1,176 @@
+from __future__ import annotations
+
+import tempfile
+import unittest
+from pathlib import Path
+
+import polars as pl
+
+from sids_rank_vs_generate.data.ranking import DENSE_COLUMNS
+from sids_rank_vs_generate.evaluation.generation_stage import GenerationConfig
+from sids_rank_vs_generate.evaluation.ranking_stage import RankingConfig
+from sids_rank_vs_generate.experiment import (
+    ExperimentConfig,
+    TrainingConfig,
+    YambdaDatasetConfig,
+    run_experiment,
+)
+from sids_rank_vs_generate.sids import RQKMeansConfig, RQKMeansPipeline
+
+
+class FullRQKMeansExperimentTest(unittest.TestCase):
+    def test_sid_and_experiment_configs_do_not_accept_seed_overrides(self) -> None:
+        with self.assertRaises(TypeError):
+            RQKMeansConfig(random_state=7)
+        with self.assertRaises(TypeError):
+            ExperimentConfig(
+                sid_pipeline=RQKMeansPipeline(RQKMeansConfig()),
+                seed=7,
+            )
+
+    def test_rqkmeans_runs_ranking_and_generation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            interactions_path = root / "interactions.parquet"
+            embeddings_path = root / "embeddings.parquet"
+            ranking_path = root / "ranking.parquet"
+            artist_path = root / "artists.parquet"
+            album_path = root / "albums.parquet"
+
+            rows = []
+            for uid in range(4):
+                for day in range(12):
+                    rows.append(
+                        {
+                            "uid": uid,
+                            "item_id": (day + uid) % 6,
+                            "timestamp": day * 86_400 + uid,
+                        }
+                    )
+            pl.DataFrame(rows).write_parquet(interactions_path)
+            pl.DataFrame(
+                {
+                    "item_id": list(range(6)),
+                    "normalized_embed": [
+                        [float(item == dimension) for dimension in range(6)]
+                        for item in range(6)
+                    ],
+                }
+            ).write_parquet(embeddings_path)
+            ranking_rows = []
+            for uid in range(4):
+                for day in range(1, 12):
+                    row = {
+                        "uid": uid,
+                        "item_id": (day + uid + 1) % 6,
+                        "timestamp": day * 86_400 + uid + 100,
+                        "played_ratio_pct": 100 if (day + uid) % 2 else 25,
+                        "track_length_seconds": 180 + day,
+                        "is_like": bool((day + uid) % 2),
+                    }
+                    row.update(
+                        {
+                            column: float(day + uid + feature_index + 1)
+                            for feature_index, column in enumerate(DENSE_COLUMNS)
+                        }
+                    )
+                    ranking_rows.append(row)
+            pl.DataFrame(ranking_rows).write_parquet(ranking_path)
+            pl.DataFrame(
+                {
+                    "artist_id": [100 + item for item in range(6)],
+                    "item_id": list(range(6)),
+                }
+            ).write_parquet(artist_path)
+            pl.DataFrame(
+                {
+                    "album_id": [200 + item for item in range(6)],
+                    "item_id": list(range(6)),
+                }
+            ).write_parquet(album_path)
+
+            config = ExperimentConfig(
+                dataset=YambdaDatasetConfig(
+                    interactions_path=interactions_path,
+                    embeddings_path=embeddings_path,
+                    ranking_interactions_path=ranking_path,
+                    artist_mapping_path=artist_path,
+                    album_mapping_path=album_path,
+                    core_min_interactions_per_item=1,
+                    test_days=3,
+                    timestamp_unit_seconds=1,
+                ),
+                sid_pipeline=RQKMeansPipeline(
+                    RQKMeansConfig(num_levels=2, codebook_size=2)
+                ),
+                training=TrainingConfig(
+                    ranking=RankingConfig(
+                        max_history_len=4,
+                        min_history_len=1,
+                        batch_size=16,
+                        epochs=1,
+                        embedding_dim=4,
+                        hidden_dim=8,
+                        dense_bins=2,
+                        dcn_cross_layers=1,
+                        dcn_deep_units=(16, 8),
+                        dcn_num_experts=2,
+                        dcn_low_rank=4,
+                        transact_d_model=8,
+                        transact_heads=2,
+                        transact_layers=1,
+                        transact_ff_dim=16,
+                        dropout=0.0,
+                        show_progress=False,
+                        device="cpu",
+                    ),
+                    generation=GenerationConfig(
+                        max_history_len=4,
+                        min_history_len=1,
+                        d_model=8,
+                        d_ff=16,
+                        num_heads=2,
+                        num_layers=1,
+                        dropout=0.0,
+                        batch_size=16,
+                        batch_size_val=16,
+                        num_workers=0,
+                        max_epochs=1,
+                        num_beams=4,
+                        recall_k=2,
+                        device="cpu",
+                    ),
+                ),
+                reports_dir=root / "reports",
+            )
+
+            result = run_experiment(config)
+
+            self.assertEqual(set(result["evaluations"]), {"ranking", "generation"})
+            self.assertEqual(
+                set(result["evaluations"]["ranking"]["models"]),
+                {"dcnv2", "transact"},
+            )
+            self.assertNotIn(
+                "history",
+                result["evaluations"]["ranking"]["models"]["dcnv2"],
+            )
+            self.assertNotIn(
+                "history",
+                result["evaluations"]["ranking"]["models"]["transact"],
+            )
+            ranking_features = result["evaluations"]["ranking"]["features"]
+            self.assertEqual(ranking_features["dense"], list(DENSE_COLUMNS))
+            self.assertEqual(
+                ranking_features["multivalent"], ["artist_ids", "album_ids"]
+            )
+            self.assertIn("statistics", result["sid"])
+            self.assertNotIn("history", result["evaluations"]["generation"])
+            self.assertTrue(Path(result["artifacts"]["semantic_ids"]).is_file())
+            self.assertTrue(
+                Path(result["evaluations"]["generation"]["checkpoint"]).is_file()
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()

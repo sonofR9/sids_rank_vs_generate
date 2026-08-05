@@ -911,7 +911,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             core_min_interactions_per_item=args.core_min_interactions,
             test_days=args.test_days,
             timestamp_unit_seconds=args.timestamp_unit_seconds,
-            seed=args.seed,
         ),
         eligible_items=embedding_catalog,
     )
