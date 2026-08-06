@@ -76,8 +76,8 @@ def validate_semantic_model_with_collisions(
     idx = np.argsort(counts)[::-1]  
     sorted_counts = counts[idx]
     cumsum = np.cumsum(sorted_counts)
-    total = np.sum(counts)
-    coverage_ratio = cumsum / total
+    total_2 = np.sum(counts)
+    coverage_ratio = cumsum / total_2
     threshold = 0.95
     idx_95 = np.searchsorted(coverage_ratio, threshold) + 1  # +1 для количества элементов
     return {

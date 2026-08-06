@@ -5,8 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from ..data.embedding_dataset import EmbeddingDataset
-from .rq_kmeans import RQKMeans
-
+from ..reproducibility import SID_EXPERIMENT_SEED
 
 class RQVAE(nn.Module):
     def __init__(
@@ -27,6 +26,11 @@ class RQVAE(nn.Module):
         pretrain_lr=5e-3,
     ):
         super().__init__()
+        torch.manual_seed(SID_EXPERIMENT_SEED)
+        np.random.seed(SID_EXPERIMENT_SEED)
+
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(SID_EXPERIMENT_SEED)
         self.num_levels = num_levels
         self.codebook_size = codebook_size
         self.batch_size = batch_size
