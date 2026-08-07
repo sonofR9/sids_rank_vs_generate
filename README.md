@@ -38,10 +38,12 @@ precomputed embeddings once and prepares a compact item-embedding cache:
   embeddings.parquet
 ```
 
-The common preparation filters interactions to items with embeddings, applies
-the configured item-core filter, creates one dense item mapping, and creates one
-chronological train/test boundary. Ranking and generation receive stage-specific
-views of this same prepared data and catalog.
+The common preparation filters interactions to items with embeddings, creates
+chronological fit/validation/test boundaries, and creates one dense item
+mapping. Comparison configs use `catalog_from_fit=True`, so the item core and
+catalog are derived from fit only. The legacy pre-test `train` pool remains
+available to the standalone SASRec command. Ranking and generation receive the
+same leakage-safe catalog and final-test boundary.
 
 ## Experiment configuration
 
@@ -84,10 +86,12 @@ python run.py experiments/rqkmeans_full.py --skip-ranking
 ### MLflow tracking
 
 Enable MLflow for the complete experiment with `--mlflow`. The runner creates
-one parent run and child runs for SID training, DCNv2, TransAct, and semantic
-generation. Custom PyTorch loops log their train and validation metrics once per
-epoch; the parent run stores final SID and downstream metrics. Checkpoints and
-other generated files remain in the local report directory printed by the run.
+one parent run and child runs for global SID training, DCNv2, TransAct, and
+semantic generation. User-aware experiments add child runs for personalized
+SID construction and the SID mapper. Custom PyTorch loops log train and
+validation metrics once per epoch; the parent run stores final SID and
+downstream metrics. Checkpoints and generated files remain in the local report
+directory printed by the run.
 
 ```bash
 python run.py experiments/rqkmeans_full.py \
@@ -115,6 +119,31 @@ With no explicit tracking URI, current MLflow versions use a local
 ```bash
 mlflow ui --backend-store-uri sqlite:///mlflow.db
 ```
+
+To run a tracking server on the same VM as the experiment:
+
+```bash
+mkdir -p "$PWD/mlflow/artifacts"
+mlflow server \
+  --host 127.0.0.1 \
+  --port 5000 \
+  --backend-store-uri "sqlite:///$PWD/mlflow/mlflow.db" \
+  --default-artifact-root "$PWD/mlflow/artifacts"
+```
+
+Check it and point the experiment at the HTTP endpoint:
+
+```bash
+curl --fail http://127.0.0.1:5000/health
+python run.py experiments/user_aware_transformer_mapper_full.py \
+  --mlflow \
+  --mlflow-tracking-uri http://127.0.0.1:5000 \
+  --mlflow-experiment-name sid-comparison
+```
+
+For runs on several VMs, use one tracking server reachable over a private
+network or SSH tunnel. Do not expose an unauthenticated MLflow port to the
+public internet. Every worker receives the same `--mlflow-tracking-uri`.
 
 A config can also point at explicitly prepared Parquet files for tests or local
 development.
@@ -148,12 +177,15 @@ Artifacts use this layout:
 reports/experiments/50m/RQKMeansPipeline/<UTC-run-id>/
   metrics.json
   semantic_ids.parquet
+  user_semantic_ids_fit.parquet        # user-aware only
   ranking/
     dcnv2.pt
     transact.pt
   generation/
     best_model.pt
+    best_mapper.pt                     # Transformer mapper only
     semantic_ids.parquet
+    user_semantic_ids_observed.parquet # user-aware only
 ```
 
 ## Other SID pipelines
@@ -171,6 +203,54 @@ class MySidPipeline(ISidPipeline):
         ...
 ```
 
+## User-aware Semantic IDs
+
+The optional user-aware pipeline is fitted from interactions strictly before
+the validation boundary. The global item SID remains the ordinary
+`ISidPipeline`; personalized IDs are an additional pair-level representation:
+
+```python
+from sids_rank_vs_generate.experiment import ExperimentConfig
+from sids_rank_vs_generate.sids import (
+    RQKMeansPipeline,
+    UserAwareRQKMeansPipeline,
+)
+
+EXPERIMENT = ExperimentConfig(
+    catalog_from_fit=True,
+    sid_pipeline=RQKMeansPipeline(...),
+    user_sid_pipeline=UserAwareRQKMeansPipeline(...),
+)
+```
+
+Ranking uses personalized candidate `usid_*` features while preserving the
+global-SID history representation. Generation predicts `SID_u`, applies a
+train-only `(user, SID_u) -> SID` mapper, and resolves the global SID to catalog
+items. The frequency mapper remains the default treatment:
+
+```bash
+python run.py experiments/user_aware_rqkmeans_full.py
+```
+
+A learned conditional Transformer mapper is available as a separate,
+directly comparable experiment. It conditions on the frozen train-only user
+profile and `SID_u`, then uses catalog-constrained decoding so every returned
+global SID exists:
+
+```bash
+python run.py experiments/user_aware_transformer_mapper_full.py
+```
+
+Content RQ-KMeans, content RQ-VAE, and the no-user pair control are configured
+in `experiments/rqkmeans_full.py`, `experiments/rqvae_full.py`, and
+`experiments/user_aware_no_user_control.py` respectively. Mapper selection is
+part of `GenerationConfig` through `UserSidMapperConfig(kind=...)`.
+
+MLflow is optional and never changes training behavior. Install
+`pip install -e '.[mlflow]'` and set
+`tracking=MLflowConfig(enabled=True, tracking_uri=...)` on `ExperimentConfig`,
+or use the command-line flags shown above.
+
 ## SASRec baseline
 
 The earlier non-SID SASRec experiment remains available separately:
@@ -185,5 +265,6 @@ sasrec-baseline --epochs 10
 PYTHONPATH=src python -m unittest discover -s tests -t . -v
 ```
 
-The suite includes an end-to-end CPU run that creates RQKMeans IDs and evaluates
-both ranking models and generation in one experiment.
+The suite includes end-to-end CPU runs for content-only and user-aware
+RQ-KMeans. They evaluate both ranking models, generation, Transformer mapping,
+and the complete tracking run hierarchy.

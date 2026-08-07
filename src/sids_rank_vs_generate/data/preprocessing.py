@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import timedelta
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
@@ -14,11 +15,13 @@ SECONDS_PER_DAY = 24 * 60 * 60
 
 @dataclass(frozen=True)
 class PreprocessingConfig:
-    """Parameters shared by training and evaluation experiments."""
+    """Общие настройки предобработки"""
 
     core_min_interactions_per_item: int = 5
     test_days: float = 7.0
     timestamp_unit_seconds: float = 1.0
+    validation_fraction: float = 0.1
+    catalog_from_fit: bool = False
 
     def __post_init__(self) -> None:
         if self.core_min_interactions_per_item <= 0:
@@ -27,11 +30,13 @@ class PreprocessingConfig:
             raise ValueError("test_days must be positive")
         if self.timestamp_unit_seconds <= 0:
             raise ValueError("timestamp_unit_seconds must be positive")
+        if not 0.0 < self.validation_fraction < 1.0:
+            raise ValueError("validation_fraction must be in (0, 1)")
 
 
 @dataclass(frozen=True)
 class PreparedInteractions:
-    """Dense item mapping and one reusable chronological train/test split."""
+    """Подготовленные данные и временные границы выборок"""
 
     data: pl.DataFrame
     train: pl.DataFrame
@@ -39,16 +44,34 @@ class PreparedInteractions:
     item_mapping: pl.DataFrame
     catalog_size: int
     test_start_timestamp: Any
+    fit: pl.DataFrame
+    validation: pl.DataFrame
+    validation_start_timestamp: Any
 
     def summary(self) -> dict[str, int | float | str]:
         return {
             "interactions": self.data.height,
             "train_interactions": self.train.height,
+            "fit_interactions": self.fit.height,
+            "validation_interactions": self.validation.height,
             "test_interactions": self.test.height,
             "users": self.data["uid"].n_unique(),
             "catalog_size": self.catalog_size,
             "test_start_timestamp": str(self.test_start_timestamp),
+            "validation_start_timestamp": str(self.validation_start_timestamp),
+            "fit_fingerprint": interaction_fingerprint(self.fit),
         }
+
+
+def interaction_fingerprint(frame: pl.DataFrame) -> str:
+    """Стабильный хеш строк обучающей выборки"""
+
+    canonical = frame.select(REQUIRED_COLUMNS).sort(["timestamp", "uid", "item_id"])
+    digest = sha256()
+    digest.update(str(canonical.schema).encode("utf-8"))
+    for batch in canonical.iter_slices(n_rows=65_536):
+        digest.update(batch.hash_rows(seed=42).to_numpy().tobytes())
+    return digest.hexdigest()
 
 
 def _validate_interactions(data: pl.DataFrame) -> None:
@@ -71,7 +94,7 @@ def load_interactions(
     *,
     latest_interactions: int | None = None,
 ) -> pl.DataFrame:
-    """Load only the canonical interaction fields from parquet."""
+    """Загрузить основные поля взаимодействий"""
 
     interactions_path = Path(path).expanduser()
     if not interactions_path.is_file():
@@ -99,23 +122,52 @@ def _test_start_timestamp(
     return max_timestamp - test_days * SECONDS_PER_DAY / timestamp_unit_seconds
 
 
+def _validation_start_timestamp(
+    train_pool: pl.DataFrame,
+    validation_fraction: float,
+    test_start_timestamp: Any,
+) -> Any:
+    if train_pool.height < 2 or train_pool["timestamp"].n_unique() < 2:
+        return test_start_timestamp
+    return train_pool["timestamp"].quantile(
+        1.0 - validation_fraction,
+        interpolation="nearest",
+    )
+
+
 def prepare_interactions(
     interactions: pl.DataFrame,
     config: PreprocessingConfig | None = None,
 ) -> PreparedInteractions:
-    """Core-filter, map item ids once, and split the data chronologically."""
+    """Отфильтровать и разделить данные по времени"""
 
     config = config or PreprocessingConfig()
     _validate_interactions(interactions)
-    source = interactions.select(REQUIRED_COLUMNS)
+    source = interactions.select(REQUIRED_COLUMNS).sort(["timestamp", "uid"])
 
+    test_start = _test_start_timestamp(
+        source,
+        config.test_days,
+        config.timestamp_unit_seconds,
+    )
+    source_train = source.filter(pl.col("timestamp") < test_start)
+    validation_start = _validation_start_timestamp(
+        source_train,
+        config.validation_fraction,
+        test_start,
+    )
+    source_fit = source_train.filter(pl.col("timestamp") < validation_start)
+    if source_fit.is_empty():
+        # В маленьких тестах граница validation может отсутствовать
+        # Этапы оценки сами отклоняют пустой validation
+        validation_start = test_start
+        source_fit = source_train
+
+    catalog_source = source_fit if config.catalog_from_fit else source
     eligible_items = (
-        source.group_by("item_id")
+        catalog_source.group_by("item_id")
         .len(name="interaction_count")
-        .filter(
-            pl.col("interaction_count")
-            >= config.core_min_interactions_per_item
-        )
+        .filter(pl.col("interaction_count") >= config.core_min_interactions_per_item)
         .select("item_id")
     )
     filtered = source.join(eligible_items, on="item_id", how="inner")
@@ -137,12 +189,11 @@ def prepare_interactions(
         .sort(["timestamp", "uid"])
     )
 
-    test_start = _test_start_timestamp(
-        data,
-        config.test_days,
-        config.timestamp_unit_seconds,
-    )
     train = data.filter(pl.col("timestamp") < test_start)
+    fit = data.filter(pl.col("timestamp") < validation_start)
+    validation = data.filter(
+        (pl.col("timestamp") >= validation_start) & (pl.col("timestamp") < test_start)
+    )
     test = data.filter(pl.col("timestamp") >= test_start)
 
     return PreparedInteractions(
@@ -152,6 +203,9 @@ def prepare_interactions(
         item_mapping=item_mapping,
         catalog_size=item_mapping.height,
         test_start_timestamp=test_start,
+        fit=fit,
+        validation=validation,
+        validation_start_timestamp=validation_start,
     )
 
 
@@ -163,7 +217,7 @@ def load_and_prepare_interactions(
 
 
 def build_histories(frame: pl.DataFrame) -> dict[Any, list[int]]:
-    """Build chronological item histories without repeating split logic."""
+    """Построить истории айтемов по времени"""
 
     _validate_interactions(frame)
     grouped = (
@@ -171,10 +225,7 @@ def build_histories(frame: pl.DataFrame) -> dict[Any, list[int]]:
         .group_by("uid", maintain_order=True)
         .agg(pl.col("item_id"))
     )
-    return {
-        row["uid"]: list(row["item_id"])
-        for row in grouped.iter_rows(named=True)
-    }
+    return {row["uid"]: list(row["item_id"]) for row in grouped.iter_rows(named=True)}
 
 
 def build_targets(frame: pl.DataFrame) -> dict[Any, list[int]]:

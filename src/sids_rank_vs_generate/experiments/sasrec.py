@@ -724,10 +724,11 @@ def run_sasrec(
         fused=device.type == "cuda",
     )
     autocast_dtype = _cuda_autocast_dtype(device)
-    grad_scaler = torch.amp.GradScaler(
-        "cuda",
-        enabled=device.type == "cuda" and autocast_dtype == torch.float16,
-    )
+    scaler_enabled = device.type == "cuda" and autocast_dtype == torch.float16
+    if hasattr(torch.amp, "GradScaler"):
+        grad_scaler = torch.amp.GradScaler("cuda", enabled=scaler_enabled)
+    else:
+        grad_scaler = torch.cuda.amp.GradScaler(enabled=scaler_enabled)
     train_losses: list[float] = []
     for epoch in range(config.epochs):
         model.train()

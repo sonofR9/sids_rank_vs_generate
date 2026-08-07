@@ -3,6 +3,7 @@ from __future__ import annotations
 import tempfile
 import unittest
 from contextlib import contextmanager
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -17,7 +18,13 @@ from sids_rank_vs_generate.experiment import (
     YambdaDatasetConfig,
     run_experiment,
 )
-from sids_rank_vs_generate.sids import RQKMeansConfig, RQKMeansPipeline
+from sids_rank_vs_generate.sids import (
+    RQKMeansConfig,
+    RQKMeansPipeline,
+    UserAwareRQKMeansConfig,
+    UserAwareRQKMeansPipeline,
+    UserSidMapperConfig,
+)
 from sids_rank_vs_generate.tracking import ExperimentTracker
 
 
@@ -61,6 +68,13 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
             ExperimentConfig(
                 sid_pipeline=RQKMeansPipeline(RQKMeansConfig()),
                 seed=7,
+            )
+
+    def test_user_aware_experiment_requires_fit_catalog(self) -> None:
+        with self.assertRaisesRegex(ValueError, "catalog_from_fit"):
+            ExperimentConfig(
+                sid_pipeline=RQKMeansPipeline(RQKMeansConfig()),
+                user_sid_pipeline=UserAwareRQKMeansPipeline(),
             )
 
     def test_rqkmeans_runs_ranking_and_generation(self) -> None:
@@ -176,6 +190,7 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                         device="cpu",
                     ),
                 ),
+                catalog_from_fit=True,
                 reports_dir=root / "reports",
             )
 
@@ -227,6 +242,91 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                     for name in metrics
                 }
                 self.assertIn("train.loss", metric_names)
+
+            user_tracker = RecordingTracker()
+            with patch(
+                "sids_rank_vs_generate.experiment.create_tracker",
+                return_value=user_tracker,
+            ):
+                user_aware_result = run_experiment(
+                    replace(
+                        config,
+                        user_sid_pipeline=UserAwareRQKMeansPipeline(
+                            UserAwareRQKMeansConfig(
+                                num_levels=2,
+                                codebook_size=2,
+                                kmeans_batch_size=16,
+                                predict_batch_size=16,
+                            )
+                        ),
+                        training=replace(
+                            config.training,
+                            generation=replace(
+                                config.training.generation,
+                                mapper=UserSidMapperConfig(
+                                    kind="transformer",
+                                    d_model=8,
+                                    d_ff=16,
+                                    num_heads=2,
+                                    num_encoder_layers=1,
+                                    num_decoder_layers=1,
+                                    dropout=0.0,
+                                    batch_size=16,
+                                    inference_batch_size=16,
+                                    max_epochs=1,
+                                    early_stopping_patience=1,
+                                ),
+                            ),
+                        ),
+                    )
+                )
+
+            self.assertEqual(
+                user_aware_result["evaluations"]["generation"]["target_sid_type"],
+                "personalized",
+            )
+            self.assertIsNotNone(user_aware_result["user_sid"])
+            self.assertTrue(
+                all(
+                    column.startswith("usid_")
+                    for column in user_aware_result["evaluations"]["ranking"][
+                        "features"
+                    ]["sparse"][1:]
+                )
+            )
+            self.assertIn(
+                "test",
+                user_aware_result["evaluations"]["generation"]["mapper"],
+            )
+            self.assertEqual(
+                user_aware_result["evaluations"]["generation"]["mapper"]["type"],
+                "transformer",
+            )
+            self.assertTrue(
+                Path(
+                    user_aware_result["evaluations"]["generation"]["mapper"][
+                        "checkpoint"
+                    ]
+                ).is_file()
+            )
+            self.assertEqual(
+                set(user_tracker.runs),
+                {
+                    "RQKMeansPipeline",
+                    "sid",
+                    "user_sid",
+                    "ranking.dcnv2",
+                    "ranking.transact",
+                    "generation",
+                    "generation.mapper",
+                },
+            )
+            mapper_metric_names = {
+                name
+                for _step, metrics in user_tracker.runs["generation.mapper"]["metrics"]
+                for name in metrics
+            }
+            self.assertIn("train.loss", mapper_metric_names)
 
 
 if __name__ == "__main__":

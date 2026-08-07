@@ -13,7 +13,7 @@ from .datasets import DatasetFiles, resolve_dataset
 from .evaluation.generation_stage import GenerationConfig, GenerationStage
 from .evaluation.ranking_stage import RankingConfig, RankingStage
 from .sid_experiment import SidExperimentConfig, run_sid_experiment
-from .sids import ISidPipeline
+from .sids import ISidPipeline, IUserAwareSidPipeline
 from .tracking import MLflowConfig, create_tracker, flatten_parameters
 
 
@@ -68,7 +68,7 @@ class YambdaDatasetConfig:
 
 @dataclass(frozen=True)
 class TrainingConfig:
-    """Optional hyperparameter overrides; model and stage choices stay fixed."""
+    """Настройки обучения моделей"""
 
     ranking: RankingConfig = RankingConfig()
     generation: GenerationConfig = GenerationConfig()
@@ -77,14 +77,23 @@ class TrainingConfig:
 @dataclass(frozen=True)
 class ExperimentConfig:
     sid_pipeline: ISidPipeline
+    user_sid_pipeline: IUserAwareSidPipeline | None = None
     dataset: YambdaDatasetConfig = YambdaDatasetConfig()
     training: TrainingConfig = TrainingConfig()
     tracking: MLflowConfig = MLflowConfig()
     reports_dir: Path = Path("reports/experiments")
+    catalog_from_fit: bool = False
 
     def __post_init__(self) -> None:
         if not isinstance(self.sid_pipeline, ISidPipeline):
             raise TypeError("sid_pipeline must implement ISidPipeline")
+        if self.user_sid_pipeline is not None and not isinstance(
+            self.user_sid_pipeline,
+            IUserAwareSidPipeline,
+        ):
+            raise TypeError("user_sid_pipeline must implement IUserAwareSidPipeline")
+        if self.user_sid_pipeline is not None and not self.catalog_from_fit:
+            raise ValueError("user-aware experiments require catalog_from_fit=True")
 
 
 def _load_module(path: Path) -> ModuleType:
@@ -152,6 +161,11 @@ def run_experiment(
     run_name = config.tracking.run_name or type(config.sid_pipeline).__name__
     tags = {
         "pipeline": type(config.sid_pipeline).__name__,
+        "user_pipeline": (
+            type(config.user_sid_pipeline).__name__
+            if config.user_sid_pipeline is not None
+            else "content-only"
+        ),
         **dict(config.tracking.tags),
     }
     with tracker.start_run(run_name, tags=tags):
@@ -160,6 +174,11 @@ def run_experiment(
                 {
                     "dataset": asdict(config.dataset),
                     "training": asdict(config.training),
+                    "user_sid_pipeline": (
+                        type(config.user_sid_pipeline).__name__
+                        if config.user_sid_pipeline is not None
+                        else None
+                    ),
                     "enabled_stages": list(enabled_stages),
                     "max_rows": max_rows,
                 }
@@ -169,6 +188,7 @@ def run_experiment(
             SidExperimentConfig(
                 dataset=dataset,
                 sid_pipeline=config.sid_pipeline,
+                user_sid_pipeline=config.user_sid_pipeline,
                 enabled_stages=enabled_stages,
                 reports_dir=config.reports_dir,
                 core_min_interactions_per_item=(
@@ -176,6 +196,8 @@ def run_experiment(
                 ),
                 test_days=config.dataset.test_days,
                 timestamp_unit_seconds=config.dataset.timestamp_unit_seconds,
+                validation_fraction=config.training.ranking.validation_fraction,
+                catalog_from_fit=config.catalog_from_fit,
                 latest_interactions=max_rows,
                 tracker=tracker,
             ),

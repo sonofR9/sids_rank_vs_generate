@@ -6,6 +6,7 @@ from sids_rank_vs_generate.sids import RQKMeansConfig, RQKMeansPipeline
 
 EXPERIMENT = ExperimentConfig(
     dataset=YambdaDatasetConfig(size="50m"),
+    catalog_from_fit=True,
     sid_pipeline=RQKMeansPipeline(
         RQKMeansConfig(
             num_levels=3,

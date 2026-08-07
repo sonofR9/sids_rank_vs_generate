@@ -9,6 +9,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 from ..datasets import DatasetFiles
+from ..sids.user_aware import IUserAwareSidPipeline, user_sid_columns
 from .preprocessing import PreparedInteractions
 
 
@@ -81,9 +82,8 @@ def _history_snapshots(
         ]
     ).list.drop_nulls()
     return (
-        prepared.data.join(history_item_mapping, on="item_id", how="inner").sort(
-            ["uid", "timestamp"]
-        )
+        prepared.data.join(history_item_mapping, on="item_id", how="inner")
+        .sort(["uid", "timestamp"])
         .with_columns(
             item_history.alias("history_item_idxs"),
             time_history.alias("history_timestamps"),
@@ -99,8 +99,7 @@ def _history_snapshots(
 
 def _hash_expression(expression: pl.Expr, salt: int) -> pl.Expr:
     return (
-        (expression.cast(pl.Int64) * 2_654_435_761 + salt)
-        % (HASH_CARDINALITY - 1)
+        (expression.cast(pl.Int64) * 2_654_435_761 + salt) % (HASH_CARDINALITY - 1)
     ) + 1
 
 
@@ -110,17 +109,13 @@ def _add_hashed_features(
 ) -> pl.DataFrame:
     expressions = [_hash_expression(pl.col("uid"), 17).alias("uid_hash")]
     expressions.extend(
-        _hash_expression(pl.col(column), 1_009 + level * 9_973).alias(
-            f"{column}_hash"
-        )
+        _hash_expression(pl.col(column), 1_009 + level * 9_973).alias(f"{column}_hash")
         for level, column in enumerate(sid_columns)
     )
     for column, salt in (("artist_ids", 20_011), ("album_ids", 40_009)):
         expressions.extend(
             pl.col(column)
-            .list.eval(
-                _hash_expression(pl.element(), salt + hash_index * 104_729)
-            )
+            .list.eval(_hash_expression(pl.element(), salt + hash_index * 104_729))
             .alias(f"{column}_hash_{hash_index}")
             for hash_index in range(NUM_HASHES)
         )
@@ -207,8 +202,11 @@ def prepare_ranking_data(
     min_history_len: int,
     validation_fraction: float,
     max_rows: int | None,
+    user_sid_pipeline: IUserAwareSidPipeline | None = None,
 ) -> RankingData:
-    """Merge DCNv2 features with the latest like history before each candidate."""
+    """Добавить признаки и историю лайков к кандидатам"""
+
+    del validation_fraction  # Граница задается общей предобработкой
 
     sid_columns = _sid_columns(items_with_sids)
     if not sid_columns:
@@ -228,9 +226,23 @@ def prepare_ranking_data(
         on=sid_columns,
         how="inner",
     ).select("item_id", "history_item_idx")
-    candidates = _load_dcn_candidates(
-        dataset, prepared, items_with_sids, max_rows
-    ).join(sid_paths, on=sid_columns, how="inner").sort(["uid", "timestamp"])
+    candidates = (
+        _load_dcn_candidates(dataset, prepared, items_with_sids, max_rows)
+        .join(sid_paths, on=sid_columns, how="inner")
+        .sort(["uid", "timestamp"])
+    )
+    candidate_sid_columns = sid_columns
+    if user_sid_pipeline is not None:
+        candidate_pairs = (
+            candidates.select("uid", "item_id").unique().sort(["uid", "item_id"])
+        )
+        candidate_user_sids = user_sid_pipeline.update(candidate_pairs)
+        candidate_sid_columns = tuple(user_sid_columns(candidate_user_sids))
+        candidates = candidates.join(
+            candidate_user_sids,
+            on=["uid", "item_id"],
+            how="inner",
+        )
     histories = _history_snapshots(
         prepared,
         history_item_mapping,
@@ -251,18 +263,15 @@ def prepare_ranking_data(
     user_mapping = merged.select("uid").unique().sort("uid").with_row_index("user_idx")
     merged = _add_hashed_features(
         merged.join(user_mapping, on="uid", how="inner"),
-        sid_columns,
+        candidate_sid_columns,
     )
 
-    train_pool = merged.filter(pl.col("timestamp") < prepared.test_start_timestamp)
-    test = merged.filter(pl.col("timestamp") >= prepared.test_start_timestamp)
-    if train_pool.is_empty() or test.is_empty():
-        raise ValueError("ranking chronological train/test split is empty")
-    validation_start = train_pool["timestamp"].quantile(
-        1.0 - validation_fraction, interpolation="nearest"
+    train = merged.filter(pl.col("timestamp") < prepared.validation_start_timestamp)
+    validation = merged.filter(
+        (pl.col("timestamp") >= prepared.validation_start_timestamp)
+        & (pl.col("timestamp") < prepared.test_start_timestamp)
     )
-    train = train_pool.filter(pl.col("timestamp") < validation_start)
-    validation = train_pool.filter(pl.col("timestamp") >= validation_start)
+    test = merged.filter(pl.col("timestamp") >= prepared.test_start_timestamp)
     for name, frame in (("train", train), ("validation", validation), ("test", test)):
         if frame.is_empty():
             raise ValueError(f"ranking {name} split is empty")
@@ -274,7 +283,7 @@ def prepare_ranking_data(
         validation=validation,
         test=test,
         dense_train=train.select(DENSE_COLUMNS),
-        sid_columns=sid_columns,
+        sid_columns=candidate_sid_columns,
         num_users=user_mapping.height,
         num_history_items=sid_paths.height + 1,
     )
@@ -332,14 +341,16 @@ def collate_ranking(batch: list[dict[str, Any]]) -> dict[str, Any]:
             (
                 column
                 for column in batch[0]
-                if column.startswith("sid_") and column[4:].isdigit()
+                if (
+                    (column.startswith("sid_") and column[4:].isdigit())
+                    or (column.startswith("usid_") and column[5:].isdigit())
+                )
+                and f"{column}_hash" in batch[0]
             ),
-            key=lambda column: int(column[4:]),
+            key=lambda column: int(column.rsplit("_", 1)[1]),
         )
     )
-    sparse = {
-        "uid": torch.tensor([row["uid_hash"] for row in batch], dtype=torch.long)
-    }
+    sparse = {"uid": torch.tensor([row["uid_hash"] for row in batch], dtype=torch.long)}
     for column in sid_columns:
         sparse[column] = torch.tensor(
             [row[f"{column}_hash"] for row in batch],

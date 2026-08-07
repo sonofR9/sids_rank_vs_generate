@@ -79,10 +79,10 @@ class PiecewiseLinearEncoder(nn.Module):
         #####################
         super().__init__()
 
-        self.weight = nn.Buffer(weight)
-        self.bias = nn.Buffer(bias)
-        self.single_bin_mask = nn.Buffer(single_bin_mask)
-        self.mask = nn.Buffer(mask)
+        self.register_buffer("weight", weight)
+        self.register_buffer("bias", bias)
+        self.register_buffer("single_bin_mask", single_bin_mask)
+        self.register_buffer("mask", mask)
         self._n_bins = n_bins
 
     @property

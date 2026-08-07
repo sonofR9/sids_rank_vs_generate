@@ -20,6 +20,8 @@ class PipelineConfig:
     core_min_interactions_per_item: int = 5
     test_days: float = 7.0
     timestamp_unit_seconds: float = 1.0
+    validation_fraction: float = 0.1
+    catalog_from_fit: bool = False
     latest_interactions: int | None = None
 
     @property
@@ -28,6 +30,8 @@ class PipelineConfig:
             core_min_interactions_per_item=self.core_min_interactions_per_item,
             test_days=self.test_days,
             timestamp_unit_seconds=self.timestamp_unit_seconds,
+            validation_fraction=self.validation_fraction,
+            catalog_from_fit=self.catalog_from_fit,
         )
 
 

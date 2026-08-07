@@ -6,7 +6,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field, is_dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import polars as pl
 
@@ -18,6 +18,7 @@ from .evaluation.collision_quality import (
     path_average_similarity,
 )
 from .evaluation.sid_statistics import calculate_sid_statistics
+from .evaluation.user_sid_statistics import calculate_user_sid_statistics
 from .evaluation.stages import (
     EvaluationContext,
     IEvaluationStage,
@@ -27,6 +28,7 @@ from .pipeline import PipelineConfig, run_pipeline
 from .plugins import load_plugin
 from .reproducibility import SID_EXPERIMENT_SEED, seed_everything
 from .sids.base import ISidPipeline
+from .sids.user_aware import IUserAwareSidPipeline, UserAwareSidTrainingData
 from .tracking import (
     ExperimentTracker,
     NullTracker,
@@ -40,11 +42,14 @@ class SidExperimentConfig:
     dataset: DatasetFiles
     sid_spec: str | None = None
     sid_pipeline: ISidPipeline | None = None
+    user_sid_pipeline: IUserAwareSidPipeline | None = None
     enabled_stages: tuple[str, ...] = ()
     reports_dir: Path = Path("reports/experiments")
     core_min_interactions_per_item: int = 5
     test_days: float = 7.0
     timestamp_unit_seconds: float = 1.0
+    validation_fraction: float = 0.1
+    catalog_from_fit: bool = False
     latest_interactions: int | None = None
     tracker: ExperimentTracker = field(default_factory=NullTracker)
 
@@ -147,12 +152,12 @@ def _to_builtin(value: Any) -> Any:
     raise TypeError(f"experiment result is not JSON serializable: {value_type}")
 
 
-def _sid_configuration(sid: ISidPipeline) -> Any:
+def _sid_configuration(sid: Any) -> Any:
     configuration = getattr(sid, "config", None)
     if configuration is None:
         return None
-    if is_dataclass(configuration):
-        configuration = asdict(configuration)
+    if is_dataclass(configuration) and not isinstance(configuration, type):
+        configuration = asdict(cast(Any, configuration))
     elif hasattr(configuration, "__dict__"):
         configuration = vars(configuration)
     return _to_builtin(configuration)
@@ -174,6 +179,8 @@ def run_sid_experiment(
         )
     if len(set(config.enabled_stages)) != len(config.enabled_stages):
         raise ValueError("evaluation stages must not be repeated")
+    if config.user_sid_pipeline is not None and not config.catalog_from_fit:
+        raise ValueError("user-aware experiments require catalog_from_fit=True")
 
     raw_item_features = _load_item_features(config.dataset.embeddings_path)
     prepared = run_pipeline(
@@ -182,6 +189,8 @@ def run_sid_experiment(
             core_min_interactions_per_item=config.core_min_interactions_per_item,
             test_days=config.test_days,
             timestamp_unit_seconds=config.timestamp_unit_seconds,
+            validation_fraction=config.validation_fraction,
+            catalog_from_fit=config.catalog_from_fit,
             latest_interactions=config.latest_interactions,
         ),
         eligible_items=raw_item_features.select("item_id"),
@@ -193,7 +202,7 @@ def run_sid_experiment(
         sid = config.sid_pipeline
         sid_reference = f"{type(sid).__module__}:{type(sid).__name__}"
     elif config.sid_spec is not None:
-        sid = load_plugin(config.sid_spec, ISidPipeline)
+        sid = load_plugin(config.sid_spec, cast(Any, ISidPipeline))
         sid_reference = config.sid_spec
     else:
         raise ValueError("sid_pipeline is required")
@@ -239,6 +248,49 @@ def run_sid_experiment(
         codebook_sizes,
     )
 
+    user_sid = config.user_sid_pipeline
+    fit_user_sids: pl.DataFrame | None = None
+    user_sid_statistics: dict[str, Any] | None = None
+    if user_sid is not None:
+        seed_everything(SID_EXPERIMENT_SEED)
+        with config.tracker.start_run(
+            "user_sid",
+            nested=True,
+            tags={
+                "stage": "user_sid",
+                "pipeline": type(user_sid).__name__,
+            },
+        ) as user_sid_tracker:
+            user_sid.set_tracker(user_sid_tracker)
+            user_sid_tracker.log_params(
+                flatten_parameters(
+                    {
+                        "pipeline": (
+                            f"{type(user_sid).__module__}:" f"{type(user_sid).__name__}"
+                        ),
+                        "config": _sid_configuration(user_sid) or {},
+                        "fit_interactions": prepared.fit.height,
+                        "catalog_items": item_features.height,
+                    }
+                )
+            )
+            user_sid.train(
+                UserAwareSidTrainingData(
+                    fit_interactions=prepared.fit,
+                    item_features=item_features,
+                    global_sids=sid_output.select("item_id", *sid_columns),
+                    fit_end_timestamp=prepared.validation_start_timestamp,
+                )
+            )
+            fit_pairs = (
+                prepared.fit.select("uid", "item_id").unique().sort(["uid", "item_id"])
+            )
+            fit_user_sids = user_sid.update(fit_pairs)
+            user_sid_statistics = calculate_user_sid_statistics(fit_user_sids)
+            user_sid_tracker.log_metrics(
+                flatten_metrics({"statistics": user_sid_statistics})
+            )
+
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     run_dir = (
         config.reports_dir.expanduser()
@@ -249,6 +301,10 @@ def run_sid_experiment(
     run_dir.mkdir(parents=True, exist_ok=True)
     semantic_ids_path = run_dir / "semantic_ids.parquet"
     sid_output.select("item_id", *sid_columns).write_parquet(semantic_ids_path)
+    user_semantic_ids_path: Path | None = None
+    if fit_user_sids is not None:
+        user_semantic_ids_path = run_dir / "user_semantic_ids_fit.parquet"
+        fit_user_sids.write_parquet(user_semantic_ids_path)
     evaluations: dict[str, Any] = {}
     for stage_name in config.enabled_stages:
         evaluator = stage_resolver(stage_name)
@@ -265,6 +321,8 @@ def run_sid_experiment(
             artifact_dir=stage_artifact_dir,
             max_rows=config.latest_interactions,
             tracker=config.tracker,
+            user_sid_pipeline=user_sid,
+            fit_user_sids=fit_user_sids,
         )
         metrics = evaluator.evaluate(context)
         if not isinstance(metrics, Mapping):
@@ -284,6 +342,18 @@ def run_sid_experiment(
                 "columns": sid_columns,
                 "statistics": sid_statistics,
             },
+            "user_sid": (
+                None
+                if user_sid is None
+                else {
+                    "pipeline": (
+                        f"{type(user_sid).__module__}:{type(user_sid).__name__}"
+                    ),
+                    "class": type(user_sid).__name__,
+                    "config": _sid_configuration(user_sid),
+                    "statistics": user_sid_statistics,
+                }
+            ),
             "item_features": {
                 "source_items": raw_item_features.height,
                 "catalog_items": item_features.height,
@@ -299,6 +369,8 @@ def run_sid_experiment(
                 ),
                 "test_days": config.test_days,
                 "timestamp_unit_seconds": config.timestamp_unit_seconds,
+                "validation_fraction": config.validation_fraction,
+                "catalog_from_fit": config.catalog_from_fit,
                 "latest_interactions": config.latest_interactions,
                 "enabled_stages": list(config.enabled_stages),
             },
@@ -309,6 +381,7 @@ def run_sid_experiment(
                 "directory": run_dir,
                 "metrics_json": metrics_path,
                 "semantic_ids": semantic_ids_path,
+                "user_semantic_ids_fit": user_semantic_ids_path,
             },
         }
     )
@@ -329,6 +402,11 @@ def run_sid_experiment(
             {
                 "data": result["data"],
                 "sid": result["sid"]["statistics"],
+                "user_sid": (
+                    result["user_sid"]["statistics"]
+                    if result["user_sid"] is not None
+                    else {}
+                ),
                 "evaluations": evaluation_metrics,
             }
         )

@@ -27,7 +27,12 @@ def move_to_device(value: Any, device: torch.device | str) -> Any:
 
 
 def autocast(device: torch.device, enabled: bool):
-    use_bf16 = enabled and device.type == "cuda"
+    use_bf16 = (
+        enabled
+        and device.type == "cuda"
+        and torch.cuda.is_available()
+        and torch.cuda.is_bf16_supported()
+    )
     return torch.amp.autocast(
         device_type=device.type,
         dtype=torch.bfloat16,

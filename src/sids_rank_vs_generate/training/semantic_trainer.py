@@ -25,6 +25,7 @@ def train_semantic(
     sid_to_items=None,
     sid_catalog=None,
     tracker: ExperimentTracker | None = None,
+    validation_callback=None,
 ):
     tracker = tracker or NullTracker()
     optimizer = torch.optim.AdamW(
@@ -36,9 +37,15 @@ def train_semantic(
     checkpoint_path = Path(cfg.checkpoint_path)
     checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if cfg.resolve_collisions:
+    if validation_callback is not None:
+        validate_fn = validation_callback
+        validation_kwargs = {}
+    elif cfg.resolve_collisions:
         validate_fn = validate_semantic_model_without_collisions
-        validation_kwargs = {"sid_catalog": sid_catalog}
+        validation_kwargs = {
+            "sid_catalog": sid_catalog,
+            "sid_to_items": sid_to_items,
+        }
     else:
         if sid_to_items is None:
             raise ValueError(
@@ -96,10 +103,7 @@ def train_semantic(
         tracker.log_metrics(
             {
                 "train.loss": train_loss,
-                **{
-                    f"validation.{name}": value
-                    for name, value in metrics.items()
-                },
+                **{f"validation.{name}": value for name, value in metrics.items()},
                 f"validation.best_{metric_name}": max(best_metric, current_metric),
             },
             step=epoch,

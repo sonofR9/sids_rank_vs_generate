@@ -67,6 +67,7 @@ class RankingStage(IEvaluationStage):
             min_history_len=self.config.min_history_len,
             validation_fraction=self.config.validation_fraction,
             max_rows=context.max_rows,
+            user_sid_pipeline=context.user_sid_pipeline,
         )
         loaders = build_ranking_loaders(
             data,

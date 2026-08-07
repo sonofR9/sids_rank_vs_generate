@@ -4,12 +4,14 @@ from ..training.utils import autocast, move_to_device
 from .beam_search import semantic_beam_search
 from collections import Counter
 
+
 @torch.inference_mode()
 def validate_semantic_model_without_collisions(
     model,
     val_loader,
     cfg,
     sid_catalog=None,
+    sid_to_items=None,
 ):
     model.eval()
 
@@ -19,6 +21,8 @@ def validate_semantic_model_without_collisions(
     token_total = 0
     top1_exact = 0
     freq_counter = Counter()
+    reciprocal_rank = 0.0
+    recommended_items = set()
     for batch in val_loader:
         batch = move_to_device(batch, cfg.device)
 
@@ -53,6 +57,21 @@ def validate_semantic_model_without_collisions(
                 freq_counter[tuple(sid_tokens.tolist())] += 1
         hit = (beams == batch["sid"][:, None, :]).all(dim=-1).any(dim=1)
 
+        if sid_to_items is not None:
+            for user_beams, target_item in zip(
+                beams,
+                batch["target"],
+                strict=True,
+            ):
+                ranked_items = []
+                for beam in user_beams[: cfg.recall_k]:
+                    ranked_items.extend(sid_to_items.get(tuple(beam.tolist()), []))
+                ranked_items = ranked_items[: cfg.recall_k]
+                recommended_items.update(ranked_items)
+                target = int(target_item.item())
+                if target in ranked_items:
+                    reciprocal_rank += 1.0 / (ranked_items.index(target) + 1)
+
         total += batch["sid"].size(0)
         exact_hits += hit.sum().item()
     sorted_freqs = sorted(freq_counter.values(), reverse=True)
@@ -64,10 +83,18 @@ def validate_semantic_model_without_collisions(
         items_needed += 1
         if cumsum / total_predictions >= 0.95:
             break
-    return {
+
+    metrics = {
         "top1_sid_token_acc": token_correct / max(token_total, 1),
         "top1_sid_exact": top1_exact / max(total, 1),
         f"recall@{cfg.recall_k}": exact_hits / max(total, 1),
         "beam_size": cfg.num_beams,
         "Effective vocab size": items_needed,
     }
+    if sid_to_items is not None:
+        catalog = {item for items in sid_to_items.values() for item in items}
+        metrics[f"mrr@{cfg.recall_k}"] = reciprocal_rank / max(total, 1)
+        metrics[f"catalog_coverage@{cfg.recall_k}"] = len(recommended_items) / max(
+            len(catalog), 1
+        )
+    return metrics
