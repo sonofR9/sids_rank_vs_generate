@@ -37,6 +37,10 @@ class RankingConfig:
     transact_ff_dim: int = 256
     dropout: float = 0.2
     num_workers: int = 0
+    prefetch_factor: int = 2
+    persistent_workers: bool = True
+    models: tuple[str, ...] = ("dcnv2", "transact")
+    use_semantic_ids: bool = True
     use_bf16: bool = True
     show_progress: bool = True
     device: str = "auto"
@@ -48,6 +52,15 @@ class RankingConfig:
             raise ValueError("transact_d_model must be divisible by transact_heads")
         if self.min_history_len <= 0 or self.max_history_len < self.min_history_len:
             raise ValueError("invalid ranking history lengths")
+        supported_models = {"dcnv2", "transact"}
+        if not self.models or len(set(self.models)) != len(self.models):
+            raise ValueError("ranking models must be non-empty and unique")
+        if unknown_models := set(self.models) - supported_models:
+            raise ValueError(f"unsupported ranking models: {sorted(unknown_models)}")
+        if self.num_workers < 0:
+            raise ValueError("num_workers must be non-negative")
+        if self.prefetch_factor <= 0:
+            raise ValueError("prefetch_factor must be positive")
 
 
 class RankingStage(IEvaluationStage):
@@ -68,11 +81,14 @@ class RankingStage(IEvaluationStage):
             validation_fraction=self.config.validation_fraction,
             max_rows=context.max_rows,
             user_sid_pipeline=context.user_sid_pipeline,
+            use_semantic_ids=self.config.use_semantic_ids,
         )
         loaders = build_ranking_loaders(
             data,
             batch_size=self.config.batch_size,
             num_workers=self.config.num_workers,
+            prefetch_factor=self.config.prefetch_factor,
+            persistent_workers=self.config.persistent_workers,
         )
 
         model_factories = {
@@ -80,7 +96,8 @@ class RankingStage(IEvaluationStage):
             "transact": TransActDcnV2Ranker,
         }
         results = {}
-        for model_name, model_factory in model_factories.items():
+        for model_name in self.config.models:
+            model_factory = model_factories[model_name]
             seed_everything(SID_EXPERIMENT_SEED)
             with context.tracker.start_run(
                 f"ranking.{model_name}",
@@ -113,7 +130,11 @@ class RankingStage(IEvaluationStage):
                 "dense": list(data.dense_train.columns),
                 "sparse": ["uid", *data.sid_columns],
                 "multivalent": ["artist_ids", "album_ids"],
-                "transact_history": "preceding generation likes",
+                "transact_history": (
+                    "preceding semantic-ID likes"
+                    if self.config.use_semantic_ids
+                    else "preceding item likes"
+                ),
             },
             "examples": {
                 "train": data.train.height,

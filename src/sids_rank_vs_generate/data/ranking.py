@@ -140,6 +140,8 @@ def _load_dcn_candidates(
     prepared: PreparedInteractions,
     items_with_sids: pl.DataFrame,
     max_rows: int | None,
+    *,
+    use_semantic_ids: bool,
 ) -> pl.DataFrame:
     ranking_path = _require_file(
         dataset.ranking_interactions_path,
@@ -171,19 +173,27 @@ def _load_dcn_candidates(
 
     artist_mapping = _load_multivalent_mapping(artist_path, "artist_id", eligible_items)
     album_mapping = _load_multivalent_mapping(album_path, "album_id", eligible_items)
-    sids = (
-        items_with_sids.select("item_id", *_sid_columns(items_with_sids))
-        .rename({"item_id": "mapped_item_id"})
-        .lazy()
-    )
-
-    return (
+    candidates = (
         candidates.join(artist_mapping, on="item_id", how="left")
         .join(album_mapping, on="item_id", how="left")
         .rename({"item_id": "original_item_id"})
         .join(item_mapping, on="original_item_id", how="inner")
-        .join(sids, left_on="item_id", right_on="mapped_item_id", how="inner")
-        .with_columns(
+    )
+    if use_semantic_ids:
+        sids = (
+            items_with_sids.select("item_id", *_sid_columns(items_with_sids))
+            .rename({"item_id": "mapped_item_id"})
+            .lazy()
+        )
+        candidates = candidates.join(
+            sids,
+            left_on="item_id",
+            right_on="mapped_item_id",
+            how="inner",
+        )
+
+    return (
+        candidates.with_columns(
             pl.col("artist_ids").fill_null(pl.lit([], dtype=pl.List(pl.UInt32))),
             pl.col("album_ids").fill_null(pl.lit([], dtype=pl.List(pl.UInt32))),
             pl.col("is_like").cast(pl.Float32).alias("target"),
@@ -203,46 +213,74 @@ def prepare_ranking_data(
     validation_fraction: float,
     max_rows: int | None,
     user_sid_pipeline: IUserAwareSidPipeline | None = None,
+    use_semantic_ids: bool = True,
 ) -> RankingData:
     """Добавить признаки и историю лайков к кандидатам"""
 
     del validation_fraction  # Граница задается общей предобработкой
 
-    sid_columns = _sid_columns(items_with_sids)
-    if not sid_columns:
-        raise ValueError("ranking requires at least one semantic-ID column")
-    sid_frame = items_with_sids.select("item_id", *sid_columns).sort("item_id")
-    if sid_frame.height != prepared.catalog_size:
-        raise ValueError("ranking requires SIDs for the full prepared catalog")
+    if use_semantic_ids:
+        sid_columns = _sid_columns(items_with_sids)
+        if not sid_columns:
+            raise ValueError("ranking requires at least one semantic-ID column")
+        sid_frame = items_with_sids.select("item_id", *sid_columns).sort("item_id")
+        if sid_frame.height != prepared.catalog_size:
+            raise ValueError("ranking requires SIDs for the full prepared catalog")
 
-    sid_paths = (
-        sid_frame.select(sid_columns)
-        .unique()
-        .sort(sid_columns)
-        .with_row_index("history_item_idx", offset=1)
-    )
-    history_item_mapping = sid_frame.join(
-        sid_paths,
-        on=sid_columns,
-        how="inner",
-    ).select("item_id", "history_item_idx")
-    candidates = (
-        _load_dcn_candidates(dataset, prepared, items_with_sids, max_rows)
-        .join(sid_paths, on=sid_columns, how="inner")
-        .sort(["uid", "timestamp"])
-    )
-    candidate_sid_columns = sid_columns
-    if user_sid_pipeline is not None:
-        candidate_pairs = (
-            candidates.select("uid", "item_id").unique().sort(["uid", "item_id"])
+        sid_paths = (
+            sid_frame.select(sid_columns)
+            .unique()
+            .sort(sid_columns)
+            .with_row_index("history_item_idx", offset=1)
         )
-        candidate_user_sids = user_sid_pipeline.update(candidate_pairs)
-        candidate_sid_columns = tuple(user_sid_columns(candidate_user_sids))
-        candidates = candidates.join(
-            candidate_user_sids,
-            on=["uid", "item_id"],
+        history_item_mapping = sid_frame.join(
+            sid_paths,
+            on=sid_columns,
             how="inner",
+        ).select("item_id", "history_item_idx")
+        candidates = (
+            _load_dcn_candidates(
+                dataset,
+                prepared,
+                items_with_sids,
+                max_rows,
+                use_semantic_ids=True,
+            )
+            .join(sid_paths, on=sid_columns, how="inner")
+            .sort(["uid", "timestamp"])
         )
+        candidate_sid_columns = sid_columns
+        if user_sid_pipeline is not None:
+            candidate_pairs = (
+                candidates.select("uid", "item_id")
+                .unique()
+                .sort(["uid", "item_id"])
+            )
+            candidate_user_sids = user_sid_pipeline.update(candidate_pairs)
+            candidate_sid_columns = tuple(user_sid_columns(candidate_user_sids))
+            candidates = candidates.join(
+                candidate_user_sids,
+                on=["uid", "item_id"],
+                how="inner",
+            )
+        num_history_items = sid_paths.height + 1
+    else:
+        history_item_mapping = prepared.item_mapping.select("item_id").with_columns(
+            (pl.col("item_id") + 1).alias("history_item_idx")
+        )
+        candidates = (
+            _load_dcn_candidates(
+                dataset,
+                prepared,
+                items_with_sids,
+                max_rows,
+                use_semantic_ids=False,
+            )
+            .with_columns((pl.col("item_id") + 1).alias("history_item_idx"))
+            .sort(["uid", "timestamp"])
+        )
+        candidate_sid_columns = ()
+        num_history_items = prepared.catalog_size + 1
     histories = _history_snapshots(
         prepared,
         history_item_mapping,
@@ -285,7 +323,7 @@ def prepare_ranking_data(
         dense_train=train.select(DENSE_COLUMNS),
         sid_columns=candidate_sid_columns,
         num_users=user_mapping.height,
-        num_history_items=sid_paths.height + 1,
+        num_history_items=num_history_items,
     )
 
 
@@ -402,6 +440,8 @@ def build_ranking_loaders(
     *,
     batch_size: int,
     num_workers: int,
+    prefetch_factor: int = 2,
+    persistent_workers: bool = True,
 ) -> tuple[DataLoader, DataLoader, DataLoader]:
     common = {
         "batch_size": batch_size,
@@ -409,6 +449,11 @@ def build_ranking_loaders(
         "collate_fn": collate_ranking,
         "pin_memory": torch.cuda.is_available(),
     }
+    if num_workers > 0:
+        common.update(
+            prefetch_factor=prefetch_factor,
+            persistent_workers=persistent_workers,
+        )
     return (
         DataLoader(PolarsRankingDataset(data.train), shuffle=True, **common),
         DataLoader(PolarsRankingDataset(data.validation), shuffle=False, **common),

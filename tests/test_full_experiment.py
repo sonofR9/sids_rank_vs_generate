@@ -243,6 +243,38 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                 }
                 self.assertIn("train.loss", metric_names)
 
+            item_only_tracker = RecordingTracker()
+            with patch(
+                "sids_rank_vs_generate.experiment.create_tracker",
+                return_value=item_only_tracker,
+            ):
+                item_only_result = run_experiment(
+                    replace(
+                        config,
+                        training=replace(
+                            config.training,
+                            ranking=replace(
+                                config.training.ranking,
+                                models=("transact",),
+                                use_semantic_ids=False,
+                            ),
+                        ),
+                    ),
+                    run_generation=False,
+                )
+
+            item_only_ranking = item_only_result["evaluations"]["ranking"]
+            self.assertEqual(set(item_only_ranking["models"]), {"transact"})
+            self.assertEqual(item_only_ranking["features"]["sparse"], ["uid"])
+            self.assertEqual(
+                item_only_ranking["features"]["transact_history"],
+                "preceding item likes",
+            )
+            self.assertEqual(
+                set(item_only_tracker.runs),
+                {"RQKMeansPipeline", "sid", "ranking.transact"},
+            )
+
             user_tracker = RecordingTracker()
             with patch(
                 "sids_rank_vs_generate.experiment.create_tracker",
