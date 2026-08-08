@@ -215,6 +215,7 @@ class R3VAESid(ISidPipeline):
             self.model.parameters(),
             lr=self.config.learning_rate,
             weight_decay=self.config.weight_decay,
+            fused=True,
         )
         generator = torch.Generator(device="cpu").manual_seed(self.config.seed)
         self.training_history = []
