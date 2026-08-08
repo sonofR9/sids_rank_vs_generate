@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import polars as pl
@@ -27,6 +27,7 @@ class R3VAEConfig:
     pd_temperature: float = 2.0
     pd_chunk_size: int = 2_048
     kmeans_init: bool = True
+    kmeans_init_method: Literal["spherical", "rqkmeans"] = "spherical"
     kmeans_iterations: int = 20
     seed: int = 42
     device: str = "auto"
@@ -52,6 +53,10 @@ class R3VAEConfig:
             raise ValueError("learning_rate must be positive")
         if self.weight_decay < 0:
             raise ValueError("weight_decay must be non-negative")
+        if self.kmeans_init_method not in {"spherical", "rqkmeans"}:
+            raise ValueError(
+                "kmeans_init_method must be 'spherical' or 'rqkmeans'"
+            )
 
 
 def _resolve_device(name: str) -> torch.device:
@@ -165,6 +170,9 @@ class R3VAESid(ISidPipeline):
             raise RuntimeError("model has not been created")
         normalized = F.normalize(embeddings.to(self.device), dim=-1)
         _, residual = self.model.reference_projection(normalized)
+        if self.config.kmeans_init_method == "rqkmeans":
+            self._initialize_codebooks_with_rqkmeans(residual)
+            return
         for level, codebook in enumerate(self.model.quantizer.codebooks):
             residual = F.normalize(residual, dim=-1)
             centers = _spherical_kmeans(
@@ -185,6 +193,38 @@ class R3VAESid(ISidPipeline):
                 centers[indices] * values.unsqueeze(-1)
             ).sum(dim=1)
             residual = residual - level_quantized
+
+    @torch.no_grad()
+    def _initialize_codebooks_with_rqkmeans(
+        self,
+        residual: torch.Tensor,
+    ) -> None:
+        if self.model is None:
+            raise RuntimeError("model has not been created")
+        from .rq_kmeans import RQKMeans
+
+        initializer = RQKMeans(
+            codebook_sizes=self.config.codebook_sizes,
+        ).fit(residual.detach().cpu().numpy())
+        if len(initializer.codebooks) != len(self.model.quantizer.codebooks):
+            raise RuntimeError(
+                "RQKMeans returned an unexpected number of codebooks"
+            )
+        for parameter, centers in zip(
+            self.model.quantizer.codebooks,
+            initializer.codebooks,
+            strict=True,
+        ):
+            values = torch.as_tensor(
+                centers,
+                dtype=parameter.dtype,
+                device=parameter.device,
+            )
+            if values.shape != parameter.shape:
+                raise RuntimeError(
+                    "RQKMeans returned an unexpected codebook shape"
+                )
+            parameter.copy_(F.normalize(values, dim=-1))
 
     def train(self, df: pl.DataFrame) -> None:
         seed_everything(self.config.seed)
@@ -215,7 +255,6 @@ class R3VAESid(ISidPipeline):
             self.model.parameters(),
             lr=self.config.learning_rate,
             weight_decay=self.config.weight_decay,
-            fused=True,
         )
         generator = torch.Generator(device="cpu").manual_seed(self.config.seed)
         self.training_history = []

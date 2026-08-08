@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import math
+import sys
+import types
 import unittest
+from dataclasses import replace
+from unittest.mock import patch
 
 import polars as pl
 import torch
@@ -111,6 +115,47 @@ class R3VAESidTest(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "zero vectors"):
             R3VAESid(self.config()).train(items)
+
+    def test_rqkmeans_initialization_copies_normalized_codebooks(self) -> None:
+        class FakeRQKMeans:
+            def __init__(self, *, codebook_sizes: tuple[int, ...]) -> None:
+                self.codebook_sizes = codebook_sizes
+                self.codebooks: list[object] = []
+
+            def fit(self, values: object) -> "FakeRQKMeans":
+                width = values.shape[1]
+                self.codebooks = [
+                    torch.arange(1, size * width + 1, dtype=torch.float32)
+                    .reshape(size, width)
+                    .numpy()
+                    for size in self.codebook_sizes
+                ]
+                return self
+
+        module_name = "sids_rank_vs_generate.sids.rq_kmeans"
+        fake_module = types.ModuleType(module_name)
+        fake_module.RQKMeans = FakeRQKMeans
+        config = replace(
+            self.config(),
+            kmeans_init_method="rqkmeans",
+        )
+        with patch.dict(sys.modules, {module_name: fake_module}):
+            sid = R3VAESid(config)
+            sid.model = R3VAE(4, config.codebook_sizes)
+            embeddings = torch.tensor(
+                self.items()["normalized_embed"].to_list(),
+                dtype=torch.float32,
+            )
+            sid._initialize_codebooks(embeddings)
+
+        assert sid.model is not None
+        for codebook in sid.model.quantizer.codebooks:
+            torch.testing.assert_close(
+                codebook.detach().norm(dim=-1),
+                torch.ones(codebook.shape[0]),
+                atol=1e-5,
+                rtol=1e-5,
+            )
 
 
 if __name__ == "__main__":

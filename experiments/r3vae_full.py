@@ -10,6 +10,7 @@ EXPERIMENT = ExperimentConfig(
             epochs=20,
             batch_size=1_024,
             learning_rate=5e-4,
+            kmeans_init_method="rqkmeans",
             seed=42,
             device="auto",
         )
