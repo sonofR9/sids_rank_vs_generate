@@ -9,6 +9,9 @@ from sids_rank_vs_generate.evaluation.beam_search import (
     SemanticIDCatalog,
     semantic_beam_search,
 )
+from sids_rank_vs_generate.evaluation.personalized_generation import (
+    _rank_personalized_items,
+)
 from sids_rank_vs_generate.evaluation.semantic_validation_with_collision import (
     validate_semantic_model_with_collisions,
 )
@@ -156,7 +159,54 @@ class _PerfectSemanticModel(nn.Module):
         return {"preds": sid}
 
 
+class _RecordingMapper:
+    def __init__(self) -> None:
+        self.requests = []
+
+    def predict_topk_batch(self, requests, k):
+        self.requests.extend(requests)
+        return [[(int(user_sid[0]),)] for _uid, user_sid in requests]
+
+
 class SemanticValidationMetricsTest(unittest.TestCase):
+    def test_personalized_mapping_stops_after_same_top_k(self):
+        beams = torch.tensor([
+            [[0], [1], [2], [3]],
+            [[0], [1], [2], [3]],
+        ])
+        sid_to_items = {
+            (0,): [10],
+            (1,): [11],
+            (2,): [12],
+            (3,): [13],
+        }
+        chunked_mapper = _RecordingMapper()
+        full_mapper = _RecordingMapper()
+
+        chunked = _rank_personalized_items(
+            uids=[1, 2],
+            beams=beams,
+            mapper=chunked_mapper,
+            sid_to_items=sid_to_items,
+            recall_k=2,
+            mapper_top_k=1,
+            mapper_beam_chunk_size=2,
+        )
+        full = _rank_personalized_items(
+            uids=[1, 2],
+            beams=beams,
+            mapper=full_mapper,
+            sid_to_items=sid_to_items,
+            recall_k=2,
+            mapper_top_k=1,
+            mapper_beam_chunk_size=4,
+        )
+
+        self.assertEqual(chunked, full)
+        self.assertEqual(chunked, [[10, 11], [10, 11]])
+        self.assertEqual(len(chunked_mapper.requests), 4)
+        self.assertEqual(len(full_mapper.requests), 8)
+
     def test_user_metrics_are_not_divided_by_prediction_count(self):
         batch = {
             "history": torch.tensor([[1], [2]]),

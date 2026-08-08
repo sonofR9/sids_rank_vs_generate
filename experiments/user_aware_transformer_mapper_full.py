@@ -1,5 +1,8 @@
 """Персональные SID с Transformer маппером"""
 
+import os
+from pathlib import Path
+
 from sids_rank_vs_generate.evaluation import GenerationConfig
 from sids_rank_vs_generate.experiment import (
     ExperimentConfig,
@@ -15,6 +18,9 @@ from sids_rank_vs_generate.sids import (
 )
 
 
+MAPPER_CHECKPOINT = os.environ.get("SID_MAPPER_CHECKPOINT")
+
+
 EXPERIMENT = ExperimentConfig(
     dataset=YambdaDatasetConfig(size="50m"),
     catalog_from_fit=True,
@@ -23,6 +29,13 @@ EXPERIMENT = ExperimentConfig(
         UserAwareRQKMeansConfig(num_levels=3, codebook_size=256)
     ),
     training=TrainingConfig(
-        generation=GenerationConfig(mapper=UserSidMapperConfig(kind="transformer"))
+        generation=GenerationConfig(
+            mapper=UserSidMapperConfig(
+                kind="transformer",
+                load_checkpoint_path=(
+                    Path(MAPPER_CHECKPOINT) if MAPPER_CHECKPOINT else None
+                ),
+            )
+        )
     ),
 )

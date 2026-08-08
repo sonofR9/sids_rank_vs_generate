@@ -60,6 +60,7 @@ class GenerationConfig:
     max_validation_examples: int | None = 50_000
     max_test_examples: int | None = 50_000
     mapper_top_k: int = 3
+    mapper_beam_chunk_size: int = 16
     mapper: UserSidMapperConfig = UserSidMapperConfig()
     use_bf16: bool = True
     device: str = "auto"
@@ -76,8 +77,8 @@ class GenerationConfig:
             raise ValueError("invalid generation history lengths")
         if self.max_epochs <= 0 or self.batch_size <= 0 or self.batch_size_val <= 0:
             raise ValueError("generation epochs and batch sizes must be positive")
-        if self.mapper_top_k <= 0:
-            raise ValueError("mapper_top_k must be positive")
+        if self.mapper_top_k <= 0 or self.mapper_beam_chunk_size <= 0:
+            raise ValueError("mapper top-k and beam chunk size must be positive")
         if self.codebook_sizes is not None and any(
             size <= 0 for size in self.codebook_sizes
         ):
@@ -432,11 +433,17 @@ class GenerationStage(IEvaluationStage):
                     device=runtime.device,
                     checkpoint_path=checkpoint,
                 )
-                transformer_mapper.fit(
-                    mapper_training_frame,
-                    validation_examples,
-                    tracker=tracker,
-                )
+                if runtime.mapper.load_checkpoint_path is None:
+                    transformer_mapper.fit(
+                        mapper_training_frame,
+                        validation_examples,
+                        tracker=tracker,
+                    )
+                else:
+                    transformer_mapper.load(
+                        mapper_training_frame,
+                        runtime.mapper.load_checkpoint_path,
+                    )
                 mapper = transformer_mapper
                 training = transformer_mapper.training_summary
             validation = mapper.evaluate_examples(

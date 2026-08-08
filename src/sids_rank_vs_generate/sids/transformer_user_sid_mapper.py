@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 import polars as pl
@@ -38,10 +38,13 @@ class UserSidMapperConfig:
     early_stopping_patience: int = 3
     early_stopping_min_delta: float = 1e-4
     grad_clip: float = 1.0
+    load_checkpoint_path: Path | None = None
 
     def __post_init__(self) -> None:
         if self.kind not in {"frequency", "transformer"}:
             raise ValueError("mapper kind must be 'frequency' or 'transformer'")
+        if self.load_checkpoint_path is not None and self.kind != "transformer":
+            raise ValueError("only Transformer mapper can load a checkpoint")
         if self.d_model <= 0 or self.d_model % self.num_heads:
             raise ValueError(
                 "mapper d_model must be positive and divisible by num_heads"
@@ -424,13 +427,13 @@ class TransformerUserSidMapper(IUserSidMapper):
         self._model.load_state_dict(best_state)
         self.checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
         torch.save(
-            {
-                "model_state_dict": best_state,
-                "config": asdict(self.config),
-                "user_sid_sizes": self.user_sid_sizes,
-                "global_sid_sizes": self.global_sid_sizes,
-                "best_validation_loss": best_loss,
-            },
+            self._checkpoint_payload(
+                best_state,
+                best_validation_loss=best_loss,
+                epochs_trained=epochs_trained,
+                train_examples=len(train_tensors[0]),
+                validation_examples=len(validation_tensors[0]),
+            ),
             self.checkpoint_path,
         )
         self.training_summary = {
@@ -443,6 +446,94 @@ class TransformerUserSidMapper(IUserSidMapper):
         self._seen_keys = {
             (uid, tuple(int(code) for code in user_sid))
             for uid, user_sid, _ in train_rows
+        }
+        self._is_fitted = True
+
+    def _checkpoint_payload(
+        self,
+        model_state_dict: dict[str, torch.Tensor],
+        *,
+        best_validation_loss: float,
+        epochs_trained: int,
+        train_examples: int,
+        validation_examples: int,
+    ) -> dict[str, Any]:
+        return {
+            "model_state_dict": model_state_dict,
+            "config": asdict(self.config),
+            "user_sid_sizes": self.user_sid_sizes,
+            "global_sid_sizes": self.global_sid_sizes,
+            "best_validation_loss": best_validation_loss,
+            "epochs_trained": epochs_trained,
+            "train_examples": train_examples,
+            "validation_examples": validation_examples,
+        }
+
+    def load(self, frame: pl.DataFrame, checkpoint_path: Path) -> None:
+        if frame.is_empty():
+            raise ValueError("mapper training data must not be empty")
+        source = Path(checkpoint_path)
+        if not source.is_file():
+            raise FileNotFoundError(f"mapper checkpoint does not exist: {source}")
+        checkpoint = torch.load(source, map_location="cpu", weights_only=False)
+        if not isinstance(checkpoint, dict):
+            raise ValueError("mapper checkpoint must contain a mapping")
+        if tuple(checkpoint.get("user_sid_sizes", ())) != self.user_sid_sizes:
+            raise ValueError("mapper checkpoint has incompatible personalized SID sizes")
+        if tuple(checkpoint.get("global_sid_sizes", ())) != self.global_sid_sizes:
+            raise ValueError(
+                "mapper checkpoint has incompatible global SID sizes"
+            )
+
+        saved_config = checkpoint.get("config", {})
+        architecture_fields = (
+            "d_model",
+            "d_ff",
+            "num_heads",
+            "num_encoder_layers",
+            "num_decoder_layers",
+        )
+        for name in architecture_fields:
+            if saved_config.get(name) != getattr(self.config, name):
+                raise ValueError(
+                    f"mapper checkpoint has incompatible config field: {name}"
+                )
+        state_dict = checkpoint.get("model_state_dict")
+        if not isinstance(state_dict, dict):
+            raise ValueError("mapper checkpoint does not contain model_state_dict")
+        self._model.load_state_dict(state_dict)
+        self._model.eval()
+
+        train_rows = self._rows_from_frame(frame)
+        self._seen_keys = {
+            (uid, tuple(int(code) for code in user_sid))
+            for uid, user_sid, _ in train_rows
+        }
+        best_validation_loss = float(checkpoint["best_validation_loss"])
+        epochs_trained = int(checkpoint.get("epochs_trained", 0))
+        validation_examples = int(checkpoint.get("validation_examples", 0))
+        current_state = {
+            name: value.detach().cpu().clone()
+            for name, value in self._model.state_dict().items()
+        }
+        self.checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(
+            self._checkpoint_payload(
+                current_state,
+                best_validation_loss=best_validation_loss,
+                epochs_trained=epochs_trained,
+                train_examples=len(train_rows),
+                validation_examples=validation_examples,
+            ),
+            self.checkpoint_path,
+        )
+        self.training_summary = {
+            "train_examples": len(train_rows),
+            "validation_examples": validation_examples,
+            "epochs_trained": epochs_trained,
+            "best_validation_loss": best_validation_loss,
+            "loaded_checkpoint": str(source),
+            "checkpoint": str(self.checkpoint_path),
         }
         self._is_fitted = True
 
@@ -475,14 +566,24 @@ class TransformerUserSidMapper(IUserSidMapper):
                 level,
             ).reshape(batch_size, beam_count, vocabulary_size)
             log_probs = F.log_softmax(logits, dim=-1)
-            allowed = torch.zeros_like(log_probs, dtype=torch.bool)
-            for batch_index in range(batch_size):
-                for beam_index in range(beam_count):
-                    prefix = tuple(
-                        int(code) for code in beams[batch_index, beam_index].tolist()
-                    )
-                    for code in self._valid_next.get(prefix, ()):
-                        allowed[batch_index, beam_index, code] = True
+            beam_prefixes = beams.detach().cpu().tolist()
+            allowed = torch.zeros(
+                batch_size,
+                beam_count,
+                vocabulary_size,
+                dtype=torch.bool,
+            )
+            for batch_index, sample_prefixes in enumerate(beam_prefixes):
+                for beam_index, prefix_values in enumerate(sample_prefixes):
+                    prefix = tuple(int(code) for code in prefix_values)
+                    valid_codes = self._valid_next.get(prefix, ())
+                    if valid_codes:
+                        allowed[
+                            batch_index,
+                            beam_index,
+                            list(valid_codes),
+                        ] = True
+            allowed = allowed.to(self.device, non_blocking=True)
             candidate_scores = (
                 scores.unsqueeze(-1) + log_probs.masked_fill(~allowed, float("-inf"))
             ).flatten(1)
@@ -497,13 +598,23 @@ class TransformerUserSidMapper(IUserSidMapper):
                 previous_beam.unsqueeze(-1).expand(-1, -1, level),
             )
             beams = torch.cat([selected, next_token.unsqueeze(-1)], dim=-1)
+        beam_values = beams.detach().cpu().tolist()
+        finite_scores = torch.isfinite(scores).detach().cpu().tolist()
         results = []
-        for sample_beams, sample_scores in zip(beams, scores, strict=True):
+        for sample_beams, sample_finite in zip(
+            beam_values,
+            finite_scores,
+            strict=True,
+        ):
             results.append(
                 [
-                    tuple(int(code) for code in path.tolist())
-                    for path, score in zip(sample_beams, sample_scores, strict=True)
-                    if torch.isfinite(score)
+                    tuple(int(code) for code in path)
+                    for path, is_finite in zip(
+                        sample_beams,
+                        sample_finite,
+                        strict=True,
+                    )
+                    if is_finite
                 ]
             )
         return results
@@ -530,15 +641,28 @@ class TransformerUserSidMapper(IUserSidMapper):
                 for level, code in enumerate(path)
             ):
                 raise ValueError("personalized SID contains an out-of-range code")
-        results = []
-        for offset in range(0, len(normalized), self.config.inference_batch_size):
-            results.extend(
+        unique_requests: list[tuple[object, SidPath]] = []
+        unique_indices: dict[tuple[object, SidPath], int] = {}
+        result_indices = []
+        for request in normalized:
+            index = unique_indices.get(request)
+            if index is None:
+                index = len(unique_requests)
+                unique_indices[request] = index
+                unique_requests.append(request)
+            result_indices.append(index)
+
+        unique_results = []
+        for offset in range(0, len(unique_requests), self.config.inference_batch_size):
+            unique_results.extend(
                 self._predict_chunk(
-                    normalized[offset : offset + self.config.inference_batch_size],
+                    unique_requests[
+                        offset : offset + self.config.inference_batch_size
+                    ],
                     k,
                 )
             )
-        return results
+        return [list(unique_results[index]) for index in result_indices]
 
     def predict_topk(
         self,

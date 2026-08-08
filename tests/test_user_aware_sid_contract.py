@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 import polars as pl
 
@@ -219,11 +220,96 @@ class UserAwareSidContractTest(unittest.TestCase):
                 k=3,
             )
 
+            with patch.object(
+                mapper,
+                "_predict_chunk",
+                wraps=mapper._predict_chunk,
+            ) as predict_chunk:
+                duplicate_predictions = mapper.predict_topk_batch(
+                    [(1, [0, 0]), (1, [0, 0]), (999, [1, 1])],
+                    k=3,
+                )
+
             self.assertTrue(Path(tmpdir, "mapper.pt").is_file())
             self.assertTrue(predictions)
             self.assertTrue(
                 all(path in valid_paths for ranked in predictions for path in ranked)
             )
+            self.assertEqual(duplicate_predictions[0], duplicate_predictions[1])
+            self.assertEqual(predict_chunk.call_count, 1)
+            self.assertEqual(len(predict_chunk.call_args.args[0]), 2)
+
+    def test_transformer_mapper_loads_checkpoint_without_training(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            config = UserSidMapperConfig(
+                kind="transformer",
+                d_model=8,
+                d_ff=16,
+                num_heads=2,
+                num_encoder_layers=1,
+                num_decoder_layers=1,
+                dropout=0.0,
+                batch_size=4,
+                inference_batch_size=4,
+                max_epochs=1,
+                early_stopping_patience=1,
+            )
+            features = pl.DataFrame(
+                {
+                    "uid": [1, 2],
+                    "user_feature": [[1.0, 0.0], [0.0, 1.0]],
+                }
+            )
+            training = pl.DataFrame(
+                {
+                    "uid": [1, 1, 2, 2],
+                    "usid_0": [0, 1, 0, 1],
+                    "usid_1": [0, 1, 1, 0],
+                    "sid_0": [0, 1, 0, 1],
+                    "sid_1": [0, 1, 1, 1],
+                }
+            )
+            validation = [
+                {"uid": 1, "sid": [0, 0], "global_sid": [0, 0]}
+            ]
+            constructor = {
+                "config": config,
+                "user_sid_sizes": (2, 2),
+                "global_sid_sizes": (2, 2),
+                "valid_global_sids": {(0, 0), (0, 1), (1, 1)},
+                "user_features": features,
+                "device": "cpu",
+            }
+            trained = TransformerUserSidMapper(
+                **constructor,
+                checkpoint_path=root / "source.pt",
+            )
+            trained.fit(training, validation)
+            expected = trained.predict_topk_batch(
+                [(1, [0, 0]), (999, [1, 1])],
+                k=3,
+            )
+
+            loaded = TransformerUserSidMapper(
+                **constructor,
+                checkpoint_path=root / "copied.pt",
+            )
+            loaded.load(training, root / "source.pt")
+
+            self.assertEqual(
+                loaded.predict_topk_batch(
+                    [(1, [0, 0]), (999, [1, 1])],
+                    k=3,
+                ),
+                expected,
+            )
+            self.assertTrue((root / "copied.pt").is_file())
+            self.assertEqual(
+                loaded.training_summary["loaded_checkpoint"],
+                str(root / "source.pt"),
+            )
+            self.assertTrue(loaded.is_seen(1, [0, 0]))
 
     def test_user_sid_statistics_measure_cross_user_variation(self) -> None:
         frame = pl.DataFrame(

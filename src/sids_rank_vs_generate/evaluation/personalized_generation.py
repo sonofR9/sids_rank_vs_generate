@@ -1,10 +1,72 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import torch
+from tqdm.auto import tqdm
 
 from ..sids.user_sid_mapper import IUserSidMapper
 from ..training.utils import autocast, move_to_device
 from .beam_search import SemanticIDCatalog, semantic_beam_search
+
+
+def _rank_personalized_items(
+    *,
+    uids: Sequence[object],
+    beams: torch.Tensor,
+    mapper: IUserSidMapper,
+    sid_to_items: dict[tuple[int, ...], list[int]],
+    recall_k: int,
+    mapper_top_k: int,
+    mapper_beam_chunk_size: int,
+) -> list[list[int]]:
+    if mapper_beam_chunk_size <= 0:
+        raise ValueError("mapper_beam_chunk_size must be positive")
+    if beams.ndim != 3 or beams.size(0) != len(uids):
+        raise ValueError("personalized beams have an unexpected shape")
+
+    beam_paths = beams.detach().cpu().tolist()
+    ranked_items = [[] for _ in uids]
+    seen_items = [set() for _ in uids]
+    active_users = list(range(len(uids)))
+
+    for beam_offset in range(0, beams.size(1), mapper_beam_chunk_size):
+        if not active_users:
+            break
+        beam_end = min(beam_offset + mapper_beam_chunk_size, beams.size(1))
+        requests = [
+            (uids[user_index], beam_paths[user_index][beam_index])
+            for user_index in active_users
+            for beam_index in range(beam_offset, beam_end)
+        ]
+        mapped_paths = mapper.predict_topk_batch(requests, mapper_top_k)
+        if len(mapped_paths) != len(requests):
+            raise RuntimeError("mapper returned an unexpected number of predictions")
+
+        mapper_offset = 0
+        remaining_users = []
+        for user_index in active_users:
+            user_predictions = mapped_paths[
+                mapper_offset : mapper_offset + beam_end - beam_offset
+            ]
+            mapper_offset += beam_end - beam_offset
+            for global_sids in user_predictions:
+                if len(ranked_items[user_index]) >= recall_k:
+                    break
+                for global_sid in global_sids:
+                    for item in sid_to_items.get(global_sid, []):
+                        if item not in seen_items[user_index]:
+                            seen_items[user_index].add(item)
+                            ranked_items[user_index].append(item)
+                        if len(ranked_items[user_index]) >= recall_k:
+                            break
+                    if len(ranked_items[user_index]) >= recall_k:
+                        break
+            if len(ranked_items[user_index]) < recall_k:
+                remaining_users.append(user_index)
+        active_users = remaining_users
+
+    return ranked_items
 
 
 @torch.inference_mode()
@@ -25,7 +87,12 @@ def validate_personalized_generation(
     top1_exact = 0
     recommended_items: set[int] = set()
 
-    for batch in loader:
+    for batch in tqdm(
+        loader,
+        desc="personalized evaluation",
+        unit="batch",
+        mininterval=5.0,
+    ):
         batch = move_to_device(batch, cfg.device)
         with autocast(batch["history"].device, cfg.use_bf16):
             output = model(
@@ -49,40 +116,22 @@ def validate_personalized_generation(
             use_bf16=cfg.use_bf16,
             sid_catalog=sid_catalog,
         )
-        mapper_requests = [
-            (uid, beam.tolist())
-            for uid, user_beams in zip(batch["uid"], beams, strict=True)
-            for beam in user_beams
-        ]
-        mapped_paths = mapper.predict_topk_batch(
-            mapper_requests,
-            cfg.mapper_top_k,
+        ranked_items_by_user = _rank_personalized_items(
+            uids=batch["uid"],
+            beams=beams,
+            mapper=mapper,
+            sid_to_items=sid_to_items,
+            recall_k=cfg.recall_k,
+            mapper_top_k=cfg.mapper_top_k,
+            mapper_beam_chunk_size=cfg.mapper_beam_chunk_size,
         )
-        mapper_offset = 0
-        for uid, user_beams, target in zip(
-            batch["uid"],
-            beams,
+        for ranked_items, target in zip(
+            ranked_items_by_user,
             batch["target"],
             strict=True,
         ):
-            ranked_items: list[int] = []
-            seen: set[int] = set()
-            for beam in user_beams:
-                global_sids = mapped_paths[mapper_offset]
-                mapper_offset += 1
-                for global_sid in global_sids:
-                    for item in sid_to_items.get(global_sid, []):
-                        if item not in seen:
-                            seen.add(item)
-                            ranked_items.append(item)
-                        if len(ranked_items) >= cfg.recall_k:
-                            break
-                    if len(ranked_items) >= cfg.recall_k:
-                        break
-                if len(ranked_items) >= cfg.recall_k:
-                    break
-
             recommended_items.update(ranked_items)
+            seen = set(ranked_items)
             target_item = int(target.item())
             if target_item in seen:
                 rank = ranked_items.index(target_item) + 1
