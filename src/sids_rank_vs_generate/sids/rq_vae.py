@@ -29,6 +29,11 @@ class RQVAE(nn.Module):
         val_part=0.05,
     ):
         super().__init__()
+        torch.manual_seed(SID_EXPERIMENT_SEED)
+        np.random.seed(SID_EXPERIMENT_SEED)
+
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(SID_EXPERIMENT_SEED)
         self.num_levels = num_levels
         self.codebook_size = codebook_size
         self.batch_size = batch_size
