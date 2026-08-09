@@ -81,6 +81,24 @@ python run.py experiments/rqkmeans_full.py --skip-generation
 python run.py experiments/rqkmeans_full.py --skip-ranking
 ```
 
+### RQ-VAE purely semantic indexing
+
+RQ-VAE supports three final assignment policies over the same trained encoder
+and codebooks: vanilla nearest-centroid IDs, recursive residual searching (RRS),
+and exhaustive candidate matching (ECM). RRS and ECM resolve collisions without
+appending a non-semantic conflict token.
+
+```bash
+python run.py experiments/rqvae_psi.py:NEAREST
+python run.py experiments/rqvae_psi.py:RRS
+python run.py experiments/rqvae_psi.py:ECM
+```
+
+The SID result includes ICR before and after assignment, collision-bucket size,
+reassigned-item count, and residual-norm distortion. RRS is the practical
+full-catalog default. ECM evaluates `top_k ** num_levels` paths per item and is
+best suited to controlled comparisons.
+
 ### MLflow tracking
 
 Enable MLflow for the complete experiment with `--mlflow`. The runner creates

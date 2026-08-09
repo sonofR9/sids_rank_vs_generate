@@ -1,6 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Literal
+
+
+AssignmentMethod = Literal["nearest", "ecm", "rrs"]
 
 
 @dataclass(frozen=True)
@@ -36,6 +40,16 @@ class RQVAEConfig:
     patience: int = 5
     min_delta: float = 1e-5
     val_part: float = 0.05
+    assignment_method: AssignmentMethod = "nearest"
+    psi_top_k: int = 4
+
+    def __post_init__(self) -> None:
+        if self.assignment_method not in {"nearest", "ecm", "rrs"}:
+            raise ValueError(
+                "assignment_method must be 'nearest', 'ecm', or 'rrs'"
+            )
+        if self.psi_top_k <= 0 or self.psi_top_k > self.codebook_size:
+            raise ValueError("psi_top_k must be positive and fit the codebook")
 
 
 @dataclass(frozen=True)

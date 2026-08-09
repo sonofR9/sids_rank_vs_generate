@@ -272,6 +272,7 @@ def run_sid_experiment(
         evaluations[stage_name] = _to_builtin(metrics)
 
     metrics_path = run_dir / "metrics.json"
+    sid_summary = getattr(sid, "summary", None)
     result = _to_builtin(
         {
             "experiment": "sid_evaluation",
@@ -283,6 +284,7 @@ def run_sid_experiment(
                 "item_count": items_with_sids.height,
                 "columns": sid_columns,
                 "statistics": sid_statistics,
+                "details": sid_summary() if callable(sid_summary) else None,
             },
             "item_features": {
                 "source_items": raw_item_features.height,
