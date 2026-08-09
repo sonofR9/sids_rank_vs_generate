@@ -45,7 +45,6 @@ class SidExperimentConfig:
     core_min_interactions_per_item: int = 5
     test_days: float = 7.0
     timestamp_unit_seconds: float = 1.0
-    latest_interactions: int | None = None
     tracker: ExperimentTracker = field(default_factory=NullTracker)
 
 
@@ -182,7 +181,6 @@ def run_sid_experiment(
             core_min_interactions_per_item=config.core_min_interactions_per_item,
             test_days=config.test_days,
             timestamp_unit_seconds=config.timestamp_unit_seconds,
-            latest_interactions=config.latest_interactions,
         ),
         eligible_items=raw_item_features.select("item_id"),
     )
@@ -263,7 +261,6 @@ def run_sid_experiment(
             items_with_sids=items_with_sids,
             dataset=config.dataset,
             artifact_dir=stage_artifact_dir,
-            max_rows=config.latest_interactions,
             tracker=config.tracker,
         )
         metrics = evaluator.evaluate(context)
@@ -301,7 +298,6 @@ def run_sid_experiment(
                 ),
                 "test_days": config.test_days,
                 "timestamp_unit_seconds": config.timestamp_unit_seconds,
-                "latest_interactions": config.latest_interactions,
                 "enabled_stages": list(config.enabled_stages),
             },
             "reproducibility": {"seed": SID_EXPERIMENT_SEED},
@@ -330,7 +326,10 @@ def run_sid_experiment(
         flatten_metrics(
             {
                 "data": result["data"],
-                "sid": result["sid"]["statistics"],
+                "sid": {
+                    **result["sid"]["statistics"],
+                    "details": result["sid"]["details"] or {},
+                },
                 "evaluations": evaluation_metrics,
             }
         )

@@ -15,6 +15,7 @@ from sids_rank_vs_generate.experiment import (
     ExperimentConfig,
     TrainingConfig,
     YambdaDatasetConfig,
+    build_parser,
     run_experiment,
 )
 from sids_rank_vs_generate.sids import RQKMeansConfig, RQKMeansPipeline
@@ -62,6 +63,11 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                 sid_pipeline=RQKMeansPipeline(RQKMeansConfig()),
                 seed=7,
             )
+
+    def test_full_experiment_has_no_row_limit_option(self) -> None:
+        help_text = build_parser().format_help()
+        self.assertNotIn("--max-rows", help_text)
+        self.assertNotIn("--max-row", help_text)
 
     def test_rqkmeans_runs_ranking_and_generation(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

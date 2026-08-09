@@ -213,6 +213,29 @@ tempCodeRunnerFile.py
 reports/experiments/*.json
 mlflow.db
 mlartifacts/
+mlruns/
+
+# Local poster runs, caches, exports, and logs
+/reports/experiments/50m/
+/reports/poster/
+/reports/poster_cache/
+/reports/poster_collision/
+/reports/poster_runs/
+/reports/poster-*.log
+/outputs/
+
+# Local workspace and generated presentation artifacts
+/.tmp/
+/*.pptx
+/*.inspect.ndjson
+
+# Local handoff and planning notes
+/HANDOFF_*.md
+/COMMIT_PLAN.md
+/NEW_SESSION_PROMPT.md
+/speech_*.md
+/experiments/rqkmeans/RECALL_EXPERIMENTS.md
+/hw/README.md
 
 # Ruff stuff:
 .ruff_cache/

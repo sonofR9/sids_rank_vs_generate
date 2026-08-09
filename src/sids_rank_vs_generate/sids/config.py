@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Literal
 
 
@@ -42,6 +43,8 @@ class RQVAEConfig:
     val_part: float = 0.05
     assignment_method: AssignmentMethod = "nearest"
     psi_top_k: int = 4
+    checkpoint_path: Path | None = None
+    reuse_checkpoint: bool = True
 
     def __post_init__(self) -> None:
         if self.assignment_method not in {"nearest", "ecm", "rrs"}:

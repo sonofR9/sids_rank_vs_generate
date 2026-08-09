@@ -72,11 +72,10 @@ Run the included configuration with:
 python run.py experiments/rqkmeans_full.py
 ```
 
-Both tasks run by default. Runtime flags skip stages or bound both interaction
-sources for a faster end-to-end check:
+Both tasks run by default on the complete interaction sources. Runtime flags
+can skip either stage:
 
 ```bash
-python run.py experiments/rqkmeans_full.py --max-rows 200000
 python run.py experiments/rqkmeans_full.py --skip-generation
 python run.py experiments/rqkmeans_full.py --skip-ranking
 ```
@@ -94,8 +93,10 @@ python run.py experiments/rqvae_psi.py:RRS
 python run.py experiments/rqvae_psi.py:ECM
 ```
 
-The SID result includes ICR before and after assignment, collision-bucket size,
-reassigned-item count, and residual-norm distortion. RRS is the practical
+The SID result includes base and final ICR, collision rate, singleton rate,
+collision-bucket size, reassigned-item count, and residual-norm distortion.
+Here ICR is the fraction of unique semantic paths among items, while the
+singleton rate is the fraction of items whose path is used exactly once. RRS is the practical
 full-catalog default. ECM evaluates `top_k ** num_levels` paths per item and is
 best suited to controlled comparisons.
 
@@ -109,7 +110,6 @@ other generated files remain in the local report directory printed by the run.
 
 ```bash
 python run.py experiments/rqkmeans_full.py \
-  --max-rows 200000 \
   --mlflow
 ```
 

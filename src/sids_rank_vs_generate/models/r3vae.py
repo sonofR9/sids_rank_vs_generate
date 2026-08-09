@@ -15,6 +15,8 @@ def preference_discrimination_loss(
     temperature: float = 2.0,
     chunk_size: int = 2_048,
 ) -> torch.Tensor:
+    """Compute Eq. (10) without materializing the full similarity matrix."""
+
     if codebook.ndim != 2:
         raise ValueError("codebook must have shape [num_codes, embedding_dim]")
     num_codes = codebook.shape[0]
@@ -38,7 +40,6 @@ def preference_discrimination_loss(
             log_sum,
             torch.logsumexp(values, dim=(0, 1)),
         )
-
     return log_sum - math.log(num_codes * (num_codes - 1))
 
 
@@ -55,6 +56,8 @@ class R3VAEOutput:
 
 
 class RatingResidualQuantizer(nn.Module):
+    """Cosine-rating residual codebooks from the authors' released model."""
+
     def __init__(
         self,
         embedding_dim: int,
@@ -95,6 +98,7 @@ class RatingResidualQuantizer(nn.Module):
         *,
         initial_quantized: torch.Tensor,
         compute_losses: bool = True,
+        compute_usage: bool = True,
     ) -> tuple[
         torch.Tensor,
         torch.Tensor,
@@ -142,10 +146,11 @@ class RatingResidualQuantizer(nn.Module):
                         chunk_size=self.pd_chunk_size,
                     )
                 )
-            usages.append(
-                hard_indices.unique().numel() / codebook.shape[0]
-                * torch.ones((), device=residual.device)
-            )
+            if compute_usage:
+                usages.append(
+                    hard_indices.unique().numel() / codebook.shape[0]
+                    * torch.ones((), device=residual.device)
+                )
 
         zero = quantized.sum() * 0.0
         return (
@@ -162,6 +167,8 @@ class RatingResidualQuantizer(nn.Module):
 
 
 class R3VAE(nn.Module):
+    """Reference vector-guided rating residual quantization autoencoder."""
+
     def __init__(
         self,
         embedding_dim: int,
@@ -221,6 +228,8 @@ class R3VAE(nn.Module):
         self,
         embeddings: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Return alpha*r and e^(0) from Eqs. (1)-(2)."""
+
         if embeddings.ndim != 2 or embeddings.shape[-1] != self.embedding_dim:
             raise ValueError(
                 "embeddings must have shape [batch_size, embedding_dim]"
@@ -240,7 +249,12 @@ class R3VAE(nn.Module):
         )
         return indices
 
-    def forward(self, embeddings: torch.Tensor) -> R3VAEOutput:
+    def forward(
+        self,
+        embeddings: torch.Tensor,
+        *,
+        compute_usage: bool = True,
+    ) -> R3VAEOutput:
         embeddings = F.normalize(embeddings.float(), dim=-1)
         reference_projection, residual = self.reference_projection(embeddings)
         (
@@ -252,6 +266,7 @@ class R3VAE(nn.Module):
         ) = self.quantizer(
             residual,
             initial_quantized=reference_projection,
+            compute_usage=compute_usage,
         )
         reconstruction = self.decoder(quantized)
         reconstruction_loss = (

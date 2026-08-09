@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any, Literal
 
 import numpy as np
@@ -32,6 +33,9 @@ class R3VAEConfig:
     seed: int = 42
     device: str = "auto"
     feature_column: str | None = None
+    mixed_precision: bool = True
+    checkpoint_path: Path | None = None
+    reuse_checkpoint: bool = True
 
     def __post_init__(self) -> None:
         if not self.codebook_sizes or any(
@@ -95,9 +99,24 @@ def _embedding_tensor(frame: pl.DataFrame, column: str) -> torch.Tensor:
         raise ValueError("item feature frame must not be empty")
     if frame[column].null_count():
         raise ValueError(f"embedding column {column!r} contains nulls")
+    series = frame[column]
     try:
-        values = np.asarray(frame[column].to_list(), dtype=np.float32)
-    except (TypeError, ValueError) as error:
+        first = series[0]
+        width = len(first)
+        if isinstance(series.dtype, pl.Array):
+            values = series.cast(
+                pl.Array(pl.Float32, series.dtype.size)
+            ).to_numpy()
+        elif isinstance(series.dtype, pl.List):
+            values = (
+                series.list.to_array(width)
+                .cast(pl.Array(pl.Float32, width))
+                .to_numpy()
+            )
+        else:
+            values = np.asarray(series.to_list(), dtype=np.float32)
+        values = np.array(values, dtype=np.float32, copy=True, order="C")
+    except (AttributeError, TypeError, ValueError) as error:
         raise ValueError(
             f"embedding column {column!r} must contain equal-length vectors"
         ) from error
@@ -111,6 +130,12 @@ def _embedding_tensor(frame: pl.DataFrame, column: str) -> torch.Tensor:
     if np.any(norms == 0):
         raise ValueError(f"embedding column {column!r} contains zero vectors")
     return torch.from_numpy(values)
+
+
+def _cuda_autocast_dtype(device: torch.device) -> torch.dtype:
+    if device.type != "cuda":
+        return torch.bfloat16
+    return torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
 
 
 @torch.no_grad()
@@ -156,6 +181,8 @@ def _spherical_kmeans(
 
 
 class R3VAESid(ISidPipeline):
+    """Train R3-VAE on item vectors and append one SID token per codebook."""
+
     def __init__(self, config: R3VAEConfig | None = None) -> None:
         self.config = config or R3VAEConfig()
         self.model: R3VAE | None = None
@@ -163,15 +190,96 @@ class R3VAESid(ISidPipeline):
         self.embedding_dim: int | None = None
         self.device = _resolve_device(self.config.device)
         self.training_history: list[dict[str, float]] = []
+        self.checkpoint_loaded = False
 
-    @torch.no_grad()
+    def _checkpoint_signature(self) -> dict[str, Any]:
+        signature = asdict(self.config)
+        for name in (
+            "checkpoint_path",
+            "reuse_checkpoint",
+            "device",
+        ):
+            signature.pop(name)
+        return signature
+
+    def _load_checkpoint(
+        self,
+        path: Path,
+        *,
+        embedding_dim: int,
+        item_count: int,
+    ) -> bool:
+        if not self.config.reuse_checkpoint or not path.is_file():
+            return False
+        try:
+            payload = torch.load(path, map_location=self.device, weights_only=True)
+        except TypeError:  # PyTorch 2.2 compatibility.
+            payload = torch.load(path, map_location=self.device)
+        expected = {
+            "format_version": 1,
+            "embedding_dim": embedding_dim,
+            "item_count": item_count,
+            "training_config": self._checkpoint_signature(),
+        }
+        actual = {name: payload.get(name) for name in expected}
+        if actual != expected:
+            raise ValueError(
+                f"R3-VAE checkpoint {path} does not match the current dataset/config"
+            )
+        if self.model is None:
+            raise RuntimeError("model has not been created")
+        self.model.load_state_dict(payload["model_state_dict"])
+        self.training_history = list(payload.get("training_history", []))
+        return True
+
+    def _save_checkpoint(
+        self,
+        path: Path,
+        *,
+        embedding_dim: int,
+        item_count: int,
+    ) -> None:
+        if self.model is None:
+            raise RuntimeError("model has not been created")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(
+            {
+                "format_version": 1,
+                "embedding_dim": embedding_dim,
+                "item_count": item_count,
+                "training_config": self._checkpoint_signature(),
+                "model_state_dict": self.model.state_dict(),
+                "training_history": self.training_history,
+            },
+            path,
+        )
+
+    @torch.inference_mode()
     def _initialize_codebooks(self, embeddings: torch.Tensor) -> None:
         if self.model is None:
             raise RuntimeError("model has not been created")
         normalized = F.normalize(embeddings.to(self.device), dim=-1)
         _, residual = self.model.reference_projection(normalized)
         if self.config.kmeans_init_method == "rqkmeans":
-            self._initialize_codebooks_with_rqkmeans(residual)
+            from .rq_kmeans import RQKMeans
+
+            initializer = RQKMeans(
+                codebook_sizes=self.config.codebook_sizes,
+            ).fit(residual.detach().cpu().numpy())
+            for codebook, centers in zip(
+                self.model.quantizer.codebooks,
+                initializer.codebooks,
+                strict=True,
+            ):
+                normalized_centers = F.normalize(
+                    torch.as_tensor(
+                        centers,
+                        dtype=codebook.dtype,
+                        device=self.device,
+                    ),
+                    dim=-1,
+                )
+                codebook.copy_(normalized_centers)
             return
         for level, codebook in enumerate(self.model.quantizer.codebooks):
             residual = F.normalize(residual, dim=-1)
@@ -193,38 +301,6 @@ class R3VAESid(ISidPipeline):
                 centers[indices] * values.unsqueeze(-1)
             ).sum(dim=1)
             residual = residual - level_quantized
-
-    @torch.no_grad()
-    def _initialize_codebooks_with_rqkmeans(
-        self,
-        residual: torch.Tensor,
-    ) -> None:
-        if self.model is None:
-            raise RuntimeError("model has not been created")
-        from .rq_kmeans import RQKMeans
-
-        initializer = RQKMeans(
-            codebook_sizes=self.config.codebook_sizes,
-        ).fit(residual.detach().cpu().numpy())
-        if len(initializer.codebooks) != len(self.model.quantizer.codebooks):
-            raise RuntimeError(
-                "RQKMeans returned an unexpected number of codebooks"
-            )
-        for parameter, centers in zip(
-            self.model.quantizer.codebooks,
-            initializer.codebooks,
-            strict=True,
-        ):
-            values = torch.as_tensor(
-                centers,
-                dtype=parameter.dtype,
-                device=parameter.device,
-            )
-            if values.shape != parameter.shape:
-                raise RuntimeError(
-                    "RQKMeans returned an unexpected codebook shape"
-                )
-            parameter.copy_(F.normalize(values, dim=-1))
 
     def train(self, df: pl.DataFrame) -> None:
         seed_everything(self.config.seed)
@@ -248,54 +324,80 @@ class R3VAESid(ISidPipeline):
             pd_temperature=self.config.pd_temperature,
             pd_chunk_size=self.config.pd_chunk_size,
         ).to(self.device)
+        checkpoint_path = self.config.checkpoint_path
+        self.checkpoint_loaded = False
+        if checkpoint_path is not None:
+            self.checkpoint_loaded = self._load_checkpoint(
+                Path(checkpoint_path),
+                embedding_dim=self.embedding_dim,
+                item_count=df.height,
+            )
+        if self.checkpoint_loaded:
+            self.tracker.log_metrics({"checkpoint.reused": 1})
+            return
         if self.config.kmeans_init:
             self._initialize_codebooks(embeddings)
 
+        embeddings_on_device = embeddings.to(self.device)
         optimizer = torch.optim.AdamW(
             self.model.parameters(),
             lr=self.config.learning_rate,
             weight_decay=self.config.weight_decay,
+            fused=self.device.type == "cuda",
+        )
+        autocast_dtype = _cuda_autocast_dtype(self.device)
+        use_autocast = self.config.mixed_precision and self.device.type == "cuda"
+        grad_scaler = torch.amp.GradScaler(
+            "cuda",
+            enabled=use_autocast and autocast_dtype == torch.float16,
         )
         generator = torch.Generator(device="cpu").manual_seed(self.config.seed)
         self.training_history = []
         for epoch in range(self.config.epochs):
             self.model.train()
-            totals = {
-                "loss": 0.0,
-                "reconstruction_loss": 0.0,
-                "semantic_cohesion_loss": 0.0,
-                "preference_discrimination_loss": 0.0,
-            }
+            metric_names = (
+                "loss",
+                "reconstruction_loss",
+                "semantic_cohesion_loss",
+                "preference_discrimination_loss",
+            )
+            totals = torch.zeros(4, dtype=torch.float32, device=self.device)
             seen = 0
             permutation = torch.randperm(
                 embeddings.shape[0],
                 generator=generator,
-            )
+            ).to(self.device)
             for start in range(0, embeddings.shape[0], self.config.batch_size):
                 batch_indices = permutation[start : start + self.config.batch_size]
-                batch = embeddings[batch_indices].to(self.device)
+                batch = embeddings_on_device[batch_indices]
                 optimizer.zero_grad(set_to_none=True)
-                output = self.model(batch)
-                if not torch.isfinite(output.loss):
-                    raise RuntimeError("R3-VAE training produced a non-finite loss")
-                output.loss.backward()
-                optimizer.step()
+                with torch.autocast(
+                    device_type=self.device.type,
+                    dtype=autocast_dtype,
+                    enabled=use_autocast,
+                ):
+                    output = self.model(batch, compute_usage=False)
+                grad_scaler.scale(output.loss).backward()
+                grad_scaler.step(optimizer)
+                grad_scaler.update()
 
                 batch_size = batch.shape[0]
                 seen += batch_size
-                totals["loss"] += output.loss.item() * batch_size
-                totals["reconstruction_loss"] += (
-                    output.reconstruction_loss.item() * batch_size
+                totals.add_(
+                    torch.stack(
+                        (
+                            output.loss,
+                            output.reconstruction_loss,
+                            output.semantic_cohesion_loss,
+                            output.preference_discrimination_loss,
+                        )
+                    ).detach().float(),
+                    alpha=batch_size,
                 )
-                totals["semantic_cohesion_loss"] += (
-                    output.semantic_cohesion_loss.item() * batch_size
-                )
-                totals["preference_discrimination_loss"] += (
-                    output.preference_discrimination_loss.item() * batch_size
-                )
-            epoch_metrics = {
-                name: value / seen for name, value in totals.items()
-            }
+            averages = (totals / seen).cpu().tolist()
+            if not all(np.isfinite(value) for value in averages):
+                raise RuntimeError("R3-VAE training produced a non-finite loss")
+            epoch_metrics = dict(zip(metric_names, averages, strict=True))
             self.training_history.append(epoch_metrics)
             tracker = getattr(self, "tracker", None)
             if tracker is not None:
@@ -315,8 +417,14 @@ class R3VAESid(ISidPipeline):
                 f"{epoch_metrics['preference_discrimination_loss']:.6f}",
                 flush=True,
             )
+        if checkpoint_path is not None:
+            self._save_checkpoint(
+                Path(checkpoint_path),
+                embedding_dim=self.embedding_dim,
+                item_count=df.height,
+            )
 
-    @torch.no_grad()
+    @torch.inference_mode()
     def update(self, df: pl.DataFrame) -> pl.DataFrame:
         if self.model is None or self.feature_column is None:
             raise RuntimeError("train() must be called before update()")
@@ -329,7 +437,8 @@ class R3VAESid(ISidPipeline):
         code_batches = []
         for start in range(0, embeddings.shape[0], self.config.batch_size):
             batch = embeddings[start : start + self.config.batch_size].to(
-                self.device
+                self.device,
+                non_blocking=True,
             )
             code_batches.append(self.model.encode(batch).cpu())
         codes = torch.cat(code_batches, dim=0).numpy()
@@ -347,4 +456,6 @@ class R3VAESid(ISidPipeline):
             "feature_column": self.feature_column,
             "embedding_dim": self.embedding_dim,
             "epochs": list(self.training_history),
+            "checkpoint_loaded": self.checkpoint_loaded,
+            "checkpoint_path": self.config.checkpoint_path,
         }

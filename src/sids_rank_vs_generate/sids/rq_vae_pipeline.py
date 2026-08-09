@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from pathlib import Path
 from typing import Any
 
 import numpy as np
 import polars as pl
 import torch
-from torch.utils.data import DataLoader
 
-from ..data.embedding_dataset import EmbeddingDataset
 from .base import ISidPipeline
 from .config import AssignmentMethod, RQVAEConfig
 from .pure_semantic import allocate_semantic_ids
@@ -21,50 +20,111 @@ class RQVAEPipeline(ISidPipeline):
         self.config = config or RQVAEConfig()
         self.model: RQVAE | None = None
         self.assignment_metrics: dict[str, float | int | str] | None = None
+        self.checkpoint_loaded = False
 
-    @torch.no_grad()
-    def _encode_latents(self, frame: pl.DataFrame) -> torch.Tensor:
+    def _training_parameters(self) -> dict[str, Any]:
+        parameters = asdict(self.config)
+        for name in (
+            "assignment_method",
+            "psi_top_k",
+            "checkpoint_path",
+            "reuse_checkpoint",
+        ):
+            parameters.pop(name)
+        return parameters
+
+    def _checkpoint_signature(self) -> dict[str, Any]:
+        parameters = self._training_parameters()
+        parameters.pop("device")
+        parameters.pop("num_workers")
+        return parameters
+
+    def _load_checkpoint(self, path: Path, *, dimension: int, item_count: int) -> bool:
+        if not self.config.reuse_checkpoint or not path.is_file():
+            return False
+        try:
+            payload = torch.load(path, map_location=self.model.device, weights_only=True)
+        except TypeError:  # PyTorch 2.2 compatibility.
+            payload = torch.load(path, map_location=self.model.device)
+        expected = {
+            "format_version": 1,
+            "embedding_dim": dimension,
+            "item_count": item_count,
+            "training_config": self._checkpoint_signature(),
+        }
+        actual = {name: payload.get(name) for name in expected}
+        if actual != expected:
+            raise ValueError(
+                f"RQ-VAE checkpoint {path} does not match the current dataset/config"
+            )
+        self.model.load_state_dict(payload["model_state_dict"])
+        return True
+
+    def _save_checkpoint(self, path: Path, *, dimension: int, item_count: int) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(
+            {
+                "format_version": 1,
+                "embedding_dim": dimension,
+                "item_count": item_count,
+                "training_config": self._checkpoint_signature(),
+                "model_state_dict": self.model.state_dict(),
+            },
+            path,
+        )
+
+    @torch.inference_mode()
+    def _encode_latents(
+        self,
+        source: pl.DataFrame | torch.Tensor,
+    ) -> torch.Tensor:
         if self.model is None:
             raise RuntimeError("train() must be called before encoding")
-        values = self.model.converter(frame)
-        loader = DataLoader(
-            EmbeddingDataset(values),
-            batch_size=self.model.batch_size,
-            shuffle=False,
-            drop_last=False,
-            pin_memory=str(self.model.device).startswith("cuda"),
-            num_workers=self.model.num_workers,
+        values = (
+            source.to(self.model.device)
+            if isinstance(source, torch.Tensor)
+            else torch.from_numpy(self.model.converter(source)).to(
+                self.model.device
+            )
         )
         self.model.eval()
         latents = [
-            self.model.encoder(batch.to(self.model.device, non_blocking=True))
-            for batch in loader
+            self.model.encoder(batch)
+            for batch in self.model._iter_batches(values, shuffle=False)
         ]
         return torch.cat(latents, dim=0)
 
     def train(self, df: pl.DataFrame) -> None:
-        parameters = asdict(self.config)
-        parameters.pop("assignment_method")
-        parameters.pop("psi_top_k")
+        parameters = self._training_parameters()
         dimension = len(df["normalized_embed"][0])
         self.model = RQVAE(dim=dimension, **parameters)
-        values = self.model.converter(df)
-        loader = DataLoader(
-            EmbeddingDataset(values),
-            batch_size=self.model.batch_size,
-            shuffle=True,
-            drop_last=False,
-            pin_memory=str(self.model.device).startswith("cuda"),
-            num_workers=self.model.num_workers,
-        )
-        self.model.pretrain_autoencoder(loader, tracker=self.tracker)
-        latent = self._encode_latents(df).cpu().numpy()
+        checkpoint_path = self.config.checkpoint_path
+        self.checkpoint_loaded = False
+        if checkpoint_path is not None:
+            self.checkpoint_loaded = self._load_checkpoint(
+                Path(checkpoint_path),
+                dimension=dimension,
+                item_count=df.height,
+            )
+        if self.checkpoint_loaded:
+            self.tracker.log_metrics({"checkpoint.reused": 1})
+            self.assignment_metrics = None
+            return
+        values = torch.from_numpy(self.model.converter(df)).to(self.model.device)
+        self.model.pretrain_autoencoder(values, tracker=self.tracker)
+        latent = self._encode_latents(values).cpu().numpy()
         initializer = RQKMeans(
             num_levels=self.config.num_levels,
             codebook_size=self.config.codebook_size,
         ).fit(latent)
         self.model.init_codebooks(initializer.codebooks)
         self.model.fit(values, tracker=self.tracker)
+        if checkpoint_path is not None:
+            self._save_checkpoint(
+                Path(checkpoint_path),
+                dimension=dimension,
+                item_count=df.height,
+            )
         self.assignment_metrics = None
 
     def assign(
@@ -104,4 +164,8 @@ class RQVAEPipeline(ISidPipeline):
         return self.assign(df)
 
     def summary(self) -> dict[str, Any]:
-        return {"assignment": self.assignment_metrics}
+        return {
+            "assignment": self.assignment_metrics,
+            "checkpoint_loaded": self.checkpoint_loaded,
+            "checkpoint_path": self.config.checkpoint_path,
+        }

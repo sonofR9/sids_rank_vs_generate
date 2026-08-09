@@ -7,6 +7,7 @@ a bit different from regular training).
 from .base import ISidPipeline
 from .config import PlumRQVAEConfig, RQKMeansConfig, RQVAEConfig
 from .plum_rq_vae_pipeline import PlumRQVAEPipeline
+from .r3vae import R3VAEConfig, R3VAESid
 from .rq_kmeans_pipeline import RQKMeansPipeline
 from .rq_vae_pipeline import RQVAEPipeline
 
@@ -18,4 +19,6 @@ __all__ = [
     "RQKMeansPipeline",
     "RQVAEConfig",
     "RQVAEPipeline",
+    "R3VAEConfig",
+    "R3VAESid",
 ]

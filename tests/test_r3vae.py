@@ -5,6 +5,8 @@ import sys
 import types
 import unittest
 from dataclasses import replace
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import polars as pl
@@ -47,9 +49,20 @@ class R3VAEModelTest(unittest.TestCase):
             self.assertIsNotNone(codebook.grad)
             self.assertTrue(torch.isfinite(codebook.grad).all())
 
+    def test_training_fast_path_skips_only_usage_diagnostics(self) -> None:
+        torch.manual_seed(9)
+        model = R3VAE(4, (3, 3))
+        embeddings = torch.randn(6, 4)
+
+        full = model(embeddings)
+        fast = model(embeddings, compute_usage=False)
+
+        torch.testing.assert_close(fast.loss, full.loss)
+        torch.testing.assert_close(fast.indices, full.indices)
+        self.assertEqual(fast.codebook_usage, ())
+
     def test_pd_matches_equation_for_orthogonal_codes(self) -> None:
-        codebook = torch.eye(3)
-        loss = preference_discrimination_loss(codebook, temperature=2.0)
+        loss = preference_discrimination_loss(torch.eye(3), temperature=2.0)
         self.assertAlmostEqual(loss.item(), -2.0, places=6)
 
 
@@ -97,17 +110,22 @@ class R3VAESidTest(unittest.TestCase):
         for epoch in sid.training_history:
             self.assertTrue(all(math.isfinite(value) for value in epoch.values()))
 
-    def test_training_is_reproducible(self) -> None:
-        first = R3VAESid(self.config())
-        second = R3VAESid(self.config())
-        first.train(self.items())
-        second.train(self.items())
+    def test_checkpoint_is_reused(self) -> None:
+        with TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "r3vae.pt"
+            config = replace(self.config(), checkpoint_path=checkpoint)
+            first = R3VAESid(config)
+            first.train(self.items())
+            self.assertTrue(checkpoint.is_file())
 
-        self.assertEqual(first.training_history, second.training_history)
-        self.assertEqual(
-            first.update(self.items()).to_dict(as_series=False),
-            second.update(self.items()).to_dict(as_series=False),
-        )
+            second = R3VAESid(config)
+            second.train(self.items())
+            self.assertTrue(second.checkpoint_loaded)
+            self.assertEqual(first.training_history, second.training_history)
+            self.assertEqual(
+                first.update(self.items()).to_dict(as_series=False),
+                second.update(self.items()).to_dict(as_series=False),
+            )
 
     def test_zero_vectors_are_rejected(self) -> None:
         items = pl.DataFrame(
@@ -135,10 +153,7 @@ class R3VAESidTest(unittest.TestCase):
         module_name = "sids_rank_vs_generate.sids.rq_kmeans"
         fake_module = types.ModuleType(module_name)
         fake_module.RQKMeans = FakeRQKMeans
-        config = replace(
-            self.config(),
-            kmeans_init_method="rqkmeans",
-        )
+        config = replace(self.config(), kmeans_init_method="rqkmeans")
         with patch.dict(sys.modules, {module_name: fake_module}):
             sid = R3VAESid(config)
             sid.model = R3VAE(4, config.codebook_sizes)

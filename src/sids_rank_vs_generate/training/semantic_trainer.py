@@ -13,7 +13,11 @@ from sids_rank_vs_generate.evaluation.semantic_validation_with_collision import 
 from sids_rank_vs_generate.evaluation.semantic_validation_without_collision import (
     validate_semantic_model_without_collisions,
 )
-from sids_rank_vs_generate.training.utils import autocast, move_to_device
+from sids_rank_vs_generate.training.utils import (
+    autocast,
+    grad_scaler,
+    move_to_device,
+)
 from sids_rank_vs_generate.tracking import ExperimentTracker, NullTracker
 
 
@@ -31,7 +35,9 @@ def train_semantic(
         model.parameters(),
         lr=cfg.lr,
         weight_decay=cfg.weight_decay,
+        fused=str(cfg.device).startswith("cuda"),
     )
+    scaler = grad_scaler(torch.device(cfg.device), cfg.use_bf16)
 
     checkpoint_path = Path(cfg.checkpoint_path)
     checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
@@ -57,7 +63,7 @@ def train_semantic(
 
     for epoch in range(1, cfg.max_epochs + 1):
         model.train()
-        loss_sum = 0.0
+        loss_sum = torch.zeros((), device=cfg.device)
         sample_count = 0
 
         for batch in train_loader:
@@ -75,15 +81,17 @@ def train_semantic(
             loss = output["loss"]
 
             optimizer.zero_grad(set_to_none=True)
-            loss.backward()
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
             torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
-            optimizer.step()
+            scaler.step(optimizer)
+            scaler.update()
 
             batch_size = batch["sid"].size(0)
-            loss_sum += loss.item() * batch_size
+            loss_sum.add_(loss.detach().float(), alpha=batch_size)
             sample_count += batch_size
 
-        train_loss = loss_sum / max(sample_count, 1)
+        train_loss = float((loss_sum / max(sample_count, 1)).cpu())
 
         metrics = validate_fn(
             model=model,

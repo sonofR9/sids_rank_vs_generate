@@ -18,6 +18,7 @@ dependencies = [
 
 [project.optional-dependencies]
 mlflow = ["mlflow>=3.0"]
+poster = ["mlflow>=3.0", "matplotlib>=3.8", "pandas>=2.1"]
 
 [project.scripts]
 sids-run = "sids_rank_vs_generate.experiment:main"

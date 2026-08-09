@@ -27,9 +27,23 @@ def move_to_device(value: Any, device: torch.device | str) -> Any:
 
 
 def autocast(device: torch.device, enabled: bool):
-    use_bf16 = enabled and device.type == "cuda"
+    use_mixed_precision = enabled and device.type == "cuda"
+    dtype = (
+        torch.bfloat16
+        if device.type == "cuda" and torch.cuda.is_bf16_supported()
+        else torch.float16
+    )
     return torch.amp.autocast(
         device_type=device.type,
-        dtype=torch.bfloat16,
-        enabled=use_bf16,
+        dtype=dtype,
+        enabled=use_mixed_precision,
     )
+
+
+def grad_scaler(device: torch.device, enabled: bool) -> torch.amp.GradScaler:
+    use_float16 = (
+        enabled
+        and device.type == "cuda"
+        and not torch.cuda.is_bf16_supported()
+    )
+    return torch.amp.GradScaler("cuda", enabled=use_float16)

@@ -10,7 +10,7 @@ from tqdm.auto import tqdm
 
 from ..evaluation.ranking_metrics import ranking_metrics
 from ..tracking import ExperimentTracker, NullTracker
-from .utils import autocast, move_to_device, resolve_device
+from .utils import autocast, grad_scaler, move_to_device, resolve_device
 
 
 @torch.inference_mode()
@@ -58,14 +58,16 @@ def train_ranking_model(
         model.parameters(),
         lr=config.learning_rate,
         weight_decay=config.weight_decay,
+        fused=device.type == "cuda",
     )
+    scaler = grad_scaler(device, config.use_bf16)
     criterion = nn.BCEWithLogitsLoss()
     best_state = None
     best_auc = float("-inf")
 
     for epoch in range(1, config.epochs + 1):
         model.train()
-        loss_sum = 0.0
+        loss_sum = torch.zeros((), device=device)
         example_count = 0
         progress = tqdm(
             train_loader,
@@ -78,16 +80,19 @@ def train_ranking_model(
             with autocast(device, config.use_bf16):
                 logits = model(batch)
                 loss = criterion(logits, batch["target"])
-            loss.backward()
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
             nn.utils.clip_grad_norm_(model.parameters(), config.grad_clip)
-            optimizer.step()
+            scaler.step(optimizer)
+            scaler.update()
 
             batch_size = batch["target"].numel()
-            loss_sum += loss.item() * batch_size
+            loss_sum.add_(loss.detach().float(), alpha=batch_size)
             example_count += batch_size
-            progress.set_postfix(loss=f"{loss.item():.4f}")
+            if config.show_progress:
+                progress.set_postfix(loss=f"{loss.detach().item():.4f}")
 
-        train_loss = loss_sum / max(example_count, 1)
+        train_loss = float((loss_sum / max(example_count, 1)).cpu())
         validation = evaluate_ranking_model(
             model,
             validation_loader,

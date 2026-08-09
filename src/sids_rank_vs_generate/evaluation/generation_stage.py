@@ -50,7 +50,7 @@ class GenerationConfig:
     constrain_to_catalog: bool = True
     resolve_collisions: bool = True
     max_train_examples: int | None = None
-    max_validation_examples: int | None = 50_000
+    max_validation_examples: int | None = None
     use_bf16: bool = True
     device: str = "auto"
     checkpoint_path: Path = Path("best_model.pt")

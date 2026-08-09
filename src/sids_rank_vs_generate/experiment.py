@@ -125,12 +125,23 @@ def run_experiment(
     *,
     run_ranking: bool = True,
     run_generation: bool = True,
-    max_rows: int | None = None,
 ) -> dict[str, Any]:
     if not run_ranking and not run_generation:
         raise ValueError("at least one evaluation stage must run")
-    if max_rows is not None and max_rows <= 0:
-        raise ValueError("max_rows must be positive")
+    assignment_method = getattr(
+        getattr(config.sid_pipeline, "config", None),
+        "assignment_method",
+        None,
+    )
+    if (
+        run_generation
+        and config.training.generation.resolve_collisions
+        and assignment_method in {"rrs", "ecm"}
+    ):
+        raise ValueError(
+            "RRS/ECM already resolves collisions inside the semantic path; "
+            "do not combine purely semantic indexing with a collision token"
+        )
     dataset = config.dataset.resolve()
     stages = {
         "ranking": RankingStage(config.training.ranking),
@@ -161,7 +172,6 @@ def run_experiment(
                     "dataset": asdict(config.dataset),
                     "training": asdict(config.training),
                     "enabled_stages": list(enabled_stages),
-                    "max_rows": max_rows,
                 }
             )
         )
@@ -176,7 +186,6 @@ def run_experiment(
                 ),
                 test_days=config.dataset.test_days,
                 timestamp_unit_seconds=config.dataset.timestamp_unit_seconds,
-                latest_interactions=max_rows,
                 tracker=tracker,
             ),
             stage_resolver=resolve_stage,
@@ -200,11 +209,6 @@ def build_parser() -> argparse.ArgumentParser:
         "--skip-generation",
         action="store_true",
         help="Skip TIGER-like generation.",
-    )
-    parser.add_argument(
-        "--max-rows",
-        type=int,
-        help="Use only the latest N rows from each interaction source.",
     )
     parser.add_argument(
         "--mlflow",
@@ -264,7 +268,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         config,
         run_ranking=not args.skip_ranking,
         run_generation=not args.skip_generation,
-        max_rows=args.max_rows,
     )
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0

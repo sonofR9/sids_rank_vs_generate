@@ -80,15 +80,17 @@ def _collision_metrics(codes: torch.Tensor) -> dict[str, float | int]:
     counts = Counter(tuples)
     item_count = len(tuples)
     singleton_items = sum(count for count in counts.values() if count == 1)
+    unique_path_count = len(counts)
+    icr = unique_path_count / item_count if item_count else 1.0
     return {
         "item_count": item_count,
-        "unique_id_count": len(counts),
-        "distinct_id_ratio": len(counts) / item_count if item_count else 1.0,
-        "independent_coding_rate": (
-            singleton_items / item_count if item_count else 1.0
-        ),
+        "unique_path_count": unique_path_count,
+        "icr": icr,
+        "collision_rate": 1.0 - icr,
+        "singleton_count": singleton_items,
+        "singleton_rate": singleton_items / item_count if item_count else 1.0,
         "colliding_item_count": item_count - singleton_items,
-        "max_collision_bucket_size": max(counts.values(), default=0),
+        "max_collision": max(counts.values(), default=0),
     }
 
 
@@ -187,7 +189,7 @@ def allocate_semantic_ids(
         raise ValueError("method must be 'nearest', 'ecm', or 'rrs'")
     books, top_ks = _validate_inputs(latents, codebooks, top_k)
     nearest = nearest_residual_codes(latents, books)
-    nearest_metrics = _collision_metrics(nearest)
+    base_metrics = _collision_metrics(nearest)
 
     if method == "nearest":
         final_codes = nearest
@@ -237,7 +239,7 @@ def allocate_semantic_ids(
     metrics: dict[str, float | int | str] = {
         "method": method,
         "top_k": ",".join(str(value) for value in top_ks),
-        **{f"nearest_{name}": value for name, value in nearest_metrics.items()},
+        **{f"base_{name}": value for name, value in base_metrics.items()},
         **{f"final_{name}": value for name, value in final_metrics.items()},
         "reassigned_item_count": int((final_codes != nearest).any(dim=1).sum()),
         "mean_nearest_residual_norm": float(nearest_norms.mean().item()),

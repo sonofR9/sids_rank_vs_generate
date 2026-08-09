@@ -155,8 +155,8 @@ class TrackingTest(unittest.TestCase):
             batch_size=4,
             num_workers=0,
             device="cpu",
-            max_epochs=1,
-            patience=1,
+            max_epochs=2,
+            patience=2,
             val_part=0.25,
         )
         embeddings = np.arange(32, dtype=np.float32).reshape(8, 4) / 32.0
@@ -172,6 +172,14 @@ class TrackingTest(unittest.TestCase):
         self.assertIn("train.codebook_loss", metric_names)
         self.assertIn("train.commitment_loss", metric_names)
         self.assertIn("validation.loss", metric_names)
+        self.assertEqual(
+            [
+                step
+                for step, metrics in tracker.metrics
+                if "train.loss" in metrics
+            ],
+            [1, 2],
+        )
 
 
 if __name__ == "__main__":

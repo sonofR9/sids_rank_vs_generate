@@ -47,18 +47,20 @@ def prepare_generation_examples(
     validation_examples = []
     history = []
     current_uid = None
-    for row in frame.iter_rows(named=True):
-        if row["uid"] != current_uid:
-            current_uid = row["uid"]
+    example_rows = frame.select("uid", "item_id", "timestamp", *sid_columns)
+    for row in example_rows.iter_rows(named=False):
+        uid, item_id, timestamp, *sid_values = row
+        if uid != current_uid:
+            current_uid = uid
             history = []
-        item_idx = item2idx[row["item_id"]]
+        item_idx = item2idx[item_id]
         if len(history) >= config.min_history_len:
             example = {
                 "history": history[-config.max_history_len :],
                 "target": item_idx,
-                "sid": [int(row[column]) for column in sid_columns],
+                "sid": [int(value) for value in sid_values],
             }
-            if row["timestamp"] >= prepared.test_start_timestamp:
+            if timestamp >= prepared.test_start_timestamp:
                 validation_examples.append(example)
             else:
                 train_examples.append(example)
@@ -110,6 +112,11 @@ def collate_generation(
 
 def build_generation_loaders(train_examples, validation_examples, config):
     collator = partial(collate_generation, num_levels=config.num_levels)
+    worker_options = (
+        {"persistent_workers": True, "prefetch_factor": 2}
+        if config.num_workers > 0
+        else {}
+    )
     train_loader = DataLoader(
         GenerationDataset(train_examples),
         batch_size=config.batch_size,
@@ -117,6 +124,7 @@ def build_generation_loaders(train_examples, validation_examples, config):
         collate_fn=collator,
         pin_memory=str(config.device).startswith("cuda"),
         num_workers=config.num_workers,
+        **worker_options,
     )
     validation_loader = DataLoader(
         GenerationDataset(validation_examples),
@@ -125,5 +133,6 @@ def build_generation_loaders(train_examples, validation_examples, config):
         collate_fn=collator,
         pin_memory=str(config.device).startswith("cuda"),
         num_workers=config.num_workers,
+        **worker_options,
     )
     return train_loader, validation_loader
