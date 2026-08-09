@@ -19,6 +19,12 @@ source .venv/bin/activate
 pip install -e .
 ```
 
+Install the optional MLflow integration when experiment tracking is needed:
+
+```bash
+pip install -e '.[mlflow]'
+```
+
 ## Data
 
 The generation history comes from the official `yandex/yambda`
@@ -73,6 +79,59 @@ sources for a faster end-to-end check:
 python run.py experiments/rqkmeans_full.py --max-rows 200000
 python run.py experiments/rqkmeans_full.py --skip-generation
 python run.py experiments/rqkmeans_full.py --skip-ranking
+```
+
+### RQ-VAE purely semantic indexing
+
+RQ-VAE supports three final assignment policies over the same trained encoder
+and codebooks: vanilla nearest-centroid IDs, recursive residual searching (RRS),
+and exhaustive candidate matching (ECM). RRS and ECM resolve collisions without
+appending a non-semantic conflict token.
+
+```bash
+python run.py experiments/rqvae_psi.py:NEAREST
+python run.py experiments/rqvae_psi.py:RRS
+python run.py experiments/rqvae_psi.py:ECM
+```
+
+The SID result includes ICR before and after assignment, collision-bucket size,
+reassigned-item count, and residual-norm distortion. RRS is the practical
+full-catalog default. ECM evaluates `top_k ** num_levels` paths per item and is
+best suited to controlled comparisons.
+
+### MLflow tracking
+
+Enable MLflow for the complete experiment with `--mlflow`. The runner creates
+one parent run and child runs for SID training, DCNv2, TransAct, and semantic
+generation. Custom PyTorch loops log their train and validation metrics once per
+epoch; the parent run stores final SID and downstream metrics. Checkpoints and
+other generated files remain in the local report directory printed by the run.
+
+```bash
+python run.py experiments/rqkmeans_full.py \
+  --max-rows 200000 \
+  --mlflow
+```
+
+Use a shared tracking server and explicit names when needed:
+
+```bash
+python run.py experiments/rqkmeans_full.py \
+  --mlflow \
+  --mlflow-tracking-uri http://localhost:5000 \
+  --mlflow-experiment-name sid-comparison \
+  --mlflow-run-name rqkmeans-l3-c256
+```
+
+MLflow is optional and disabled by default, so tests and ordinary runs do not
+import it. Python experiment configs can enable the same behavior with
+`MLflowConfig(enabled=True)` in `ExperimentConfig.tracking`.
+
+With no explicit tracking URI, current MLflow versions use a local
+`sqlite:///mlflow.db` store. Open the local UI after a run with:
+
+```bash
+mlflow ui --backend-store-uri sqlite:///mlflow.db
 ```
 
 A config can also point at explicitly prepared Parquet files for tests or local

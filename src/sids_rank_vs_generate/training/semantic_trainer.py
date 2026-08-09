@@ -14,9 +14,19 @@ from sids_rank_vs_generate.evaluation.semantic_validation_without_collision impo
     validate_semantic_model_without_collisions,
 )
 from sids_rank_vs_generate.training.utils import autocast, move_to_device
+from sids_rank_vs_generate.tracking import ExperimentTracker, NullTracker
 
 
-def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
+def train_semantic(
+    model,
+    train_loader,
+    val_loader,
+    cfg,
+    sid_to_items=None,
+    sid_catalog=None,
+    tracker: ExperimentTracker | None = None,
+):
+    tracker = tracker or NullTracker()
     optimizer = torch.optim.AdamW(
         model.parameters(),
         lr=cfg.lr,
@@ -28,7 +38,7 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
 
     if cfg.resolve_collisions:
         validate_fn = validate_semantic_model_without_collisions
-        validation_kwargs = {}
+        validation_kwargs = {"sid_catalog": sid_catalog}
     else:
         if sid_to_items is None:
             raise ValueError(
@@ -36,7 +46,10 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
             )
 
         validate_fn = validate_semantic_model_with_collisions
-        validation_kwargs = {"sid_to_items": sid_to_items}
+        validation_kwargs = {
+            "sid_to_items": sid_to_items,
+            "sid_catalog": sid_catalog,
+        }
 
     metric_name = f"recall@{cfg.recall_k}"
     best_metric = float("-inf")
@@ -56,6 +69,7 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
                     batch["positions"],
                     batch["mask"],
                     batch["sid"],
+                    target=batch["target"],
                 )
 
             loss = output["loss"]
@@ -79,6 +93,17 @@ def train_semantic(model, train_loader, val_loader, cfg, sid_to_items=None):
         )
 
         current_metric = metrics[metric_name]
+        tracker.log_metrics(
+            {
+                "train.loss": train_loss,
+                **{
+                    f"validation.{name}": value
+                    for name, value in metrics.items()
+                },
+                f"validation.best_{metric_name}": max(best_metric, current_metric),
+            },
+            step=epoch,
+        )
 
         print(
             f"epoch={epoch} | loss={train_loss:.6f} | "

@@ -5,7 +5,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from ..data.embedding_dataset import EmbeddingDataset
-from ..reproducibility import SID_EXPERIMENT_SEED
+from ..tracking import ExperimentTracker, NullTracker
+from .rq_kmeans import RQKMeans
+
 
 class RQVAE(nn.Module):
     def __init__(
@@ -77,7 +79,13 @@ class RQVAE(nn.Module):
 
         return np.asarray(X, dtype=np.float32)
 
-    def pretrain_autoencoder(self, loader):
+    def pretrain_autoencoder(
+        self,
+        loader,
+        *,
+        tracker: ExperimentTracker | None = None,
+    ):
+        tracker = tracker or NullTracker()
         # Оптимизируем только параметры энкодера и декодера, не заходим в кодбук
         opt = torch.optim.AdamW(list(self.encoder.parameters()) + list(self.decoder.parameters()), lr=self.pretrain_lr)
         self.train()
@@ -98,6 +106,10 @@ class RQVAE(nn.Module):
             print(
                 f"pretrain epoch={epoch + 1}/{self.pretrain_epochs} | "
                 f"recon={total_loss / total_count:.6f}"
+            )
+            tracker.log_metrics(
+                {"pretrain.reconstruction_loss": total_loss / total_count},
+                step=epoch + 1,
             )
 
     def sample_mask(self, batch_size, dtype, device):
@@ -181,7 +193,13 @@ class RQVAE(nn.Module):
             "mask": mask
         }
     
-    def fit(self, X: pl.Series | pl.DataFrame | np.ndarray):
+    def fit(
+        self,
+        X: pl.Series | pl.DataFrame | np.ndarray,
+        *,
+        tracker: ExperimentTracker | None = None,
+    ):
+        tracker = tracker or NullTracker()
         X = self.converter(X)
     
         loader = DataLoader(
@@ -249,6 +267,15 @@ class RQVAE(nn.Module):
                 f"recon={total_recon / total_count:.6f} | "
                 f"codebook={total_codebook / total_count:.6f} | "
                 f"commit={total_commit / total_count:.6f}"
+            )
+            tracker.log_metrics(
+                {
+                    "train.loss": total_loss / total_count,
+                    "train.reconstruction_loss": total_recon / total_count,
+                    "train.codebook_loss": total_codebook / total_count,
+                    "train.commitment_loss": total_commit / total_count,
+                },
+                step=epoch + 1,
             )
     
         return self

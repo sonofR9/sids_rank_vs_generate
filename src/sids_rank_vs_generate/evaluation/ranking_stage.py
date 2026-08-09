@@ -6,6 +6,7 @@ from typing import Any
 from ..data.ranking import build_ranking_loaders, prepare_ranking_data
 from ..models.ranking import DcnV2Ranker, TransActDcnV2Ranker
 from ..reproducibility import SID_EXPERIMENT_SEED, seed_everything
+from ..tracking import flatten_parameters
 from ..training.ranking import train_ranking_model
 from .stages import EvaluationContext, IEvaluationStage
 
@@ -80,12 +81,30 @@ class RankingStage(IEvaluationStage):
         results = {}
         for model_name, model_factory in model_factories.items():
             seed_everything(SID_EXPERIMENT_SEED)
-            results[model_name] = train_ranking_model(
-                model_factory(data, self.config),
-                *loaders,
-                self.config,
-                context.artifact_dir / f"{model_name}.pt",
-            )
+            with context.tracker.start_run(
+                f"ranking.{model_name}",
+                nested=True,
+                tags={"stage": "ranking", "model": model_name},
+            ) as tracker:
+                tracker.log_params(
+                    flatten_parameters(
+                        {
+                            "config": asdict(self.config),
+                            "examples": {
+                                "train": data.train.height,
+                                "validation": data.validation.height,
+                                "test": data.test.height,
+                            },
+                        }
+                    )
+                )
+                results[model_name] = train_ranking_model(
+                    model_factory(data, self.config),
+                    *loaders,
+                    self.config,
+                    context.artifact_dir / f"{model_name}.pt",
+                    tracker=tracker,
+                )
 
         return {
             "config": asdict(self.config),

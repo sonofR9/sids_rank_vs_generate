@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from ..data.embedding_dataset import EmbeddingDataset
-from ..reproducibility import SID_EXPERIMENT_SEED
+from ..tracking import ExperimentTracker, NullTracker
 
 
 class RQVAE(nn.Module):
@@ -95,20 +95,41 @@ class RQVAE(nn.Module):
         return loss, recon_loss, codebook_loss, commit_loss
 
     @torch.no_grad()
-    def evaluate(self, loader):
+    def evaluate_metrics(self, loader):
         self.eval()
-        total_loss = 0.0
+        totals = {
+            "loss": 0.0,
+            "reconstruction_loss": 0.0,
+            "codebook_loss": 0.0,
+            "commitment_loss": 0.0,
+        }
         total_count = 0
         for x in loader:
             x = x.to(self.device, non_blocking=True)
-            loss, _, _, _ = self.compute_loss(x)
+            loss, recon, codebook, commit = self.compute_loss(x)
             batch_size = x.size(0)
-            total_loss += loss.item() * batch_size
+            totals["loss"] += loss.item() * batch_size
+            totals["reconstruction_loss"] += recon.item() * batch_size
+            totals["codebook_loss"] += codebook.item() * batch_size
+            totals["commitment_loss"] += commit.item() * batch_size
             total_count += batch_size
 
-        return total_loss / max(total_count, 1)
+        return {
+            name: value / max(total_count, 1)
+            for name, value in totals.items()
+        }
 
-    def pretrain_autoencoder(self, loader):
+    @torch.no_grad()
+    def evaluate(self, loader):
+        return self.evaluate_metrics(loader)["loss"]
+
+    def pretrain_autoencoder(
+        self,
+        loader,
+        *,
+        tracker: ExperimentTracker | None = None,
+    ):
+        tracker = tracker or NullTracker()
         # Оптимизируем только параметры энкодера и декодера, не заходим в кодбук
         opt = torch.optim.AdamW(list(self.encoder.parameters()) + list(self.decoder.parameters()), lr=self.pretrain_lr)
         self.train()
@@ -129,6 +150,10 @@ class RQVAE(nn.Module):
             print(
                 f"pretrain epoch={epoch + 1}/{self.pretrain_epochs} | "
                 f"recon_loss={total_loss/total_count}")
+            tracker.log_metrics(
+                {"pretrain.reconstruction_loss": total_loss / total_count},
+                step=epoch + 1,
+            )
 
 
     @torch.no_grad()
@@ -183,7 +208,13 @@ class RQVAE(nn.Module):
             "residuals_all": residuals_all,
         }
     
-    def fit(self, X):
+    def fit(
+        self,
+        X,
+        *,
+        tracker: ExperimentTracker | None = None,
+    ):
+        tracker = tracker or NullTracker()
         X = self.converter(X)
 
         rng = np.random.default_rng(42)
@@ -222,7 +253,12 @@ class RQVAE(nn.Module):
         for epoch in range(self.max_epochs):
             self.train()
 
-            total_loss = 0.0
+            totals = {
+                "loss": 0.0,
+                "reconstruction_loss": 0.0,
+                "codebook_loss": 0.0,
+                "commitment_loss": 0.0,
+            }
             total_count = 0
 
             for x in train_loader:
@@ -237,11 +273,33 @@ class RQVAE(nn.Module):
                 optimizer.step()
 
                 batch_size = x.size(0)
-                total_loss += loss.item() * batch_size
+                totals["loss"] += loss.item() * batch_size
+                totals["reconstruction_loss"] += recon.item() * batch_size
+                totals["codebook_loss"] += codebook.item() * batch_size
+                totals["commitment_loss"] += commit.item() * batch_size
                 total_count += batch_size
 
-            train_loss = total_loss / max(total_count, 1)
-            val_loss = self.evaluate(val_loader)
+            train_metrics = {
+                name: value / max(total_count, 1)
+                for name, value in totals.items()
+            }
+            val_metrics = self.evaluate_metrics(val_loader)
+            train_loss = train_metrics["loss"]
+            val_loss = val_metrics["loss"]
+            tracker.log_metrics(
+                {
+                    **{
+                        f"train.{name}": value
+                        for name, value in train_metrics.items()
+                    },
+                    **{
+                        f"validation.{name}": value
+                        for name, value in val_metrics.items()
+                    },
+                    "validation.best_loss": min(best_val_loss, val_loss),
+                },
+                step=epoch + 1,
+            )
 
             print(
                 f"epoch={epoch + 1}/{self.max_epochs} | "

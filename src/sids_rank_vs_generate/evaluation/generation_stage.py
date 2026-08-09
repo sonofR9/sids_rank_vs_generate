@@ -15,7 +15,9 @@ from ..data.generation import (
 from ..models.semantic_transformer_model import SemanticTransformerModel
 from ..reproducibility import SID_EXPERIMENT_SEED, seed_everything
 from ..sids.collision_resolution import add_collision_resolving_sid, get_sid_cols
+from ..tracking import flatten_parameters
 from ..training.semantic_trainer import train_semantic
+from .beam_search import SemanticIDCatalog
 from .semantic_validation_with_collision import (
     validate_semantic_model_with_collisions,
 )
@@ -45,6 +47,7 @@ class GenerationConfig:
     early_stopping_min_delta: float = 1e-4
     num_beams: int = 150
     recall_k: int = 100
+    constrain_to_catalog: bool = True
     resolve_collisions: bool = True
     max_train_examples: int | None = None
     max_validation_examples: int | None = 50_000
@@ -83,6 +86,18 @@ def _build_sid_to_items(
         sid = tuple(int(row[column]) for column in sid_columns)
         result.setdefault(sid, []).append(item2idx[row["item_id"]])
     return result
+
+
+def _build_sid_catalog(
+    semantic_df: pl.DataFrame,
+    codebook_size: int,
+) -> SemanticIDCatalog:
+    sid_columns = get_sid_cols(semantic_df)
+    semantic_ids = semantic_df.select(*sid_columns).iter_rows()
+    return SemanticIDCatalog(
+        semantic_ids=semantic_ids,
+        codebook_sizes=(codebook_size,) * len(sid_columns),
+    )
 
 
 class GenerationStage(IEvaluationStage):
@@ -148,21 +163,54 @@ class GenerationStage(IEvaluationStage):
             if runtime.resolve_collisions
             else _build_sid_to_items(semantic_df, item2idx)
         )
-        model = SemanticTransformerModel(len(item2idx), runtime).to(runtime.device)
-        train_semantic(
-            model,
-            train_loader,
-            validation_loader,
-            runtime,
-            sid_to_items=sid_to_items,
+        sid_catalog = (
+            _build_sid_catalog(semantic_df, runtime.codebook_size)
+            if runtime.constrain_to_catalog
+            else None
         )
-        if runtime.resolve_collisions:
-            metrics = validate_semantic_model_without_collisions(
-                model, validation_loader, runtime
+        model = SemanticTransformerModel(len(item2idx), runtime).to(runtime.device)
+        with context.tracker.start_run(
+            "generation",
+            nested=True,
+            tags={"stage": "generation", "model": "semantic_transformer"},
+        ) as tracker:
+            tracker.log_params(
+                flatten_parameters(
+                    {
+                        "config": asdict(runtime),
+                        "examples": {
+                            "train": len(train_examples),
+                            "validation": len(validation_examples),
+                        },
+                    }
+                )
             )
-        else:
-            metrics = validate_semantic_model_with_collisions(
-                model, validation_loader, runtime, sid_to_items
+            train_semantic(
+                model,
+                train_loader,
+                validation_loader,
+                runtime,
+                sid_to_items=sid_to_items,
+                sid_catalog=sid_catalog,
+                tracker=tracker,
+            )
+            if runtime.resolve_collisions:
+                metrics = validate_semantic_model_without_collisions(
+                    model,
+                    validation_loader,
+                    runtime,
+                    sid_catalog=sid_catalog,
+                )
+            else:
+                metrics = validate_semantic_model_with_collisions(
+                    model,
+                    validation_loader,
+                    runtime,
+                    sid_to_items,
+                    sid_catalog=sid_catalog,
+                )
+            tracker.log_metrics(
+                {f"final.{name}": value for name, value in metrics.items()}
             )
         semantic_df.write_parquet(context.artifact_dir / "semantic_ids.parquet")
         return {

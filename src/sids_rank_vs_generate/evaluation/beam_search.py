@@ -1,7 +1,85 @@
+from __future__ import annotations
+
+from collections.abc import Iterable, Sequence
+from numbers import Integral
+
 import torch
 import torch.nn.functional as F
 
 from ..training.utils import autocast
+
+
+class SemanticIDCatalog:
+    """Prefix index for semantic IDs that actually exist in the catalog."""
+
+    def __init__(
+        self,
+        semantic_ids: Iterable[Sequence[int]],
+        codebook_sizes: Sequence[int],
+    ) -> None:
+        self.codebook_sizes = tuple(int(size) for size in codebook_sizes)
+        if not self.codebook_sizes or any(size <= 0 for size in self.codebook_sizes):
+            raise ValueError("codebook_sizes must contain positive sizes")
+
+        paths: set[tuple[int, ...]] = set()
+        for semantic_id in semantic_ids:
+            path = tuple(semantic_id)
+            if len(path) != len(self.codebook_sizes):
+                raise ValueError(
+                    "semantic ID length must match the number of codebooks"
+                )
+            for level, (token, size) in enumerate(
+                zip(path, self.codebook_sizes)
+            ):
+                if not isinstance(token, Integral) or not 0 <= int(token) < size:
+                    raise ValueError(
+                        f"semantic ID token at level {level} is out of range"
+                    )
+            paths.add(tuple(int(token) for token in path))
+
+        if not paths:
+            raise ValueError("semantic ID catalog must not be empty")
+
+        self.semantic_ids = tuple(sorted(paths))
+        self._next_tokens: dict[tuple[int, ...], frozenset[int]] = {}
+        mutable_next_tokens: dict[tuple[int, ...], set[int]] = {}
+        for path in self.semantic_ids:
+            for level, token in enumerate(path):
+                mutable_next_tokens.setdefault(path[:level], set()).add(token)
+        self._next_tokens = {
+            prefix: frozenset(tokens)
+            for prefix, tokens in mutable_next_tokens.items()
+        }
+
+    def valid_next_tokens(self, prefix: Sequence[int]) -> frozenset[int]:
+        """Return tokens that keep ``prefix`` on a path in the catalog."""
+
+        return self._next_tokens.get(tuple(int(token) for token in prefix), frozenset())
+
+
+def _model_codebook_sizes(model) -> tuple[int, ...]:
+    configured = getattr(model, "codebook_sizes", None)
+    if configured is None:
+        configured = (model.codebook_size,) * model.num_levels
+    sizes = tuple(int(size) for size in configured)
+    if len(sizes) != model.num_levels:
+        raise ValueError("model codebook sizes do not match its number of levels")
+    return sizes
+
+
+def _model_codebook_offsets(model, device: torch.device) -> torch.Tensor:
+    configured = getattr(model, "codebook_offsets", None)
+    if configured is not None:
+        return configured.to(device=device)
+    sizes = _model_codebook_sizes(model)
+    return torch.tensor([0, *sizes[:-1]], device=device).cumsum(dim=0)
+
+
+def _encode_history(model, history, positions, mask):
+    encode_history = getattr(model, "encode_history", None)
+    if callable(encode_history):
+        return encode_history(history, positions, mask)
+    return model.encoder(history, positions, mask)
 
 
 @torch.inference_mode()
@@ -12,7 +90,10 @@ def semantic_beam_search(
     mask,
     beam_size: int = 150,
     use_bf16: bool = False,
+    sid_catalog: SemanticIDCatalog | None = None,
 ):
+    if beam_size <= 0:
+        raise ValueError("beam_size must be positive")
     model.eval()
     with autocast(history.device, use_bf16):
         return _semantic_beam_search(
@@ -21,6 +102,7 @@ def semantic_beam_search(
             positions,
             mask,
             beam_size,
+            sid_catalog,
         )
 
 
@@ -30,8 +112,14 @@ def _semantic_beam_search(
     positions,
     mask,
     beam_size,
+    sid_catalog,
 ):
-    memory, _ = model.encoder(
+    codebook_sizes = _model_codebook_sizes(model)
+    if sid_catalog is not None and sid_catalog.codebook_sizes != codebook_sizes:
+        raise ValueError("catalog and model codebook sizes must match")
+
+    memory, _ = _encode_history(
+        model,
         history,
         positions,
         mask,
@@ -39,6 +127,7 @@ def _semantic_beam_search(
 
     batch_size = history.size(0)
     device = history.device
+    codebook_offsets = _model_codebook_offsets(model, device)
 
     # Изначально один beam с BOS.
     beams = torch.full(
@@ -66,13 +155,7 @@ def _semantic_beam_search(
             bos = flat_tokens[:, :1]
             sid_tokens = flat_tokens[:, 1:]
 
-            offsets = (
-                torch.arange(
-                    sid_tokens.size(1),
-                    device=device,
-                )
-                * model.codebook_size
-            ).unsqueeze(0)
+            offsets = codebook_offsets[: sid_tokens.size(1)].unsqueeze(0)
 
             flat_tokens = torch.cat(
                 [bos, sid_tokens + offsets],
@@ -115,8 +198,32 @@ def _semantic_beam_search(
         log_probs = log_probs.reshape(
             batch_size,
             current_beam_size,
-            model.codebook_size,
+            codebook_sizes[level],
         )
+
+        valid_counts = None
+        if sid_catalog is not None:
+            beam_prefixes = beams[:, :, 1:].detach().cpu().tolist()
+            valid_mask_cpu = torch.zeros(
+                batch_size,
+                current_beam_size,
+                codebook_sizes[level],
+                dtype=torch.bool,
+            )
+            for batch_index, batch_prefixes in enumerate(beam_prefixes):
+                for beam_index, prefix in enumerate(batch_prefixes):
+                    valid_tokens = sid_catalog.valid_next_tokens(prefix)
+                    if valid_tokens:
+                        valid_mask_cpu[
+                            batch_index,
+                            beam_index,
+                            list(valid_tokens),
+                        ] = True
+            valid_mask = valid_mask_cpu.to(device=device)
+            valid_counts = valid_mask.flatten(1).sum(dim=1)
+            if torch.any(valid_counts == 0):
+                raise RuntimeError("beam search reached a prefix outside the SID catalog")
+            log_probs = log_probs.masked_fill(~valid_mask, float("-inf"))
 
         candidate_scores = (
             scores.unsqueeze(-1) + log_probs
@@ -126,6 +233,8 @@ def _semantic_beam_search(
             beam_size,
             candidate_scores.size(1),
         )
+        if valid_counts is not None:
+            next_beam_size = min(next_beam_size, int(valid_counts.min().item()))
 
         new_scores, best_indices = torch.topk(
             candidate_scores,
@@ -134,11 +243,11 @@ def _semantic_beam_search(
         )
 
         previous_beam = (
-            best_indices // model.codebook_size
+            best_indices // codebook_sizes[level]
         )
 
         next_token = (
-            best_indices % model.codebook_size
+            best_indices % codebook_sizes[level]
         )
 
         selected_beams = beams.gather(

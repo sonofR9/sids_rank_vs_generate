@@ -4,7 +4,7 @@ import argparse
 import importlib.util
 import json
 import sys
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Sequence
@@ -14,6 +14,7 @@ from .evaluation.generation_stage import GenerationConfig, GenerationStage
 from .evaluation.ranking_stage import RankingConfig, RankingStage
 from .sid_experiment import SidExperimentConfig, run_sid_experiment
 from .sids import ISidPipeline
+from .tracking import MLflowConfig, create_tracker, flatten_parameters
 
 
 @dataclass(frozen=True)
@@ -78,6 +79,7 @@ class ExperimentConfig:
     sid_pipeline: ISidPipeline
     dataset: YambdaDatasetConfig = YambdaDatasetConfig()
     training: TrainingConfig = TrainingConfig()
+    tracking: MLflowConfig = MLflowConfig()
     reports_dir: Path = Path("reports/experiments")
 
     def __post_init__(self) -> None:
@@ -146,21 +148,39 @@ def run_experiment(
     def resolve_stage(name: str):
         return stages[name]
 
-    return run_sid_experiment(
-        SidExperimentConfig(
-            dataset=dataset,
-            sid_pipeline=config.sid_pipeline,
-            enabled_stages=enabled_stages,
-            reports_dir=config.reports_dir,
-            core_min_interactions_per_item=(
-                config.dataset.core_min_interactions_per_item
+    tracker = create_tracker(config.tracking)
+    run_name = config.tracking.run_name or type(config.sid_pipeline).__name__
+    tags = {
+        "pipeline": type(config.sid_pipeline).__name__,
+        **dict(config.tracking.tags),
+    }
+    with tracker.start_run(run_name, tags=tags):
+        tracker.log_params(
+            flatten_parameters(
+                {
+                    "dataset": asdict(config.dataset),
+                    "training": asdict(config.training),
+                    "enabled_stages": list(enabled_stages),
+                    "max_rows": max_rows,
+                }
+            )
+        )
+        return run_sid_experiment(
+            SidExperimentConfig(
+                dataset=dataset,
+                sid_pipeline=config.sid_pipeline,
+                enabled_stages=enabled_stages,
+                reports_dir=config.reports_dir,
+                core_min_interactions_per_item=(
+                    config.dataset.core_min_interactions_per_item
+                ),
+                test_days=config.dataset.test_days,
+                timestamp_unit_seconds=config.dataset.timestamp_unit_seconds,
+                latest_interactions=max_rows,
+                tracker=tracker,
             ),
-            test_days=config.dataset.test_days,
-            timestamp_unit_seconds=config.dataset.timestamp_unit_seconds,
-            latest_interactions=max_rows,
-        ),
-        stage_resolver=resolve_stage,
-    )
+            stage_resolver=resolve_stage,
+        )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -186,12 +206,60 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         help="Use only the latest N rows from each interaction source.",
     )
+    parser.add_argument(
+        "--mlflow",
+        action="store_true",
+        help="Log the complete experiment and every train loop to MLflow.",
+    )
+    parser.add_argument(
+        "--mlflow-tracking-uri",
+        help="MLflow tracking URI; defaults to MLflow's configured local store.",
+    )
+    parser.add_argument(
+        "--mlflow-experiment-name",
+        help="Override the MLflow experiment name from the Python config.",
+    )
+    parser.add_argument(
+        "--mlflow-run-name",
+        help="Override the MLflow parent run name from the Python config.",
+    )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     config = load_experiment_config(args.config)
+    mlflow_requested = any(
+        (
+            args.mlflow,
+            args.mlflow_tracking_uri is not None,
+            args.mlflow_experiment_name is not None,
+            args.mlflow_run_name is not None,
+        )
+    )
+    if mlflow_requested:
+        config = replace(
+            config,
+            tracking=replace(
+                config.tracking,
+                enabled=True,
+                tracking_uri=(
+                    args.mlflow_tracking_uri
+                    if args.mlflow_tracking_uri is not None
+                    else config.tracking.tracking_uri
+                ),
+                experiment_name=(
+                    args.mlflow_experiment_name
+                    if args.mlflow_experiment_name is not None
+                    else config.tracking.experiment_name
+                ),
+                run_name=(
+                    args.mlflow_run_name
+                    if args.mlflow_run_name is not None
+                    else config.tracking.run_name
+                ),
+            ),
+        )
     result = run_experiment(
         config,
         run_ranking=not args.skip_ranking,
