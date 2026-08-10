@@ -7,6 +7,7 @@ EXPERIMENT = ExperimentConfig(
     dataset=YambdaDatasetConfig(size="50m"),
     sid_pipeline=PlumRQVAEPipeline(
         PlumRQVAEConfig(
+            num_levels=2,
             codebook_sizes=(512, 256),
             device="auto",
         )

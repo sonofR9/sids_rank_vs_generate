@@ -56,9 +56,9 @@ class RQVAEConfig:
 class PlumRQVAEConfig:
     hidden_dim: int = 128
     latent_dim: int = 128
-    num_levels: int = 2
+    num_levels: int = 3
     codebook_size: int = 512
-    codebook_sizes: tuple[int, ...] = (512, 256)
+    codebook_sizes: tuple[int, ...] = (512, 256, 128)
     batch_size: int = 256
     num_epochs: int = 50
     lr: float = 5e-4
@@ -67,6 +67,15 @@ class PlumRQVAEConfig:
     device: str | None = None
     pretrain_epochs: int = 3
     pretrain_lr: float = 5e-3
+
+    def __post_init__(self) -> None:
+        if not self.codebook_sizes or any(
+            size <= 0 for size in self.codebook_sizes
+        ):
+            raise ValueError("codebook_sizes must contain positive values")
+        if self.num_levels != len(self.codebook_sizes):
+            raise ValueError("num_levels must match codebook_sizes")
+
 
 @dataclass(frozen=True)
 class BalanceRQKMeansConfig:
@@ -78,3 +87,12 @@ class BalanceRQKMeansConfig:
     predict_batch_size: int = 16_384
     max_iter: int = 50
     device: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.codebook_sizes is not None:
+            if not self.codebook_sizes or any(
+                size <= 0 for size in self.codebook_sizes
+            ):
+                raise ValueError("codebook_sizes must contain positive values")
+        elif self.num_levels is None or self.codebook_size is None:
+            raise ValueError("num_levels and codebook_size are required")
