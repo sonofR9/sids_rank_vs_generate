@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -17,7 +16,6 @@ import numpy as np
 import pandas as pd
 from matplotlib.lines import Line2D
 from matplotlib.ticker import MaxNLocator
-from scipy.stats import pearsonr, spearmanr
 
 
 CONFIGURATION_COLUMNS = (
@@ -260,24 +258,6 @@ def _finite_pairs(frame: pd.DataFrame, metric_column: str) -> pd.DataFrame:
     return frame.loc[mask].copy()
 
 
-def _correlations(frame: pd.DataFrame, metric_column: str) -> tuple[int, float, float]:
-    pair = _finite_pairs(frame, metric_column)
-    n = len(pair)
-    if n < 2:
-        return n, math.nan, math.nan
-    x = pair[metric_column].astype(float).to_numpy()
-    y = pair["recall_100"].astype(float).to_numpy()
-    if np.ptp(x) == 0.0 or np.ptp(y) == 0.0:
-        return n, math.nan, math.nan
-    return n, float(pearsonr(x, y).statistic), float(spearmanr(x, y).statistic)
-
-
-def _format_correlation(value: float, *, symbol: str) -> str:
-    if not math.isfinite(value):
-        return f"{symbol} = undefined (constant)"
-    return f"{symbol} = {value:.3f}"
-
-
 def _draw_sweep_lines(axis: plt.Axes, frame: pd.DataFrame, metric_column: str) -> None:
     for method, method_frame in frame.groupby("method", sort=False):
         color = METHOD_COLORS.get(method, "#6B7280")
@@ -306,12 +286,12 @@ def _plot_metric(
     output_dir: Path,
     *,
     baseline_recall: float | None,
-) -> tuple[int, float, float]:
+) -> int:
     metric_column = f"metrics.{spec.logged_name}"
     plot_frame = _finite_pairs(frame, metric_column)
-    n, pearson, spearman = _correlations(plot_frame, metric_column)
+    n = len(plot_frame)
     if n == 0:
-        return n, pearson, spearman
+        return n
 
     plt.rcParams.update(
         {
@@ -386,17 +366,10 @@ def _plot_metric(
     axis.yaxis.set_major_locator(MaxNLocator(nbins=7))
     axis.margins(x=0.08, y=0.10)
 
-    stats_text = "\n".join(
-        (
-            _format_correlation(pearson, symbol="Pearson r"),
-            _format_correlation(spearman, symbol="Spearman ρ"),
-            f"n = {n}",
-        )
-    )
     axis.text(
         0.025,
         0.975,
-        stats_text,
+        f"n = {n}",
         transform=axis.transAxes,
         ha="left",
         va="top",
@@ -439,7 +412,7 @@ def _plot_metric(
             facecolor="white",
         )
     plt.close(figure)
-    return n, pearson, spearman
+    return n
 
 
 def _discovered_metrics(frame: pd.DataFrame) -> pd.DataFrame:
@@ -543,7 +516,7 @@ def main() -> None:
         metric_column = f"metrics.{spec.logged_name}"
         if metric_column not in merged or not merged[metric_column].notna().any():
             continue
-        n, pearson, spearman = _plot_metric(
+        n = _plot_metric(
             merged,
             spec,
             args.output_dir,
@@ -555,22 +528,17 @@ def main() -> None:
             {
                 "metric": spec.label,
                 "num_runs": n,
-                "pearson_corr": pearson,
-                "spearman_corr": spearman,
             }
         )
         plotted.append(spec.logged_name)
 
     summary = pd.DataFrame(summaries)
-    summary["_abs_spearman"] = summary["spearman_corr"].abs()
     summary.sort_values(
-        ["_abs_spearman", "metric"],
+        ["num_runs", "metric"],
         ascending=[False, True],
-        na_position="last",
         inplace=True,
     )
-    summary.drop(columns="_abs_spearman", inplace=True)
-    summary.to_csv(args.output_dir / "correlation_summary.csv", index=False)
+    summary.to_csv(args.output_dir / "metric_coverage_summary.csv", index=False)
 
     metadata = {
         "tracking_uri": args.tracking_uri,

@@ -111,7 +111,7 @@ The SID quality block includes:
   the configured codebook ranges.
 
 Join the SID-only parent runs to the matching poster Recall@100 runs and export
-the requested paper-style correlation figures with:
+the requested paper-style metric-versus-Recall@100 figures with:
 
 ```bash
 python scripts/analyze_sid_quality_correlations.py \
@@ -124,8 +124,8 @@ The join key is the complete SID configuration (model, initialization,
 assignment, collision policy, codebook size, number of levels, seed, dataset,
 and data scope). The exporter detects the exact logged Recall@100 name, keeps
 the latest completed parent run per configuration, reports unmatched runs, and
-writes PNG/PDF/SVG figures, the correlation summary, all discovered SID
-metrics, and the matched run metadata under
+writes PNG/PDF/SVG figures, per-metric run coverage, all discovered SID metrics,
+and the matched run metadata under
 `reports/poster/sid_quality_correlations/`.
 
 ### RQ-VAE purely semantic indexing

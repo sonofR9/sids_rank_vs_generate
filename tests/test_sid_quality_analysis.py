@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import importlib.util
-import math
 import sys
 import unittest
 from pathlib import Path
@@ -102,20 +101,6 @@ class SidQualityAnalysisTest(unittest.TestCase):
         self.assertEqual(merged.iloc[0]["method"], "RQVAE")
         self.assertTrue(missing_quality.empty)
         self.assertEqual(len(missing_recall), 1)
-
-    def test_constant_metric_has_undefined_correlations(self) -> None:
-        pd = self.module.pd
-        frame = pd.DataFrame(
-            {
-                "metric": [1.0, 1.0, 1.0],
-                "recall_100": [0.08, 0.10, 0.12],
-            }
-        )
-        n, pearson, spearman = self.module._correlations(frame, "metric")
-        self.assertEqual(n, 3)
-        self.assertTrue(math.isnan(pearson))
-        self.assertTrue(math.isnan(spearman))
-
 
 if __name__ == "__main__":
     unittest.main()
