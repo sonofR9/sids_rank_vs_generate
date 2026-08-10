@@ -69,6 +69,32 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
         self.assertNotIn("--max-rows", help_text)
         self.assertNotIn("--max-row", help_text)
 
+    def test_sid_only_experiment_is_allowed(self) -> None:
+        config = ExperimentConfig(
+            sid_pipeline=RQKMeansPipeline(
+                RQKMeansConfig(num_levels=2, codebook_size=2)
+            )
+        )
+        with (
+            patch(
+                "sids_rank_vs_generate.experiment.YambdaDatasetConfig.resolve",
+                return_value=object(),
+            ),
+            patch(
+                "sids_rank_vs_generate.experiment.run_sid_experiment",
+                return_value={"evaluations": {}},
+            ) as runner,
+        ):
+            result = run_experiment(
+                config,
+                run_ranking=False,
+                run_generation=False,
+            )
+
+        self.assertEqual(result["evaluations"], {})
+        sid_config = runner.call_args.args[0]
+        self.assertEqual(sid_config.enabled_stages, ())
+
     def test_rqkmeans_runs_ranking_and_generation(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -226,6 +252,20 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                     "generation",
                 },
             )
+            parent_metric_names = {
+                name
+                for _step, metrics in tracker.runs["RQKMeansPipeline"]["metrics"]
+                for name in metrics
+            }
+            for metric_name in (
+                "sid.collision_percentiles.p95",
+                "sid.code_gini",
+                "sid.code_entropy",
+                "sid.prefix_coherence_at_1",
+                "sid.codebook_quality.codebook_utilization_rate_total",
+                "sid.valid_sid_rate",
+            ):
+                self.assertIn(metric_name, parent_metric_names)
             for run_name in ("ranking.dcnv2", "ranking.transact", "generation"):
                 metric_names = {
                     name

@@ -126,8 +126,6 @@ def run_experiment(
     run_ranking: bool = True,
     run_generation: bool = True,
 ) -> dict[str, Any]:
-    if not run_ranking and not run_generation:
-        raise ValueError("at least one evaluation stage must run")
     assignment_method = getattr(
         getattr(config.sid_pipeline, "config", None),
         "assignment_method",
@@ -208,7 +206,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--skip-generation",
         action="store_true",
-        help="Skip TIGER-like generation.",
+        help="Skip TIGER-like generation; combine with --skip-ranking for SID-only.",
     )
     parser.add_argument(
         "--mlflow",

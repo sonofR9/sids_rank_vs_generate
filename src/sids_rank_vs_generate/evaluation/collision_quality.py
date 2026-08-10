@@ -9,6 +9,49 @@ import polars as pl
 from sids_rank_vs_generate.sids.collision_resolution import get_sid_cols
 
 
+def _macro_group_cosine_similarity(
+    sids: pl.DataFrame,
+    embeddings: pl.DataFrame,
+    *,
+    group_cols: Sequence[str],
+    embedding_col: str,
+) -> float | None:
+    """Average within-group pairwise cosine, with equal weight per group."""
+
+    groups = (
+        sids.select("item_id", *group_cols)
+        .join(embeddings.select("item_id", embedding_col), on="item_id", how="inner")
+        .group_by(list(group_cols))
+        .agg(
+            pl.col(embedding_col).alias("embeddings"),
+            pl.len().alias("group_size"),
+        )
+        .filter(pl.col("group_size") > 1)
+    )
+
+    similarities: list[float] = []
+    for vectors in groups["embeddings"]:
+        matrix = np.asarray(vectors.to_list(), dtype=np.float32)
+        norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+        normalized = np.divide(
+            matrix,
+            norms,
+            out=np.zeros_like(matrix),
+            where=norms > 0,
+        )
+        vector_sum = normalized.sum(axis=0)
+        diagonal = float(np.square(normalized).sum())
+        count = matrix.shape[0]
+        similarity = (
+            np.dot(vector_sum, vector_sum) - diagonal
+        ) / (count * (count - 1))
+        similarities.append(
+            float(np.clip(similarity, -1.0, 1.0))
+        )
+
+    return float(np.mean(similarities)) if similarities else None
+
+
 def path_average_similarity(
     sids: pl.DataFrame,
     embeddings: pl.DataFrame,
@@ -27,34 +70,69 @@ def path_average_similarity(
             "embedding frame is missing columns: " + ", ".join(sorted(missing))
         )
 
-    collisions = (
-        sids.select("item_id", *sid_cols)
-        .join(embeddings.select("item_id", embedding_col), on="item_id", how="inner")
-        .group_by(sid_cols)
-        .agg(
-            pl.col(embedding_col).alias("embeddings"),
-            pl.len().alias("collision_size"),
-        )
-        .filter(pl.col("collision_size") > 1)
+    return _macro_group_cosine_similarity(
+        sids,
+        embeddings,
+        group_cols=sid_cols,
+        embedding_col=embedding_col,
     )
 
-    similarities: list[float] = []
-    for vectors in collisions["embeddings"]:
-        matrix = np.asarray(vectors.to_list(), dtype=np.float32)
-        norms = np.linalg.norm(matrix, axis=1, keepdims=True)
-        normalized = np.divide(
-            matrix,
-            norms,
-            out=np.zeros_like(matrix),
-            where=norms > 0,
-        )
-        pairwise = normalized @ normalized.T
-        count = matrix.shape[0]
-        similarities.append(
-            float((pairwise.sum() - np.trace(pairwise)) / (count * (count - 1)))
+
+def prefix_coherence(
+    sids: pl.DataFrame,
+    embeddings: pl.DataFrame,
+    *,
+    embedding_col: str = "normalized_embed",
+) -> dict[str, float | None]:
+    """Return macro-average semantic coherence for every SID prefix depth."""
+
+    sid_cols = get_sid_cols(sids)
+    if not sid_cols:
+        raise ValueError("semantic ID frame has no sid_<level> columns")
+    required = {"item_id", embedding_col}
+    missing = required - set(embeddings.columns)
+    if missing:
+        raise ValueError(
+            "embedding frame is missing columns: " + ", ".join(sorted(missing))
         )
 
-    return float(np.mean(similarities)) if similarities else None
+    return {
+        f"prefix_coherence_at_{level}": _macro_group_cosine_similarity(
+            sids,
+            embeddings,
+            group_cols=sid_cols[:level],
+            embedding_col=embedding_col,
+        )
+        for level in range(1, len(sid_cols) + 1)
+    }
+
+
+def valid_sid_rate(
+    sids: pl.DataFrame,
+    codebook_sizes: Sequence[int],
+) -> float:
+    """Fraction of rows with a complete, integral, in-range semantic path."""
+
+    sid_cols = get_sid_cols(sids)
+    sizes = tuple(int(size) for size in codebook_sizes)
+    if len(sizes) != len(sid_cols):
+        raise ValueError("one codebook size is required for every SID level")
+    if any(size <= 0 for size in sizes):
+        raise ValueError("codebook sizes must be positive")
+    if sids.is_empty():
+        raise ValueError("semantic ID frame must not be empty")
+    if any(not sids.schema[column].is_integer() for column in sid_cols):
+        return 0.0
+
+    valid = pl.lit(True)
+    for column, size in zip(sid_cols, sizes, strict=True):
+        valid = (
+            valid
+            & pl.col(column).is_not_null()
+            & (pl.col(column) >= 0)
+            & (pl.col(column) < size)
+        )
+    return float(sids.select(valid.mean().alias("valid_sid_rate")).item())
 
 
 def codebook_quality(
@@ -75,6 +153,8 @@ def codebook_quality(
     metrics: dict[str, float] = {}
     load_balance: dict[str, list[float]] = {"p25": [], "p75": [], "p90": []}
     possible_paths = 1
+    total_used_codes = 0
+    total_available_codes = 0
 
     for level, (column, size) in enumerate(zip(sid_cols, sizes, strict=True), start=1):
         minimum = int(sids[column].min())
@@ -105,9 +185,14 @@ def codebook_quality(
         metrics[f"codebook_utilization_rate_at_{level}_layer"] = (
             counts_by_code.height / size
         )
+        total_used_codes += counts_by_code.height
+        total_available_codes += size
 
     for label, values in load_balance.items():
         metrics[f"load_balance_{label}_mean"] = float(np.mean(values))
+    metrics["codebook_utilization_rate_total"] = (
+        total_used_codes / total_available_codes
+    )
     return metrics
 
 

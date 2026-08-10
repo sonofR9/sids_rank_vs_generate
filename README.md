@@ -73,12 +73,42 @@ python run.py experiments/rqkmeans_full.py
 ```
 
 Both tasks run by default on the complete interaction sources. Runtime flags
-can skip either stage:
+can skip either stage, or both for a SID-only quality run:
 
 ```bash
 python run.py experiments/rqkmeans_full.py --skip-generation
 python run.py experiments/rqkmeans_full.py --skip-ranking
+python run.py experiments/rqkmeans_full.py --skip-ranking --skip-generation
 ```
+
+SID-only runs still construct and validate the full item-to-SID mapping, save
+`semantic_ids.parquet`, and log every SID quality metric. They do not initialize
+or train ranking and generation models.
+
+The poster configuration matrix can be rerun in this mode with:
+
+```bash
+RUN_SET=smoke bash scripts/run_sid_quality_matrix.sh
+RUN_SET=all bash scripts/run_sid_quality_matrix.sh
+```
+
+`smoke` runs only the RQKMeans L3/C256 anchor. The matrix intentionally omits
+collision-token duplicates because that option changes generation, not SID
+construction.
+
+The SID quality block includes:
+
+- ICR, collision rate, singleton rate, P90/P95/P99/P99.9 collision-group size,
+  and maximum collision-group size;
+- occupancy Gini, Shannon entropy in nats, and entropy normalized by `log(K)`
+  over the used complete SID paths;
+- per-layer utilization plus total utilization defined as
+  `sum(used codes) / sum(codebook sizes)`;
+- intra-code similarity over complete SID collision groups and prefix coherence
+  at every SID depth, both defined as the macro-average within-group pairwise
+  cosine similarity;
+- valid SID rate, the fraction of complete integral paths whose tokens are in
+  the configured codebook ranges.
 
 ### RQ-VAE purely semantic indexing
 

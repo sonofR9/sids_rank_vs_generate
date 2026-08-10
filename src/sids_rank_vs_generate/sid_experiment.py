@@ -16,6 +16,8 @@ from .evaluation.collision_quality import (
     codebook_quality,
     infer_codebook_sizes,
     path_average_similarity,
+    prefix_coherence,
+    valid_sid_rate,
 )
 from .evaluation.sid_statistics import calculate_sid_statistics
 from .evaluation.stages import (
@@ -223,16 +225,30 @@ def run_sid_experiment(
         sid_output.select("item_id", *sid_columns)
     )
     codebook_sizes = infer_codebook_sizes(getattr(sid, "config", None), sid_output)
-    sid_statistics["path_average_similarity"] = path_average_similarity(
+    embedding_col = (
+        "normalized_embed"
+        if "normalized_embed" in item_features.columns
+        else "embed"
+    )
+    intra_code_similarity = path_average_similarity(
         sid_output,
         item_features,
-        embedding_col=(
-            "normalized_embed"
-            if "normalized_embed" in item_features.columns
-            else "embed"
-        ),
+        embedding_col=embedding_col,
+    )
+    sid_statistics["path_average_similarity"] = intra_code_similarity
+    sid_statistics["intra_code_similarity"] = intra_code_similarity
+    sid_statistics.update(
+        prefix_coherence(
+            sid_output,
+            item_features,
+            embedding_col=embedding_col,
+        )
     )
     sid_statistics["codebook_quality"] = codebook_quality(
+        sid_output,
+        codebook_sizes,
+    )
+    sid_statistics["valid_sid_rate"] = valid_sid_rate(
         sid_output,
         codebook_sizes,
     )

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import tempfile
 import unittest
 from pathlib import Path
@@ -129,9 +130,21 @@ class SidRunnerTest(unittest.TestCase):
             self.assertEqual(result["sid"]["item_count"], 3)
             statistics = result["sid"]["statistics"]
             self.assertIsNone(statistics["path_average_similarity"])
+            self.assertIsNone(statistics["intra_code_similarity"])
+            self.assertAlmostEqual(statistics["prefix_coherence_at_1"], 1.0)
+            self.assertIsNone(statistics["prefix_coherence_at_2"])
+            self.assertEqual(statistics["valid_sid_rate"], 1.0)
+            self.assertEqual(statistics["code_gini"], 0.0)
+            self.assertAlmostEqual(statistics["code_entropy"], math.log(3))
             self.assertEqual(
                 statistics["codebook_quality"][
                     "codebook_utilization_rate_at_1_layer"
+                ],
+                1.0,
+            )
+            self.assertEqual(
+                statistics["codebook_quality"][
+                    "codebook_utilization_rate_total"
                 ],
                 1.0,
             )
@@ -140,6 +153,26 @@ class SidRunnerTest(unittest.TestCase):
             self.assertEqual(result["evaluations"]["candgen"]["recall"], 0.5)
             run_dir = Path(result["artifacts"]["directory"])
             self.assertTrue((run_dir / "ranking" / "curve.txt").is_file())
+
+    def test_sid_only_runner_builds_metrics_without_evaluations(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            directory = Path(tmpdir)
+            dataset = self._write_inputs(directory)
+
+            result = run_sid_experiment(
+                SidExperimentConfig(
+                    dataset=dataset,
+                    sid_spec="tests.test_sid_runner:FakeSid",
+                    reports_dir=directory / "reports",
+                    core_min_interactions_per_item=2,
+                    test_days=1,
+                )
+            )
+
+            self.assertEqual(result["evaluations"], {})
+            self.assertEqual(result["config"]["enabled_stages"], [])
+            self.assertIn("collision_percentiles", result["sid"]["statistics"])
+            self.assertTrue(Path(result["artifacts"]["semantic_ids"]).is_file())
 
     def test_cli_uses_only_shared_dataset_and_report_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
