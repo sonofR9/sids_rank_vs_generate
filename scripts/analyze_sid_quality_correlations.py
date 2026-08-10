@@ -29,6 +29,9 @@ CONFIGURATION_COLUMNS = (
     "dataset",
     "data_scope",
 )
+QUALITY_LOOKUP_COLLISION_COLUMN = "quality_collision_resolution"
+RAW_ICR_METRIC = "analysis.raw_independent_code_rate"
+DEFAULT_SASREC_RECALL = 0.113
 
 
 @dataclass(frozen=True)
@@ -39,7 +42,7 @@ class MetricSpec:
 
 
 TARGET_METRICS = (
-    MetricSpec("sid.independent_code_rate", "ICR", "icr"),
+    MetricSpec(RAW_ICR_METRIC, "Raw independent code rate (ICR)", "icr"),
     MetricSpec("sid.collision_rate", "Collision Rate", "collision_rate"),
     MetricSpec(
         "sid.collision_percentiles.p95",
@@ -84,10 +87,12 @@ METHOD_COLORS = {
     "RQVAE (ECM)": "#B279A2",
     "R3VAE (spherical)": "#54A24B",
     "R3VAE (rqkmeans)": "#72B7B2",
+    "RQVAE-token": "#F58518",
 }
 METHOD_MARKERS = {
     "RQVAE (RRS)": "D",
     "RQVAE (ECM)": "o",
+    "RQVAE-token": "s",
 }
 METHOD_ORDER = (
     "R3VAE (rqkmeans)",
@@ -96,7 +101,10 @@ METHOD_ORDER = (
     "RQVAE (ECM)",
     "RQVAE",
     "RQVAE (RRS)",
+    "RQVAE-token",
 )
+UNCONNECTED_METHODS = {"RQVAE-token"}
+FILLED_METHODS = {"RQVAE-token"}
 
 
 def _value(row: pd.Series, column: str, default=None):
@@ -119,6 +127,7 @@ def _tagged_runs(
     *,
     name_prefix: str | None = None,
     require_poster: bool = False,
+    collision_resolution: str | None = "none",
 ) -> pd.DataFrame:
     frame = _parent_runs(runs)
     if name_prefix is not None:
@@ -129,11 +138,15 @@ def _tagged_runs(
             "tags.poster", pd.Series(index=frame.index, dtype="object")
         )
         frame = frame[poster_tags.eq("true")]
-    for column, expected in (
+    expected_tags = [
         ("tags.dataset", "50m"),
         ("tags.data_scope", "full"),
-        ("tags.collision_resolution", "none"),
-    ):
+    ]
+    if collision_resolution is not None:
+        expected_tags.append(
+            ("tags.collision_resolution", collision_resolution)
+        )
+    for column, expected in expected_tags:
         if column in frame:
             frame = frame[frame[column].eq(expected)]
     return frame.copy()
@@ -211,10 +224,29 @@ def _latest_per_configuration(frame: pd.DataFrame) -> pd.DataFrame:
 def _method_name(row: pd.Series) -> str:
     model = row["model"]
     if model == "r3vae":
-        return f"R3VAE ({row['init']})"
-    if model == "rqvae" and row["assignment"] != "nearest":
-        return f"RQVAE ({str(row['assignment']).upper()})"
-    return {"rqkmeans": "RQKMeans", "rqvae": "RQVAE"}.get(model, model)
+        family = f"R3VAE ({row['init']})"
+    elif model == "rqvae" and row["assignment"] != "nearest":
+        family = f"RQVAE ({str(row['assignment']).upper()})"
+    else:
+        family = {"rqkmeans": "RQKMeans", "rqvae": "RQVAE"}.get(model, model)
+    if row["collision_resolution"] == "token":
+        return f"{family}-token"
+    return family
+
+
+def _add_analysis_metrics(frame: pd.DataFrame) -> pd.DataFrame:
+    frame = frame.copy()
+    final_column = "metrics.sid.independent_code_rate"
+    base_column = "metrics.sid.details.assignment.base_icr"
+    if final_column not in frame:
+        return frame
+    final_icr = pd.to_numeric(frame[final_column], errors="coerce")
+    if base_column in frame:
+        base_icr = pd.to_numeric(frame[base_column], errors="coerce")
+    else:
+        base_icr = pd.Series(np.nan, index=frame.index, dtype=float)
+    frame[f"metrics.{RAW_ICR_METRIC}"] = base_icr.fillna(final_icr)
+    return frame
 
 
 def _join_runs(
@@ -224,8 +256,26 @@ def _join_runs(
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     quality = _latest_per_configuration(quality)
     recall = _latest_per_configuration(recall)
+    join_columns = [
+        column for column in CONFIGURATION_COLUMNS
+        if column != "collision_resolution"
+    ]
+    quality_lookup = quality.copy()
+    quality_lookup[QUALITY_LOOKUP_COLLISION_COLUMN] = quality_lookup[
+        "collision_resolution"
+    ]
+    recall_lookup = recall.copy()
+    recall_lookup[QUALITY_LOOKUP_COLLISION_COLUMN] = recall_lookup[
+        "collision_resolution"
+    ].replace({"token": "none"})
+    recall_lookup.rename(
+        columns={"collision_resolution": "collision_resolution_recall"},
+        inplace=True,
+    )
     recall_columns = [
-        *CONFIGURATION_COLUMNS,
+        *join_columns,
+        QUALITY_LOOKUP_COLLISION_COLUMN,
+        "collision_resolution_recall",
         "run_id",
         "run_name",
         "experiment_name",
@@ -234,21 +284,26 @@ def _join_runs(
         "git_branch",
         recall_metric_column,
     ]
-    merged = quality.merge(
-        recall[recall_columns],
-        on=list(CONFIGURATION_COLUMNS),
+    merged = quality_lookup.merge(
+        recall_lookup[recall_columns],
+        on=[*join_columns, QUALITY_LOOKUP_COLLISION_COLUMN],
         how="inner",
         suffixes=("_quality", "_recall"),
-        validate="one_to_one",
+        validate="one_to_many",
     )
     merged = merged.rename(columns={recall_metric_column: "recall_100"})
+    merged.rename(
+        columns={"collision_resolution": "collision_resolution_quality"},
+        inplace=True,
+    )
+    merged["collision_resolution"] = merged.pop("collision_resolution_recall")
+    merged = _add_analysis_metrics(merged)
     merged["method"] = merged.apply(_method_name, axis=1)
 
-    quality_keys = pd.MultiIndex.from_frame(quality[list(CONFIGURATION_COLUMNS)])
-    recall_keys = pd.MultiIndex.from_frame(recall[list(CONFIGURATION_COLUMNS)])
-    matched_keys = pd.MultiIndex.from_frame(merged[list(CONFIGURATION_COLUMNS)])
-    unmatched_quality = quality[~quality_keys.isin(matched_keys)].copy()
-    unmatched_recall = recall[~recall_keys.isin(matched_keys)].copy()
+    matched_quality_ids = set(merged["run_id_quality"])
+    matched_recall_ids = set(merged["run_id_recall"])
+    unmatched_quality = quality[~quality["run_id"].isin(matched_quality_ids)].copy()
+    unmatched_recall = recall[~recall["run_id"].isin(matched_recall_ids)].copy()
     return merged, unmatched_quality, unmatched_recall
 
 
@@ -295,7 +350,7 @@ def _draw_panel(
         if points.empty:
             continue
         color = METHOD_COLORS.get(method, "#6B7280")
-        if len(points) >= 2:
+        if len(points) >= 2 and method not in UNCONNECTED_METHODS:
             axis.plot(
                 points[metric_column],
                 points["recall_100"],
@@ -310,7 +365,7 @@ def _draw_panel(
             points["recall_100"],
             s=58,
             marker=METHOD_MARKERS.get(method, "o"),
-            facecolors="white",
+            facecolors=color if method in FILLED_METHODS else "white",
             edgecolors=color,
             linewidths=1.65,
             alpha=0.96,
@@ -327,9 +382,10 @@ def _draw_panel(
             zorder=0,
         )
         if show_baseline_label:
+            label_x = 0.08 if metric_column.endswith(RAW_ICR_METRIC) else 0.62
             axis.annotate(
                 "SASRec baseline",
-                xy=(0.04, baseline_recall),
+                xy=(label_x, baseline_recall),
                 xycoords=("axes fraction", "data"),
                 xytext=(0, 4),
                 textcoords="offset points",
@@ -451,11 +507,20 @@ def _plot_metric(
         Line2D(
             [0],
             [0],
-            color=METHOD_COLORS.get(method, "#6B7280"),
-            linewidth=1.15,
+            color=(
+                "none"
+                if method in UNCONNECTED_METHODS
+                else METHOD_COLORS.get(method, "#6B7280")
+            ),
+            linewidth=0.0 if method in UNCONNECTED_METHODS else 1.15,
             marker=METHOD_MARKERS.get(method, "o"),
             markersize=6.2,
-            markerfacecolor="white",
+            markerfacecolor=(
+                METHOD_COLORS.get(method, "#6B7280")
+                if method in FILLED_METHODS
+                else "white"
+            ),
+            markeredgecolor=METHOD_COLORS.get(method, "#6B7280"),
             markeredgewidth=1.45,
             label=method,
         )
@@ -522,7 +587,11 @@ def main() -> None:
     parser.add_argument(
         "--baseline-recall",
         type=float,
-        help="Optional comparable SASRec Recall@100 horizontal baseline.",
+        default=DEFAULT_SASREC_RECALL,
+        help=(
+            "Comparable SASRec Recall@100 horizontal baseline "
+            f"(default: {DEFAULT_SASREC_RECALL})."
+        ),
     )
     args = parser.parse_args()
 
@@ -542,8 +611,16 @@ def main() -> None:
         experiment_ids=[recall_experiment.experiment_id],
         output_format="pandas",
     )
-    quality_parents = _tagged_runs(quality_runs, name_prefix="sid-quality-")
-    recall_parents = _tagged_runs(recall_runs, require_poster=True)
+    quality_parents = _tagged_runs(
+        quality_runs,
+        name_prefix="sid-quality-",
+        collision_resolution="none",
+    )
+    recall_parents = _tagged_runs(
+        recall_runs,
+        require_poster=True,
+        collision_resolution=None,
+    )
 
     recall_metric = args.recall_metric
     if recall_metric is None:

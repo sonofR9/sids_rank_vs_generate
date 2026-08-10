@@ -121,11 +121,15 @@ python scripts/analyze_sid_quality_correlations.py \
 ```
 
 The join key is the complete SID configuration (model, initialization,
-assignment, collision policy, codebook size, number of levels, seed, dataset,
-and data scope). The exporter detects the exact logged Recall@100 name, keeps
-the latest completed parent run per configuration, reports unmatched runs, and
-writes PNG/PDF/SVG figures, per-metric run coverage, all discovered SID metrics,
-and the matched run metadata under
+assignment, codebook size, number of levels, seed, dataset, and data scope).
+Ordinary recall runs match the same collision policy; collision-token recall
+runs reuse the matching no-token SID-quality row because the token is appended
+only for generation. For ICR plots, the exporter uses the logged base ICR before
+RRS/ECM collision resolution while keeping Recall@100 from the final run. It
+detects the exact logged Recall@100 name, keeps the latest completed parent run
+per configuration, reports unmatched runs, restores the paper's SASRec
+Recall@100 baseline, and writes PNG/PDF/SVG figures, per-metric run coverage,
+all discovered SID metrics, and the matched run metadata under
 `reports/poster/sid_quality_correlations/`.
 
 ### RQ-VAE purely semantic indexing

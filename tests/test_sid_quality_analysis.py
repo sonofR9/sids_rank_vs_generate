@@ -60,7 +60,8 @@ class SidQualityAnalysisTest(unittest.TestCase):
                     "start_time": 2,
                     "git_commit": "abc",
                     "git_branch": "branch",
-                    "metrics.sid.independent_code_rate": 0.9,
+                    "metrics.sid.independent_code_rate": 1.0,
+                    "metrics.sid.details.assignment.base_icr": 0.9,
                 }
             ]
         )
@@ -76,6 +77,18 @@ class SidQualityAnalysisTest(unittest.TestCase):
                     "git_commit": "def",
                     "git_branch": "poster",
                     "metrics.evaluations.generation.recall_at_100": 0.11,
+                },
+                {
+                    **configuration,
+                    "collision_resolution": "token",
+                    "run_id": "recall-token",
+                    "run_name": "poster-rqvae-token",
+                    "experiment_name": "recall",
+                    "experiment_id": "1",
+                    "start_time": 1,
+                    "git_commit": "def",
+                    "git_branch": "poster",
+                    "metrics.evaluations.generation.recall_at_100": 0.115,
                 },
                 {
                     **configuration,
@@ -96,9 +109,15 @@ class SidQualityAnalysisTest(unittest.TestCase):
             recall,
             "metrics.evaluations.generation.recall_at_100",
         )
-        self.assertEqual(len(merged), 1)
-        self.assertEqual(float(merged.iloc[0]["recall_100"]), 0.11)
-        self.assertEqual(merged.iloc[0]["method"], "RQVAE")
+        self.assertEqual(len(merged), 2)
+        self.assertEqual(set(merged["method"]), {"RQVAE", "RQVAE-token"})
+        self.assertEqual(
+            set(merged["recall_100"].astype(float)),
+            {0.11, 0.115},
+        )
+        self.assertTrue(
+            merged["metrics.analysis.raw_independent_code_rate"].eq(0.9).all()
+        )
         self.assertTrue(missing_quality.empty)
         self.assertEqual(len(missing_recall), 1)
 
