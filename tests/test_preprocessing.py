@@ -73,6 +73,19 @@ class PreprocessingTest(unittest.TestCase):
         self.assertEqual(prepared.train.height, 1)
         self.assertEqual(prepared.test.height, 2)
 
+    def test_history_preprocessing_uses_only_the_configured_window(self) -> None:
+        prepared = prepare_interactions(
+            sample_interactions(),
+            PreprocessingConfig(
+                core_min_interactions_per_item=1,
+                history_days=2.5,
+                test_days=1,
+            ),
+        )
+
+        self.assertEqual(prepared.data["timestamp"].min(), 2 * DAY)
+        self.assertEqual(prepared.data.height, 4)
+
 
 if __name__ == "__main__":
     unittest.main()
