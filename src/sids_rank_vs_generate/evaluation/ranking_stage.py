@@ -12,17 +12,39 @@ from .stages import EvaluationContext, IEvaluationStage
 
 
 @dataclass(frozen=True)
+class RankingTrainingSchedule:
+    """Optimizer schedule tuned independently for one ranking model."""
+
+    batch_size: int
+    epochs: int
+    learning_rate: float
+
+    def __post_init__(self) -> None:
+        if self.batch_size <= 0 or self.epochs <= 0:
+            raise ValueError("ranking batch size and epochs must be positive")
+        if self.learning_rate <= 0:
+            raise ValueError("ranking learning rate must be positive")
+
+
+@dataclass(frozen=True)
 class RankingConfig:
-    """Training hyperparameters for the two fixed ranking models."""
+    """Shared architecture plus independently tuned training schedules."""
 
     max_history_len: int = 50
     min_history_len: int = 2
     validation_days: float = 7.0
     hyperparameter_tuning: bool = False
     train_days: float = 270.0
-    batch_size: int = 32_768
-    epochs: int = 2
-    learning_rate: float = 2e-3
+    dcnv2_training: RankingTrainingSchedule = RankingTrainingSchedule(
+        batch_size=32_768,
+        epochs=2,
+        learning_rate=2e-3,
+    )
+    transact_training: RankingTrainingSchedule = RankingTrainingSchedule(
+        batch_size=8_192,
+        epochs=1,
+        learning_rate=5e-4,
+    )
     weight_decay: float = 1e-4
     grad_clip: float = 1.0
     embedding_dim: int = 32
@@ -73,19 +95,18 @@ class RankingStage(IEvaluationStage):
             train_days=self.config.train_days,
             max_rows=context.max_rows,
         )
-        loaders = build_ranking_loaders(
-            data,
-            batch_size=self.config.batch_size,
-            num_workers=self.config.num_workers,
-        )
-
         model_factories = {
-            "dcnv2": DcnV2Ranker,
-            "transact": TransActDcnV2Ranker,
+            "dcnv2": (DcnV2Ranker, self.config.dcnv2_training),
+            "transact": (TransActDcnV2Ranker, self.config.transact_training),
         }
         results = {}
-        for model_name, model_factory in model_factories.items():
+        for model_name, (model_factory, schedule) in model_factories.items():
             seed_everything(SID_EXPERIMENT_SEED)
+            loaders = build_ranking_loaders(
+                data,
+                batch_size=schedule.batch_size,
+                num_workers=self.config.num_workers,
+            )
             with context.tracker.start_run(
                 f"ranking.{model_name}",
                 nested=True,
@@ -112,6 +133,7 @@ class RankingStage(IEvaluationStage):
                     *loaders,
                     self.config,
                     context.artifact_dir / f"{model_name}.pt",
+                    training_schedule=schedule,
                     tracker=tracker,
                 )
 

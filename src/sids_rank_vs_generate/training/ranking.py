@@ -63,14 +63,17 @@ def train_ranking_model(
     config,
     artifact_path: Path,
     tracker: ExperimentTracker | None = None,
+    *,
+    training_schedule=None,
 ) -> dict[str, Any]:
     tracker = tracker or NullTracker()
+    training_schedule = training_schedule or config
     device = resolve_device(config.device)
     torch.set_float32_matmul_precision("high")
     model = model.to(device)
     optimizer = torch.optim.AdamW(
         model.parameters(),
-        lr=config.learning_rate,
+        lr=training_schedule.learning_rate,
         weight_decay=config.weight_decay,
     )
     criterion = nn.BCEWithLogitsLoss()
@@ -80,14 +83,14 @@ def train_ranking_model(
     best_auc = float("-inf")
     best_epoch = None
 
-    for epoch in range(1, config.epochs + 1):
+    for epoch in range(1, training_schedule.epochs + 1):
         model.train()
         loss_sum = 0.0
         example_count = 0
         progress = tqdm(
             prefetch_batches(train_loader),
             total=len(train_loader),
-            desc=f"ranking epoch {epoch}/{config.epochs}",
+            desc=f"ranking epoch {epoch}/{training_schedule.epochs}",
             disable=not config.show_progress,
         )
         for batch in progress:
@@ -162,7 +165,7 @@ def train_ranking_model(
         "checkpoint_metric": (
             "roc_auc" if validation_loader is not None else None
         ),
-        "trained_epochs": config.epochs,
+        "trained_epochs": training_schedule.epochs,
         "best_epoch": best_epoch,
         "best_validation": best_validation,
         "test": test_metrics,

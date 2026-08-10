@@ -10,7 +10,10 @@ import polars as pl
 
 from sids_rank_vs_generate.data.ranking import DENSE_COLUMNS
 from sids_rank_vs_generate.evaluation.generation_stage import GenerationConfig
-from sids_rank_vs_generate.evaluation.ranking_stage import RankingConfig
+from sids_rank_vs_generate.evaluation.ranking_stage import (
+    RankingConfig,
+    RankingTrainingSchedule,
+)
 from sids_rank_vs_generate.experiment import (
     ExperimentConfig,
     TrainingConfig,
@@ -142,8 +145,8 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                     ranking=RankingConfig(
                         max_history_len=4,
                         min_history_len=1,
-                        batch_size=16,
-                        epochs=1,
+                        dcnv2_training=RankingTrainingSchedule(16, 1, 2e-3),
+                        transact_training=RankingTrainingSchedule(16, 1, 5e-4),
                         embedding_dim=4,
                         hidden_dim=8,
                         dense_bins=2,

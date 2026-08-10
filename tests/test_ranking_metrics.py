@@ -39,8 +39,12 @@ class RankingMetricsTest(unittest.TestCase):
         self.assertFalse(config.hyperparameter_tuning)
         self.assertEqual(config.train_days, 270.0)
         self.assertEqual(config.validation_days, 7.0)
-        self.assertEqual(config.epochs, 2)
-        self.assertEqual(config.learning_rate, 2e-3)
+        self.assertEqual(config.dcnv2_training.batch_size, 32_768)
+        self.assertEqual(config.dcnv2_training.epochs, 2)
+        self.assertEqual(config.dcnv2_training.learning_rate, 2e-3)
+        self.assertEqual(config.transact_training.batch_size, 8_192)
+        self.assertEqual(config.transact_training.epochs, 1)
+        self.assertEqual(config.transact_training.learning_rate, 5e-4)
 
     def test_pairwise_accuracy_reports_eligible_comparison_count(self) -> None:
         metrics = ranking_metrics(

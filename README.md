@@ -49,8 +49,9 @@ does not create a validation split. Hyperparameter-tuning configurations set
 `RankingConfig(hyperparameter_tuning=True)` to train on 270 days and evaluate the
 following fixed 7-day validation window without inspecting test. Earlier
 interactions remain available when constructing each candidate's history. The
-ranking defaults use two FP32 epochs at a `2e-3` learning rate, selected on that
-7-day validation window.
+ranking defaults use model-specific FP32 schedules selected on that 7-day
+validation window: DCNv2 uses batch 32,768 for two epochs at `2e-3`, while
+TransAct uses batch 8,192 for one epoch at `5e-4`.
 
 ## Experiment configuration
 
@@ -164,8 +165,9 @@ Ranking uses the existing listen labels and all prepared DCNv2 lag features.
 Both models consume the same dense counters, user and candidate SID features,
 and multivalent artist/album IDs. The TransAct variant adds the latest like
 history strictly preceding each ranking timestamp to that same DCNv2 input.
-Ranking defaults are tuned for a 48 GiB V100: batch size 32,768, learning rate
-2e-3, and FP32 training with PyTorch float32 matmul precision set to `high`.
+Ranking defaults are tuned for a 48 GiB V100: DCNv2 uses batch size 32,768 and
+TransAct uses batch size 8,192. Both train in FP32 with PyTorch float32 matmul
+precision set to `high`.
 Pairwise accuracy on adjacent opposite-label events within 15-minute user gaps
 is the primary reporting metric. ROC-AUC selects checkpoints during tuning;
 PR-AUC and log loss remain secondary diagnostics. Attention is
