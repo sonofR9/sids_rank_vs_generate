@@ -14,6 +14,7 @@ from .config import AssignmentMethod, RQVAEConfig
 from .pure_semantic import allocate_semantic_ids
 from .rq_kmeans import RQKMeans
 from .rq_vae import RQVAE
+from ..reproducibility import seed_everything
 
 
 class RQVAEPipeline(ISidPipeline):
@@ -43,6 +44,7 @@ class RQVAEPipeline(ISidPipeline):
         return torch.cat(latents, dim=0)
 
     def train(self, df: pl.DataFrame) -> None:
+        seed_everything(self.config.seed)
         parameters = asdict(self.config)
         parameters.pop("assignment_method")
         parameters.pop("psi_top_k")
