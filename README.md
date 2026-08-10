@@ -110,6 +110,24 @@ The SID quality block includes:
 - valid SID rate, the fraction of complete integral paths whose tokens are in
   the configured codebook ranges.
 
+Join the SID-only parent runs to the matching poster Recall@100 runs and export
+the requested paper-style correlation figures with:
+
+```bash
+python scripts/analyze_sid_quality_correlations.py \
+  --tracking-uri http://51.250.47.231:5000 \
+  --quality-experiment sid-quality-only-full-v2 \
+  --recall-experiment sid-comparison
+```
+
+The join key is the complete SID configuration (model, initialization,
+assignment, collision policy, codebook size, number of levels, seed, dataset,
+and data scope). The exporter detects the exact logged Recall@100 name, keeps
+the latest completed parent run per configuration, reports unmatched runs, and
+writes PNG/PDF/SVG figures, the correlation summary, all discovered SID
+metrics, and the matched run metadata under
+`reports/poster/sid_quality_correlations/`.
+
 ### RQ-VAE purely semantic indexing
 
 RQ-VAE supports three final assignment policies over the same trained encoder
