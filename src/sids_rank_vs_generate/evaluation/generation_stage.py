@@ -8,6 +8,7 @@ import polars as pl
 import torch
 
 from ..data.generation import (
+    attach_item_log_q,
     build_generation_loaders,
     limit_examples,
     prepare_generation_examples,
@@ -57,6 +58,13 @@ class GenerationConfig:
     num_levels: int = 0
     codebook_size: int = 0
     rq_num_levels: int = 0
+    semantic_history_weight: float = 0.0
+    auxiliary_item_loss_weight: float = 0.0
+    ranking_temperature: float = 0.07
+    logq_mode: str = "none"
+    logq_eps: float = 1e-12
+    logq_debug: bool = False
+    gather_distributed_negatives: bool = False
     
 
     def __post_init__(self) -> None:
@@ -66,6 +74,12 @@ class GenerationConfig:
             raise ValueError("invalid generation history lengths")
         if self.max_epochs <= 0 or self.batch_size <= 0 or self.batch_size_val <= 0:
             raise ValueError("generation epochs and batch sizes must be positive")
+        if self.ranking_temperature <= 0:
+            raise ValueError("ranking temperature must be positive")
+        if self.logq_mode not in {"none", "standard", "corrected"}:
+            raise ValueError("logq_mode must be one of: none, standard, corrected")
+        if self.logq_eps <= 0 or self.logq_eps > 1:
+            raise ValueError("logq_eps must be in (0, 1]")
 
 
 def _resolve_device(name: str) -> str:
@@ -155,6 +169,13 @@ class GenerationStage(IEvaluationStage):
         )
         if not train_examples or not validation_examples:
             raise ValueError("generation train and validation examples must be non-empty")
+        if runtime.logq_mode != "none":
+            # The loader samples training examples uniformly, so the in-batch
+            # item proposal Q is the target frequency in this final train set.
+            train_examples = attach_item_log_q(
+                train_examples,
+                eps=runtime.logq_eps,
+            )
         train_loader, validation_loader = build_generation_loaders(
             train_examples, validation_examples, runtime
         )
