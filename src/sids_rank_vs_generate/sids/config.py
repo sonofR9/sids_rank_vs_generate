@@ -57,7 +57,7 @@ class PlumRQVAEConfig:
     hidden_dim: int = 128
     latent_dim: int = 128
     num_levels: int = 3
-    codebook_size: int = 2048
+    codebook_size: int = 1024
     codebooks_sizes: tuple[int, ...] | None = None
     batch_size: int = 256
     num_epochs: int = 50
