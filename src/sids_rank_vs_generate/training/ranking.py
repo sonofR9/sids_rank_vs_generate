@@ -78,6 +78,7 @@ def train_ranking_model(
     best_validation = None
     best_pairwise_accuracy = float("-inf")
     best_auc = float("-inf")
+    best_epoch = None
 
     for epoch in range(1, config.epochs + 1):
         model.train()
@@ -105,11 +106,11 @@ def train_ranking_model(
             progress.set_postfix(loss=f"{loss.item():.4f}")
 
         train_loss = loss_sum / max(example_count, 1)
-        validation = evaluate_ranking_model(
-            model,
-            validation_loader,
-            device,
-        )
+        if validation_loader is None:
+            tracker.log_metrics({"train.loss": train_loss}, step=epoch)
+            continue
+
+        validation = evaluate_ranking_model(model, validation_loader, device)
         tracker.log_metrics(
             {
                 "train.loss": train_loss,
@@ -125,29 +126,45 @@ def train_ranking_model(
             },
             step=epoch,
         )
-        best_auc = max(best_auc, validation["roc_auc"])
-        if validation["pairwise_accuracy"] > best_pairwise_accuracy:
-            best_pairwise_accuracy = validation["pairwise_accuracy"]
+        best_pairwise_accuracy = max(
+            best_pairwise_accuracy,
+            validation["pairwise_accuracy"],
+        )
+        if validation["roc_auc"] > best_auc:
+            best_auc = validation["roc_auc"]
+            best_epoch = epoch
             best_validation = validation
             best_state = copy.deepcopy(model.state_dict())
 
-    if best_state is None:
+    if validation_loader is None:
+        best_state = copy.deepcopy(model.state_dict())
+    elif best_state is None:
         raise RuntimeError("ranking training produced no checkpoint")
     model.load_state_dict(best_state)
     torch.save(best_state, artifact_path)
-    test_metrics = evaluate_ranking_model(
-        model,
-        test_loader,
-        device,
+    test_metrics = (
+        None
+        if validation_loader is not None
+        else evaluate_ranking_model(model, test_loader, device)
     )
-    tracker.log_metrics(
-        {f"test.{name}": value for name, value in test_metrics.items()}
-    )
+    if test_metrics is not None:
+        tracker.log_metrics(
+            {f"test.{name}": value for name, value in test_metrics.items()}
+        )
     return {
         "device": str(device),
+        "mode": (
+            "hyperparameter_tuning"
+            if validation_loader is not None
+            else "test"
+        ),
         "primary_metric": "pairwise_accuracy",
+        "checkpoint_metric": (
+            "roc_auc" if validation_loader is not None else None
+        ),
+        "trained_epochs": config.epochs,
+        "best_epoch": best_epoch,
         "best_validation": best_validation,
-        "best_validation_pairwise_accuracy": best_pairwise_accuracy,
         "test": test_metrics,
         "checkpoint": artifact_path,
     }

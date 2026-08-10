@@ -204,6 +204,19 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                 result["evaluations"]["ranking"]["primary_metric"],
                 "pairwise_accuracy",
             )
+            ranking_result = result["evaluations"]["ranking"]
+            self.assertEqual(ranking_result["examples"]["validation"], 0)
+            self.assertEqual(
+                ranking_result["train_end_timestamp"],
+                ranking_result["test_start_timestamp"],
+            )
+            for model_name in ("dcnv2", "transact"):
+                model_result = ranking_result["models"][model_name]
+                self.assertEqual(model_result["mode"], "test")
+                self.assertIsNone(model_result["best_validation"])
+                self.assertIsNotNone(model_result["test"])
+                self.assertIn("pairwise_accuracy", model_result["test"])
+                self.assertIn("roc_auc", model_result["test"])
             self.assertIn(
                 "train_start_timestamp", result["evaluations"]["ranking"]
             )
@@ -234,6 +247,9 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                     for name in metrics
                 }
                 self.assertIn("train.loss", metric_names)
+                if run_name.startswith("ranking."):
+                    self.assertIn("test.pairwise_accuracy", metric_names)
+                    self.assertIn("test.roc_auc", metric_names)
 
 
 if __name__ == "__main__":

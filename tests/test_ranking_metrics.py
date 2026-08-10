@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import math
+import tempfile
 import unittest
+from pathlib import Path
+from types import SimpleNamespace
 
 import polars as pl
 import torch
@@ -11,9 +14,34 @@ from sids_rank_vs_generate.data.ranking import (
     collate_ranking_frame,
 )
 from sids_rank_vs_generate.evaluation.ranking_metrics import ranking_metrics
+from sids_rank_vs_generate.evaluation.ranking_stage import RankingConfig
+from sids_rank_vs_generate.training.ranking import train_ranking_model
+
+
+class _ConstantRanker(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.logit = torch.nn.Parameter(torch.tensor(0.0))
+
+    def forward(self, batch):
+        return self.logit.expand_as(batch["target"])
+
+
+class _UnusedLoader:
+    def __iter__(self):
+        raise AssertionError("test data must not be inspected while tuning")
 
 
 class RankingMetricsTest(unittest.TestCase):
+    def test_default_ranking_schedule_matches_tuned_window(self) -> None:
+        config = RankingConfig()
+
+        self.assertFalse(config.hyperparameter_tuning)
+        self.assertEqual(config.train_days, 60.0)
+        self.assertEqual(config.validation_days, 7.0)
+        self.assertEqual(config.epochs, 2)
+        self.assertEqual(config.learning_rate, 2e-3)
+
     def test_pairwise_accuracy_reports_eligible_comparison_count(self) -> None:
         metrics = ranking_metrics(
             targets=torch.tensor([0.0, 1.0, 0.0]),
@@ -62,6 +90,36 @@ class RankingMetricsTest(unittest.TestCase):
                 torch.tensor([math.log1p(10), math.log1p(5)]),
             )
         )
+
+    def test_tuning_evaluates_validation_without_inspecting_test(self) -> None:
+        batch = {
+            "target": torch.tensor([0.0, 1.0]),
+            "user_idx": torch.tensor([0, 0]),
+            "candidate_timestamp": torch.tensor([0.0, 1.0]),
+        }
+        config = SimpleNamespace(
+            device="cpu",
+            learning_rate=1e-3,
+            weight_decay=0.0,
+            epochs=1,
+            grad_clip=1.0,
+            show_progress=False,
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            result = train_ranking_model(
+                _ConstantRanker(),
+                [batch],
+                [batch],
+                _UnusedLoader(),
+                config,
+                Path(directory) / "model.pt",
+            )
+
+        self.assertEqual(result["mode"], "hyperparameter_tuning")
+        self.assertEqual(result["checkpoint_metric"], "roc_auc")
+        self.assertEqual(result["best_epoch"], 1)
+        self.assertIsNotNone(result["best_validation"])
+        self.assertIsNone(result["test"])
 
 
 if __name__ == "__main__":

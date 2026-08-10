@@ -37,13 +37,15 @@ NUM_HASHES = 2
 @dataclass(frozen=True)
 class RankingData:
     train: pl.DataFrame
-    validation: pl.DataFrame
+    validation: pl.DataFrame | None
     test: pl.DataFrame
     dense_train: pl.DataFrame
     sid_columns: tuple[str, ...]
     num_users: int
     num_history_items: int
     train_start_timestamp: Any
+    train_end_timestamp: Any
+    test_start_timestamp: Any
     timestamp_unit_seconds: float
 
 
@@ -210,7 +212,8 @@ def prepare_ranking_data(
     *,
     max_history_len: int,
     min_history_len: int,
-    validation_fraction: float,
+    validation_days: float,
+    hyperparameter_tuning: bool,
     train_days: float,
     max_rows: int | None,
 ) -> RankingData:
@@ -234,8 +237,18 @@ def prepare_ranking_data(
         on=sid_columns,
         how="inner",
     ).select("item_id", "history_item_idx")
+    train_end = (
+        timestamp_days_before(
+            prepared.test_start_timestamp,
+            prepared.data.schema["timestamp"],
+            validation_days,
+            prepared.timestamp_unit_seconds,
+        )
+        if hyperparameter_tuning
+        else prepared.test_start_timestamp
+    )
     train_start = timestamp_days_before(
-        prepared.test_start_timestamp,
+        train_end,
         prepared.data.schema["timestamp"],
         train_days,
         prepared.timestamp_unit_seconds,
@@ -270,19 +283,23 @@ def prepare_ranking_data(
         sid_columns,
     )
 
-    train_pool = merged.filter(
+    train = merged.filter(
         (pl.col("timestamp") >= train_start)
-        & (pl.col("timestamp") < prepared.test_start_timestamp)
+        & (pl.col("timestamp") < train_end)
+    )
+    validation = (
+        merged.filter(
+            (pl.col("timestamp") >= train_end)
+            & (pl.col("timestamp") < prepared.test_start_timestamp)
+        )
+        if hyperparameter_tuning
+        else None
     )
     test = merged.filter(pl.col("timestamp") >= prepared.test_start_timestamp)
-    if train_pool.is_empty() or test.is_empty():
-        raise ValueError("ranking chronological train/test split is empty")
-    validation_start = train_pool["timestamp"].quantile(
-        1.0 - validation_fraction, interpolation="nearest"
-    )
-    train = train_pool.filter(pl.col("timestamp") < validation_start)
-    validation = train_pool.filter(pl.col("timestamp") >= validation_start)
-    for name, frame in (("train", train), ("validation", validation), ("test", test)):
+    splits = [("train", train), ("test", test)]
+    if validation is not None:
+        splits.append(("validation", validation))
+    for name, frame in splits:
         if frame.is_empty():
             raise ValueError(f"ranking {name} split is empty")
         if frame["target"].n_unique() < 2:
@@ -297,6 +314,8 @@ def prepare_ranking_data(
         num_users=user_mapping.height,
         num_history_items=sid_paths.height + 1,
         train_start_timestamp=train_start,
+        train_end_timestamp=train_end,
+        test_start_timestamp=prepared.test_start_timestamp,
         timestamp_unit_seconds=prepared.timestamp_unit_seconds,
     )
 
@@ -528,7 +547,7 @@ def build_ranking_loaders(
     *,
     batch_size: int,
     num_workers: int,
-) -> tuple[DataLoader, DataLoader, DataLoader]:
+) -> tuple[DataLoader, DataLoader | None, DataLoader]:
     def loader(frame: pl.DataFrame, *, shuffle: bool) -> DataLoader:
         return DataLoader(
             PolarsRankingDataset(frame),
@@ -545,6 +564,10 @@ def build_ranking_loaders(
 
     return (
         loader(data.train, shuffle=True),
-        loader(data.validation, shuffle=False),
+        (
+            loader(data.validation, shuffle=False)
+            if data.validation is not None
+            else None
+        ),
         loader(data.test, shuffle=False),
     )

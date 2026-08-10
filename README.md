@@ -43,10 +43,14 @@ the configured item-core filter, creates one dense item mapping, and creates one
 chronological train/test boundary. Ranking and generation receive stage-specific
 views of this same prepared data and catalog.
 
-By default, preprocessing and history construction use the latest 365 days.
-Ranking candidates are read only for the 60 training days preceding the 7-day
-test boundary; the earlier interactions remain available when constructing each
-candidate's preceding history.
+By default, preprocessing and history construction use the latest 365 days. A
+regular run trains on the 60 days immediately preceding the fixed 7-day test and
+does not create a validation split. Hyperparameter-tuning configurations set
+`RankingConfig(hyperparameter_tuning=True)` to train on 60 days and evaluate the
+following fixed 7-day validation window without inspecting test. Earlier
+interactions remain available when constructing each candidate's history. The
+ranking defaults use two FP32 epochs at a `2e-3` learning rate, selected on that
+7-day validation window.
 
 ## Experiment configuration
 

@@ -17,10 +17,11 @@ class RankingConfig:
 
     max_history_len: int = 50
     min_history_len: int = 2
-    validation_fraction: float = 0.1
+    validation_days: float = 7.0
+    hyperparameter_tuning: bool = False
     train_days: float = 60.0
     batch_size: int = 32_768
-    epochs: int = 5
+    epochs: int = 2
     learning_rate: float = 2e-3
     weight_decay: float = 1e-4
     grad_clip: float = 1.0
@@ -42,8 +43,8 @@ class RankingConfig:
     device: str = "auto"
 
     def __post_init__(self) -> None:
-        if not 0.0 < self.validation_fraction < 1.0:
-            raise ValueError("validation_fraction must be in (0, 1)")
+        if self.validation_days <= 0:
+            raise ValueError("validation_days must be positive")
         if self.train_days <= 0:
             raise ValueError("train_days must be positive")
         if self.transact_d_model % self.transact_heads:
@@ -67,7 +68,8 @@ class RankingStage(IEvaluationStage):
             context.dataset,
             max_history_len=self.config.max_history_len,
             min_history_len=self.config.min_history_len,
-            validation_fraction=self.config.validation_fraction,
+            validation_days=self.config.validation_days,
+            hyperparameter_tuning=self.config.hyperparameter_tuning,
             train_days=self.config.train_days,
             max_rows=context.max_rows,
         )
@@ -95,7 +97,11 @@ class RankingStage(IEvaluationStage):
                             "config": asdict(self.config),
                             "examples": {
                                 "train": data.train.height,
-                                "validation": data.validation.height,
+                                "validation": (
+                                    data.validation.height
+                                    if data.validation is not None
+                                    else 0
+                                ),
                                 "test": data.test.height,
                             },
                         }
@@ -120,9 +126,13 @@ class RankingStage(IEvaluationStage):
             },
             "examples": {
                 "train": data.train.height,
-                "validation": data.validation.height,
+                "validation": (
+                    data.validation.height if data.validation is not None else 0
+                ),
                 "test": data.test.height,
             },
             "train_start_timestamp": str(data.train_start_timestamp),
+            "train_end_timestamp": str(data.train_end_timestamp),
+            "test_start_timestamp": str(data.test_start_timestamp),
             "models": results,
         }
