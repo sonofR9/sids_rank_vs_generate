@@ -44,9 +44,9 @@ chronological train/test boundary. Ranking and generation receive stage-specific
 views of this same prepared data and catalog.
 
 By default, preprocessing and history construction use the latest 365 days. A
-regular run trains on the 60 days immediately preceding the fixed 7-day test and
+regular run trains on the 270 days immediately preceding the fixed 7-day test and
 does not create a validation split. Hyperparameter-tuning configurations set
-`RankingConfig(hyperparameter_tuning=True)` to train on 60 days and evaluate the
+`RankingConfig(hyperparameter_tuning=True)` to train on 270 days and evaluate the
 following fixed 7-day validation window without inspecting test. Earlier
 interactions remain available when constructing each candidate's history. The
 ranking defaults use two FP32 epochs at a `2e-3` learning rate, selected on that
@@ -166,9 +166,9 @@ and multivalent artist/album IDs. The TransAct variant adds the latest like
 history strictly preceding each ranking timestamp to that same DCNv2 input.
 Ranking defaults are tuned for a 48 GiB V100: batch size 32,768, learning rate
 2e-3, and FP32 training with PyTorch float32 matmul precision set to `high`.
-Pairwise accuracy on adjacent opposite-label
-events within 15-minute user gaps is the primary checkpoint and reporting
-metric; ROC-AUC, PR-AUC, and log loss remain secondary diagnostics. Attention is
+Pairwise accuracy on adjacent opposite-label events within 15-minute user gaps
+is the primary reporting metric. ROC-AUC selects checkpoints during tuning;
+PR-AUC and log loss remain secondary diagnostics. Attention is
 explicitly restricted to the
 math backend, so runs do not depend on Flash Attention support. Columnar batch
 assembly is prefetched on CPU while the current batch trains on GPU.

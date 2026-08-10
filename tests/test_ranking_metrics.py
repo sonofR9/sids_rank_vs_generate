@@ -37,7 +37,7 @@ class RankingMetricsTest(unittest.TestCase):
         config = RankingConfig()
 
         self.assertFalse(config.hyperparameter_tuning)
-        self.assertEqual(config.train_days, 60.0)
+        self.assertEqual(config.train_days, 270.0)
         self.assertEqual(config.validation_days, 7.0)
         self.assertEqual(config.epochs, 2)
         self.assertEqual(config.learning_rate, 2e-3)

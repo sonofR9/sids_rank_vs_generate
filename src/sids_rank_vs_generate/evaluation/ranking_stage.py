@@ -19,7 +19,7 @@ class RankingConfig:
     min_history_len: int = 2
     validation_days: float = 7.0
     hyperparameter_tuning: bool = False
-    train_days: float = 60.0
+    train_days: float = 270.0
     batch_size: int = 32_768
     epochs: int = 2
     learning_rate: float = 2e-3
