@@ -1,5 +1,5 @@
 from sids_rank_vs_generate.experiment import ExperimentConfig, YambdaDatasetConfig
-from sids_rank_vs_generate.sids.r3vae import BalanceRQKMeansPipeline
+from sids_rank_vs_generate.sids.balance_rq_kmeans_pipeline import BalanceRQKMeansPipeline
 from sids_rank_vs_generate.sids.config import BalanceRQKMeansConfig
 
 
