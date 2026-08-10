@@ -258,26 +258,124 @@ def _finite_pairs(frame: pd.DataFrame, metric_column: str) -> pd.DataFrame:
     return frame.loc[mask].copy()
 
 
-def _draw_sweep_lines(axis: plt.Axes, frame: pd.DataFrame, metric_column: str) -> None:
-    for method, method_frame in frame.groupby("method", sort=False):
+def _sweep_panels(frame: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    level_sweep = frame[frame["codebook_size"] == 256].copy()
+    codebook_sweep = frame[frame["num_levels"] == 3].copy()
+    return level_sweep, codebook_sweep
+
+
+def _padded_limits(values: pd.Series) -> tuple[float, float]:
+    minimum = float(values.min())
+    maximum = float(values.max())
+    span = maximum - minimum
+    if span == 0.0:
+        padding = max(abs(minimum) * 0.05, 0.05)
+    else:
+        padding = span * 0.06
+    return minimum - padding, maximum + padding
+
+
+def _draw_panel(
+    axis: plt.Axes,
+    panel_frame: pd.DataFrame,
+    metric_column: str,
+    *,
+    order_column: str,
+    title: str,
+    sweep_label: str,
+    sweep_label_x: float,
+    present_methods: list[str],
+    x_limits: tuple[float, float],
+    y_limits: tuple[float, float],
+    baseline_recall: float | None,
+    show_baseline_label: bool,
+) -> None:
+    for method in present_methods:
+        points = panel_frame[panel_frame["method"] == method]
+        points = points.sort_values(order_column).drop_duplicates(order_column)
+        if points.empty:
+            continue
         color = METHOD_COLORS.get(method, "#6B7280")
-        for fixed_column, fixed_value, order_column in (
-            ("codebook_size", 256, "num_levels"),
-            ("num_levels", 3, "codebook_size"),
-        ):
-            sweep = method_frame[method_frame[fixed_column] == fixed_value]
-            sweep = sweep.sort_values(order_column).drop_duplicates(order_column)
-            if len(sweep) < 2:
-                continue
+        if len(points) >= 2:
             axis.plot(
-                sweep[metric_column],
-                sweep["recall_100"],
+                points[metric_column],
+                points["recall_100"],
                 color=color,
-                linewidth=1.15,
-                alpha=0.72,
+                linewidth=1.35,
+                alpha=0.78,
                 solid_capstyle="round",
                 zorder=1,
             )
+        axis.scatter(
+            points[metric_column],
+            points["recall_100"],
+            s=58,
+            marker=METHOD_MARKERS.get(method, "o"),
+            facecolors="white",
+            edgecolors=color,
+            linewidths=1.65,
+            alpha=0.96,
+            zorder=3,
+        )
+
+    if baseline_recall is not None:
+        axis.axhline(
+            baseline_recall,
+            color="#6B7280",
+            linewidth=1.05,
+            linestyle=(0, (4, 3)),
+            alpha=0.82,
+            zorder=0,
+        )
+        if show_baseline_label:
+            axis.annotate(
+                "SASRec baseline",
+                xy=(0.04, baseline_recall),
+                xycoords=("axes fraction", "data"),
+                xytext=(0, 4),
+                textcoords="offset points",
+                color="#6B7280",
+                fontsize=8.2,
+                ha="left",
+                va="bottom",
+            )
+
+    axis.set_title(title, pad=9, fontweight="normal")
+    axis.set_xlim(*x_limits)
+    axis.set_ylim(*y_limits)
+    axis.grid(True, color="#D1D5DB", linewidth=0.65, alpha=0.42)
+    axis.set_axisbelow(True)
+    axis.spines["top"].set_visible(False)
+    axis.spines["right"].set_visible(False)
+    axis.spines["left"].set_color("#9CA3AF")
+    axis.spines["bottom"].set_color("#9CA3AF")
+    axis.tick_params(colors="#374151", width=0.8)
+    axis.xaxis.set_major_locator(MaxNLocator(nbins=6))
+    axis.yaxis.set_major_locator(MaxNLocator(nbins=7))
+    axis.text(
+        0.025,
+        0.975,
+        f"n = {len(panel_frame)}",
+        transform=axis.transAxes,
+        ha="left",
+        va="top",
+        fontsize=8.5,
+        color="#374151",
+        bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.82, "pad": 2.0},
+        zorder=5,
+    )
+    axis.text(
+        sweep_label_x,
+        0.91,
+        sweep_label,
+        transform=axis.transAxes,
+        ha="left",
+        va="center",
+        fontsize=8.2,
+        color="#4B5563",
+        alpha=0.86,
+        zorder=5,
+    )
 
 
 def _plot_metric(
@@ -307,78 +405,61 @@ def _plot_metric(
             "ps.fonttype": 42,
         }
     )
-    figure, axis = plt.subplots(figsize=(7.0, 5.2), facecolor="white")
-    axis.set_facecolor("white")
-    _draw_sweep_lines(axis, plot_frame, metric_column)
+    level_frame, codebook_frame = _sweep_panels(plot_frame)
+    shown = pd.concat([level_frame, codebook_frame], ignore_index=True)
+    if shown.empty:
+        return 0
 
     present_methods = [
-        method for method in METHOD_ORDER if method in set(plot_frame["method"])
+        method for method in METHOD_ORDER if method in set(shown["method"])
     ]
-    present_methods.extend(sorted(set(plot_frame["method"]) - set(present_methods)))
-    for method in present_methods:
-        points = plot_frame[plot_frame["method"] == method]
-        color = METHOD_COLORS.get(method, "#6B7280")
-        axis.scatter(
-            points[metric_column],
-            points["recall_100"],
-            s=58,
-            marker=METHOD_MARKERS.get(method, "o"),
-            facecolors="white",
-            edgecolors=color,
-            linewidths=1.65,
-            alpha=0.96,
-            zorder=3,
-            label=method,
-        )
-
+    present_methods.extend(sorted(set(shown["method"]) - set(present_methods)))
+    x_limits = _padded_limits(shown[metric_column].astype(float))
+    y_values = shown["recall_100"].astype(float)
     if baseline_recall is not None:
-        axis.axhline(
-            baseline_recall,
-            color="#6B7280",
-            linewidth=1.05,
-            linestyle=(0, (4, 3)),
-            alpha=0.82,
-            zorder=0,
-        )
-        axis.annotate(
-            "SASRec baseline",
-            xy=(0.02, baseline_recall),
-            xycoords=("axes fraction", "data"),
-            xytext=(0, 4),
-            textcoords="offset points",
-            color="#6B7280",
-            fontsize=8.2,
-            ha="left",
-            va="bottom",
-        )
+        y_values = pd.concat([y_values, pd.Series([baseline_recall])])
+    y_limits = _padded_limits(y_values)
 
-    axis.set_title(f"{spec.label} → Recall@100", pad=10, fontweight="normal")
-    axis.set_xlabel(spec.label, labelpad=8)
-    axis.set_ylabel("Recall@100", labelpad=8)
-    axis.grid(True, color="#D1D5DB", linewidth=0.65, alpha=0.42)
-    axis.set_axisbelow(True)
-    axis.spines["top"].set_visible(False)
-    axis.spines["right"].set_visible(False)
-    axis.spines["left"].set_color("#9CA3AF")
-    axis.spines["bottom"].set_color("#9CA3AF")
-    axis.tick_params(colors="#374151", width=0.8)
-    axis.xaxis.set_major_locator(MaxNLocator(nbins=6))
-    axis.yaxis.set_major_locator(MaxNLocator(nbins=7))
-    axis.margins(x=0.08, y=0.10)
-
-    axis.text(
-        0.025,
-        0.975,
-        f"n = {n}",
-        transform=axis.transAxes,
-        ha="left",
-        va="top",
-        fontsize=8.7,
-        color="#374151",
-        linespacing=1.35,
-        bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.86, "pad": 2.5},
-        zorder=5,
+    figure, axes = plt.subplots(
+        1,
+        2,
+        figsize=(12, 5),
+        sharex=True,
+        sharey=True,
+        facecolor="white",
     )
+    for axis in axes:
+        axis.set_facecolor("white")
+    _draw_panel(
+        axes[0],
+        level_frame,
+        metric_column,
+        order_column="num_levels",
+        title="Varying number of codebooks (C=256)",
+        sweep_label="L: 2 → 3 → 4",
+        sweep_label_x=0.36,
+        present_methods=present_methods,
+        x_limits=x_limits,
+        y_limits=y_limits,
+        baseline_recall=baseline_recall,
+        show_baseline_label=False,
+    )
+    _draw_panel(
+        axes[1],
+        codebook_frame,
+        metric_column,
+        order_column="codebook_size",
+        title="Varying codebook size (L=3)",
+        sweep_label="C: 128 → 256 → 512 → 1024",
+        sweep_label_x=0.04,
+        present_methods=present_methods,
+        x_limits=x_limits,
+        y_limits=y_limits,
+        baseline_recall=baseline_recall,
+        show_baseline_label=True,
+    )
+    figure.supxlabel(spec.label, fontsize=12, y=0.17)
+    figure.supylabel("Recall@100", fontsize=12, x=0.018)
 
     handles = [
         Line2D(
@@ -397,13 +478,13 @@ def _plot_metric(
     figure.legend(
         handles=handles,
         loc="lower center",
-        bbox_to_anchor=(0.5, 0.008),
+        bbox_to_anchor=(0.5, 0.018),
         ncol=3,
         frameon=False,
         handlelength=1.8,
         columnspacing=1.15,
     )
-    figure.tight_layout(rect=(0, 0.115, 1, 1))
+    figure.tight_layout(rect=(0.035, 0.20, 0.995, 0.90), w_pad=2.0)
     for suffix in ("png", "pdf", "svg"):
         figure.savefig(
             output_dir / f"recall100_vs_{spec.file_stem}.{suffix}",

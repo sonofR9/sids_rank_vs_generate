@@ -102,5 +102,19 @@ class SidQualityAnalysisTest(unittest.TestCase):
         self.assertTrue(missing_quality.empty)
         self.assertEqual(len(missing_recall), 1)
 
+    def test_level_and_codebook_sweeps_are_split_into_panels(self) -> None:
+        pd = self.module.pd
+        frame = pd.DataFrame(
+            {
+                "codebook_size": [256, 256, 256, 128, 512],
+                "num_levels": [2, 3, 4, 3, 3],
+            }
+        )
+        level_sweep, codebook_sweep = self.module._sweep_panels(frame)
+        self.assertEqual(level_sweep["num_levels"].tolist(), [2, 3, 4])
+        self.assertEqual(codebook_sweep["codebook_size"].tolist(), [256, 128, 512])
+        self.assertTrue(level_sweep["codebook_size"].eq(256).all())
+        self.assertTrue(codebook_sweep["num_levels"].eq(3).all())
+
 if __name__ == "__main__":
     unittest.main()
