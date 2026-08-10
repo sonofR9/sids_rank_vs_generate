@@ -43,6 +43,11 @@ the configured item-core filter, creates one dense item mapping, and creates one
 chronological train/test boundary. Ranking and generation receive stage-specific
 views of this same prepared data and catalog.
 
+By default, preprocessing and history construction use the latest 365 days.
+Ranking candidates are read only for the 60 training days preceding the 7-day
+test boundary; the earlier interactions remain available when constructing each
+candidate's preceding history.
+
 ## Experiment configuration
 
 An experiment file contains the instantiated SID pipeline. The two ranking
@@ -155,6 +160,14 @@ Ranking uses the existing listen labels and all prepared DCNv2 lag features.
 Both models consume the same dense counters, user and candidate SID features,
 and multivalent artist/album IDs. The TransAct variant adds the latest like
 history strictly preceding each ranking timestamp to that same DCNv2 input.
+Ranking defaults are tuned for a 48 GiB V100: batch size 32,768, learning rate
+2e-3, and FP32 training with PyTorch float32 matmul precision set to `high`.
+Pairwise accuracy on adjacent opposite-label
+events within 15-minute user gaps is the primary checkpoint and reporting
+metric; ROC-AUC, PR-AUC, and log loss remain secondary diagnostics. Attention is
+explicitly restricted to the
+math backend, so runs do not depend on Flash Attention support. Columnar batch
+assembly is prefetched on CPU while the current batch trains on GPU.
 
 Generation predicts the target item's SID autoregressively from item history.
 Collision resolution can append a final disambiguation level; without it, beams

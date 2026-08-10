@@ -19,12 +19,17 @@ class PreprocessingConfig:
     core_min_interactions_per_item: int = 5
     test_days: float = 7.0
     timestamp_unit_seconds: float = 1.0
+    history_days: float | None = 365.0
 
     def __post_init__(self) -> None:
         if self.core_min_interactions_per_item <= 0:
             raise ValueError("core_min_interactions_per_item must be positive")
+        if self.history_days is not None and self.history_days <= 0:
+            raise ValueError("history_days must be positive when provided")
         if self.test_days <= 0:
             raise ValueError("test_days must be positive")
+        if self.history_days is not None and self.history_days <= self.test_days:
+            raise ValueError("history_days must be larger than test_days")
         if self.timestamp_unit_seconds <= 0:
             raise ValueError("timestamp_unit_seconds must be positive")
 
@@ -39,6 +44,7 @@ class PreparedInteractions:
     item_mapping: pl.DataFrame
     catalog_size: int
     test_start_timestamp: Any
+    timestamp_unit_seconds: float
 
     def summary(self) -> dict[str, int | float | str]:
         return {
@@ -99,6 +105,19 @@ def _test_start_timestamp(
     return max_timestamp - test_days * SECONDS_PER_DAY / timestamp_unit_seconds
 
 
+def timestamp_days_before(
+    timestamp: Any,
+    timestamp_dtype: pl.DataType,
+    days: float,
+    timestamp_unit_seconds: float,
+) -> Any:
+    """Move a temporal or binned numeric timestamp back by ``days``."""
+
+    if timestamp_dtype.is_temporal():
+        return timestamp - timedelta(days=days)
+    return timestamp - days * SECONDS_PER_DAY / timestamp_unit_seconds
+
+
 def prepare_interactions(
     interactions: pl.DataFrame,
     config: PreprocessingConfig | None = None,
@@ -108,6 +127,14 @@ def prepare_interactions(
     config = config or PreprocessingConfig()
     _validate_interactions(interactions)
     source = interactions.select(REQUIRED_COLUMNS)
+    if config.history_days is not None:
+        history_start = timestamp_days_before(
+            source["timestamp"].max(),
+            source.schema["timestamp"],
+            config.history_days,
+            config.timestamp_unit_seconds,
+        )
+        source = source.filter(pl.col("timestamp") >= history_start)
 
     eligible_items = (
         source.group_by("item_id")
@@ -152,6 +179,7 @@ def prepare_interactions(
         item_mapping=item_mapping,
         catalog_size=item_mapping.height,
         test_start_timestamp=test_start,
+        timestamp_unit_seconds=config.timestamp_unit_seconds,
     )
 
 

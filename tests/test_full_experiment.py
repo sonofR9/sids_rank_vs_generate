@@ -200,6 +200,13 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                 result["evaluations"]["ranking"]["models"]["transact"],
             )
             ranking_features = result["evaluations"]["ranking"]["features"]
+            self.assertEqual(
+                result["evaluations"]["ranking"]["primary_metric"],
+                "pairwise_accuracy",
+            )
+            self.assertIn(
+                "train_start_timestamp", result["evaluations"]["ranking"]
+            )
             self.assertEqual(ranking_features["dense"], list(DENSE_COLUMNS))
             self.assertEqual(
                 ranking_features["multivalent"], ["artist_ids", "album_ids"]

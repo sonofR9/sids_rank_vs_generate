@@ -18,9 +18,10 @@ class RankingConfig:
     max_history_len: int = 50
     min_history_len: int = 2
     validation_fraction: float = 0.1
-    batch_size: int = 256
+    train_days: float = 60.0
+    batch_size: int = 32_768
     epochs: int = 5
-    learning_rate: float = 3e-4
+    learning_rate: float = 2e-3
     weight_decay: float = 1e-4
     grad_clip: float = 1.0
     embedding_dim: int = 32
@@ -37,13 +38,14 @@ class RankingConfig:
     transact_ff_dim: int = 256
     dropout: float = 0.2
     num_workers: int = 0
-    use_bf16: bool = True
     show_progress: bool = True
     device: str = "auto"
 
     def __post_init__(self) -> None:
         if not 0.0 < self.validation_fraction < 1.0:
             raise ValueError("validation_fraction must be in (0, 1)")
+        if self.train_days <= 0:
+            raise ValueError("train_days must be positive")
         if self.transact_d_model % self.transact_heads:
             raise ValueError("transact_d_model must be divisible by transact_heads")
         if self.min_history_len <= 0 or self.max_history_len < self.min_history_len:
@@ -66,6 +68,7 @@ class RankingStage(IEvaluationStage):
             max_history_len=self.config.max_history_len,
             min_history_len=self.config.min_history_len,
             validation_fraction=self.config.validation_fraction,
+            train_days=self.config.train_days,
             max_rows=context.max_rows,
         )
         loaders = build_ranking_loaders(
@@ -108,6 +111,7 @@ class RankingStage(IEvaluationStage):
 
         return {
             "config": asdict(self.config),
+            "primary_metric": "pairwise_accuracy",
             "features": {
                 "dense": list(data.dense_train.columns),
                 "sparse": ["uid", *data.sid_columns],
@@ -119,5 +123,6 @@ class RankingStage(IEvaluationStage):
                 "validation": data.validation.height,
                 "test": data.test.height,
             },
+            "train_start_timestamp": str(data.train_start_timestamp),
             "models": results,
         }

@@ -9,7 +9,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 from ..datasets import DatasetFiles
-from .preprocessing import PreparedInteractions
+from .preprocessing import PreparedInteractions, timestamp_days_before
 
 
 DENSE_COLUMNS = (
@@ -43,6 +43,8 @@ class RankingData:
     sid_columns: tuple[str, ...]
     num_users: int
     num_history_items: int
+    train_start_timestamp: Any
+    timestamp_unit_seconds: float
 
 
 def _require_file(path: Path | None, description: str) -> Path:
@@ -144,6 +146,7 @@ def _load_dcn_candidates(
     dataset: DatasetFiles,
     prepared: PreparedInteractions,
     items_with_sids: pl.DataFrame,
+    start_timestamp: Any,
     max_rows: int | None,
 ) -> pl.DataFrame:
     ranking_path = _require_file(
@@ -170,7 +173,9 @@ def _load_dcn_candidates(
     if missing:
         raise ValueError(f"ranking interactions are missing columns: {sorted(missing)}")
 
-    candidates = candidates.join(eligible_items, on="item_id", how="inner")
+    candidates = candidates.filter(
+        pl.col("timestamp") >= start_timestamp
+    ).join(eligible_items, on="item_id", how="inner")
     if max_rows is not None:
         candidates = candidates.top_k(max_rows, by="timestamp")
 
@@ -206,6 +211,7 @@ def prepare_ranking_data(
     max_history_len: int,
     min_history_len: int,
     validation_fraction: float,
+    train_days: float,
     max_rows: int | None,
 ) -> RankingData:
     """Merge DCNv2 features with the latest like history before each candidate."""
@@ -228,8 +234,18 @@ def prepare_ranking_data(
         on=sid_columns,
         how="inner",
     ).select("item_id", "history_item_idx")
+    train_start = timestamp_days_before(
+        prepared.test_start_timestamp,
+        prepared.data.schema["timestamp"],
+        train_days,
+        prepared.timestamp_unit_seconds,
+    )
     candidates = _load_dcn_candidates(
-        dataset, prepared, items_with_sids, max_rows
+        dataset,
+        prepared,
+        items_with_sids,
+        train_start,
+        max_rows,
     ).join(sid_paths, on=sid_columns, how="inner").sort(["uid", "timestamp"])
     histories = _history_snapshots(
         prepared,
@@ -254,7 +270,10 @@ def prepare_ranking_data(
         sid_columns,
     )
 
-    train_pool = merged.filter(pl.col("timestamp") < prepared.test_start_timestamp)
+    train_pool = merged.filter(
+        (pl.col("timestamp") >= train_start)
+        & (pl.col("timestamp") < prepared.test_start_timestamp)
+    )
     test = merged.filter(pl.col("timestamp") >= prepared.test_start_timestamp)
     if train_pool.is_empty() or test.is_empty():
         raise ValueError("ranking chronological train/test split is empty")
@@ -277,18 +296,20 @@ def prepare_ranking_data(
         sid_columns=sid_columns,
         num_users=user_mapping.height,
         num_history_items=sid_paths.height + 1,
+        train_start_timestamp=train_start,
+        timestamp_unit_seconds=prepared.timestamp_unit_seconds,
     )
 
 
 class PolarsRankingDataset(Dataset):
     def __init__(self, frame: pl.DataFrame) -> None:
-        self.frame = frame
+        self.length = frame.height
 
     def __len__(self) -> int:
-        return self.frame.height
+        return self.length
 
-    def __getitem__(self, index: int) -> dict[str, Any]:
-        return self.frame.row(index, named=True)
+    def __getitem__(self, index: int) -> int:
+        return index
 
 
 def _collate_multivalent(
@@ -371,7 +392,7 @@ def collate_ranking(batch: list[dict[str, Any]]) -> dict[str, Any]:
         "candidate_track_length_z": (
             candidate_track_length - candidate_track_length.mean()
         )
-        / candidate_track_length.std().clamp_min(1.0),
+        / candidate_track_length.std(unbiased=False).clamp_min(1.0),
         "candidate_has_track_length": (candidate_track_length > 0).float(),
         "history_item_idxs_flat": history_items,
         "history_event_type_idxs_flat": torch.full_like(history_items, 2),
@@ -386,20 +407,144 @@ def collate_ranking(batch: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _tensor_column(frame: pl.DataFrame, column: str, dtype) -> torch.Tensor:
+    return frame[column].to_torch().to(dtype=dtype)
+
+
+def _collate_multivalent_frame(
+    frame: pl.DataFrame,
+    column: str,
+) -> dict[str, torch.Tensor]:
+    lengths = frame[column].list.len().to_torch().long()
+    nonempty = frame.filter(pl.col(column).list.len() > 0)
+    if nonempty.is_empty():
+        values = torch.empty((0, NUM_HASHES), dtype=torch.long)
+    else:
+        hash_columns = [
+            f"{column}_hash_{hash_index}" for hash_index in range(NUM_HASHES)
+        ]
+        values = torch.tensor(
+            nonempty.select(hash_columns)
+            .explode(hash_columns)
+            .to_numpy(),
+            dtype=torch.long,
+        )
+    return {"values": values, "lengths": lengths}
+
+
+def collate_ranking_frame(
+    source: pl.DataFrame,
+    indices: list[int],
+    timestamp_unit_seconds: float = 1.0,
+) -> dict[str, Any]:
+    """Build a batch column-wise, avoiding one Python dictionary per row."""
+
+    frame = source[indices]
+    history_lengths = frame["history_item_idxs"].list.len().to_torch().long()
+    history_items = frame["history_item_idxs"].explode().to_torch().long()
+    history_timestamps = frame["history_timestamps"].explode().to_torch()
+    candidate_timestamps = (
+        _tensor_column(frame, "timestamp", torch.float64)
+        * timestamp_unit_seconds
+    )
+    history_deltas = (
+        candidate_timestamps.repeat_interleave(history_lengths)
+        - history_timestamps.double() * timestamp_unit_seconds
+    ).float().clamp_min_(0.0).log1p_()
+
+    sid_columns = tuple(
+        sorted(
+            (
+                column
+                for column in frame.columns
+                if column.startswith("sid_") and column[4:].isdigit()
+            ),
+            key=lambda column: int(column[4:]),
+        )
+    )
+    sparse = {
+        "uid": _tensor_column(frame, "uid_hash", torch.long),
+        **{
+            column: _tensor_column(frame, f"{column}_hash", torch.long)
+            for column in sid_columns
+        },
+    }
+    candidate_track_length = _tensor_column(
+        frame, "track_length_seconds", torch.float32
+    )
+    zeros = torch.zeros(history_items.numel(), dtype=torch.float32)
+    return {
+        "dense_features": torch.tensor(
+            frame.select(DENSE_COLUMNS).to_numpy(), dtype=torch.float32
+        ),
+        "sparse_features": sparse,
+        "multivalent_features": {
+            column: _collate_multivalent_frame(frame, column)
+            for column in MULTIVALENT_COLUMNS
+        },
+        "user_idx": _tensor_column(frame, "user_idx", torch.long),
+        "candidate_item_idx": _tensor_column(
+            frame, "history_item_idx", torch.long
+        ),
+        "candidate_timestamp": candidate_timestamps,
+        "candidate_is_organic": torch.zeros(frame.height, dtype=torch.float32),
+        "candidate_track_length_z": (
+            candidate_track_length - candidate_track_length.mean()
+        )
+        / candidate_track_length.std(unbiased=False).clamp_min(1.0),
+        "candidate_has_track_length": (candidate_track_length > 0).float(),
+        "history_item_idxs_flat": history_items,
+        "history_event_type_idxs_flat": torch.full_like(history_items, 2),
+        "history_is_organic_flat": zeros,
+        "history_played_ratio_flat": zeros,
+        "history_has_played_ratio_flat": zeros,
+        "history_track_length_z_flat": zeros,
+        "history_has_track_length_flat": zeros,
+        "history_time_delta_z_flat": history_deltas,
+        "history_lengths": history_lengths,
+        "target": _tensor_column(frame, "target", torch.float32),
+    }
+
+
+class RankingBatchCollator:
+    def __init__(
+        self,
+        frame: pl.DataFrame,
+        timestamp_unit_seconds: float,
+    ) -> None:
+        self.frame = frame
+        self.timestamp_unit_seconds = timestamp_unit_seconds
+
+    def __call__(self, indices: list[int]) -> dict[str, Any]:
+        return collate_ranking_frame(
+            self.frame,
+            indices,
+            self.timestamp_unit_seconds,
+        )
+
+
 def build_ranking_loaders(
     data: RankingData,
     *,
     batch_size: int,
     num_workers: int,
 ) -> tuple[DataLoader, DataLoader, DataLoader]:
-    common = {
-        "batch_size": batch_size,
-        "num_workers": num_workers,
-        "collate_fn": collate_ranking,
-        "pin_memory": torch.cuda.is_available(),
-    }
+    def loader(frame: pl.DataFrame, *, shuffle: bool) -> DataLoader:
+        return DataLoader(
+            PolarsRankingDataset(frame),
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
+            collate_fn=RankingBatchCollator(
+                frame,
+                data.timestamp_unit_seconds,
+            ),
+            pin_memory=torch.cuda.is_available(),
+            persistent_workers=num_workers > 0,
+        )
+
     return (
-        DataLoader(PolarsRankingDataset(data.train), shuffle=True, **common),
-        DataLoader(PolarsRankingDataset(data.validation), shuffle=False, **common),
-        DataLoader(PolarsRankingDataset(data.test), shuffle=False, **common),
+        loader(data.train, shuffle=True),
+        loader(data.validation, shuffle=False),
+        loader(data.test, shuffle=False),
     )

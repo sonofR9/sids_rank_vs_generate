@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -10,7 +11,21 @@ from tqdm.auto import tqdm
 
 from ..evaluation.ranking_metrics import ranking_metrics
 from ..tracking import ExperimentTracker, NullTracker
-from .utils import autocast, move_to_device, resolve_device
+from .utils import math_sdp_only, move_to_device, resolve_device
+
+
+def prefetch_batches(loader):
+    """Prepare the next columnar CPU batch while the GPU handles this one."""
+
+    iterator = iter(loader)
+    with ThreadPoolExecutor(max_workers=1, thread_name_prefix="ranking-batch") as pool:
+        future = pool.submit(next, iterator, None)
+        while True:
+            batch = future.result()
+            if batch is None:
+                return
+            future = pool.submit(next, iterator, None)
+            yield batch
 
 
 @torch.inference_mode()
@@ -18,17 +33,15 @@ def evaluate_ranking_model(
     model: nn.Module,
     loader,
     device: torch.device,
-    *,
-    use_bf16: bool,
-) -> dict[str, float]:
+) -> dict[str, float | int]:
     model.eval()
     logits_all = []
     targets_all = []
     users_all = []
     timestamps_all = []
-    for batch in loader:
+    for batch in prefetch_batches(loader):
         batch = move_to_device(batch, device)
-        with autocast(device, use_bf16):
+        with math_sdp_only(device):
             logits = model(batch)
         logits_all.append(logits.float().cpu())
         targets_all.append(batch["target"].cpu())
@@ -53,6 +66,7 @@ def train_ranking_model(
 ) -> dict[str, Any]:
     tracker = tracker or NullTracker()
     device = resolve_device(config.device)
+    torch.set_float32_matmul_precision("high")
     model = model.to(device)
     optimizer = torch.optim.AdamW(
         model.parameters(),
@@ -61,6 +75,8 @@ def train_ranking_model(
     )
     criterion = nn.BCEWithLogitsLoss()
     best_state = None
+    best_validation = None
+    best_pairwise_accuracy = float("-inf")
     best_auc = float("-inf")
 
     for epoch in range(1, config.epochs + 1):
@@ -68,14 +84,15 @@ def train_ranking_model(
         loss_sum = 0.0
         example_count = 0
         progress = tqdm(
-            train_loader,
+            prefetch_batches(train_loader),
+            total=len(train_loader),
             desc=f"ranking epoch {epoch}/{config.epochs}",
             disable=not config.show_progress,
         )
         for batch in progress:
             batch = move_to_device(batch, device)
             optimizer.zero_grad(set_to_none=True)
-            with autocast(device, config.use_bf16):
+            with math_sdp_only(device):
                 logits = model(batch)
                 loss = criterion(logits, batch["target"])
             loss.backward()
@@ -92,7 +109,6 @@ def train_ranking_model(
             model,
             validation_loader,
             device,
-            use_bf16=config.use_bf16,
         )
         tracker.log_metrics(
             {
@@ -101,12 +117,18 @@ def train_ranking_model(
                     f"validation.{name}": value
                     for name, value in validation.items()
                 },
+                "validation.best_pairwise_accuracy": max(
+                    best_pairwise_accuracy,
+                    validation["pairwise_accuracy"],
+                ),
                 "validation.best_roc_auc": max(best_auc, validation["roc_auc"]),
             },
             step=epoch,
         )
-        if validation["roc_auc"] > best_auc:
-            best_auc = validation["roc_auc"]
+        best_auc = max(best_auc, validation["roc_auc"])
+        if validation["pairwise_accuracy"] > best_pairwise_accuracy:
+            best_pairwise_accuracy = validation["pairwise_accuracy"]
+            best_validation = validation
             best_state = copy.deepcopy(model.state_dict())
 
     if best_state is None:
@@ -117,13 +139,15 @@ def train_ranking_model(
         model,
         test_loader,
         device,
-        use_bf16=config.use_bf16,
     )
     tracker.log_metrics(
         {f"test.{name}": value for name, value in test_metrics.items()}
     )
     return {
         "device": str(device),
+        "primary_metric": "pairwise_accuracy",
+        "best_validation": best_validation,
+        "best_validation_pairwise_accuracy": best_pairwise_accuracy,
         "test": test_metrics,
         "checkpoint": artifact_path,
     }

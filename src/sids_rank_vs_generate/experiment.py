@@ -27,6 +27,7 @@ class YambdaDatasetConfig:
     album_mapping_path: Path | None = None
     source_embeddings_path: Path | None = None
     core_min_interactions_per_item: int = 5
+    history_days: float | None = 365.0
     test_days: float = 7.0
     timestamp_unit_seconds: float = 5.0
 
@@ -174,6 +175,7 @@ def run_experiment(
                 core_min_interactions_per_item=(
                     config.dataset.core_min_interactions_per_item
                 ),
+                history_days=config.dataset.history_days,
                 test_days=config.dataset.test_days,
                 timestamp_unit_seconds=config.dataset.timestamp_unit_seconds,
                 latest_interactions=max_rows,
