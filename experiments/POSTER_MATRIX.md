@@ -6,6 +6,11 @@ interaction sources and validation examples, Recall@100, and skip the unrelated
 ranking stage. CUDA training automatically uses BF16 where supported and FP16
 with gradient scaling on older GPUs such as V100.
 
+Ranking-only reruns use `scripts/run_poster_ranking_matrix.sh`. Its
+`ranking_none_all` set mirrors the 28 completed raw-SID (`none`) generation
+configurations, skips generation, and uses the accelerated ranking schedules
+from the current `main` branch.
+
 The matrix is deliberately phased:
 
 - `phase_a`: L3/C256 anchors plus RQVAE nearest/token/RRS/ECM. Existing

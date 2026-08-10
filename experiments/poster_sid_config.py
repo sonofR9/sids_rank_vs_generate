@@ -49,6 +49,11 @@ COLLISION_RESOLUTION = _choice(
     "none",
     {"none", "token"},
 )
+EVALUATION_SCOPE = _choice(
+    "EVALUATION_SCOPE",
+    "generation",
+    {"generation", "ranking"},
+)
 CODEBOOK_SIZE = _positive_int("CODEBOOK_SIZE", 256)
 NUM_LEVELS = _positive_int("NUM_LEVELS", 3)
 DATASET_SIZE = os.environ.get("DATASET_SIZE", "50m").strip()
@@ -133,6 +138,7 @@ EXPERIMENT = ExperimentConfig(
             ("seed", str(SEED)),
             ("dataset", DATASET_SIZE),
             ("data_scope", "full"),
+            ("evaluation_scope", EVALUATION_SCOPE),
         ),
     ),
     reports_dir=Path("reports/poster_runs"),
