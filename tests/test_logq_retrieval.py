@@ -16,6 +16,7 @@ from sids_rank_vs_generate.losses.logq_retrieval import (
     apply_logq_correction,
     concatenate_gathered_candidates,
     corrected_logq_loss,
+    counts_to_log_q,
     probabilities_to_log_q,
     sanitize_log_q,
 )
@@ -124,6 +125,11 @@ class LogQCorrectionTest(unittest.TestCase):
         self.assertTrue(torch.isfinite(log_q).all())
         self.assertTrue(torch.isfinite(safe).all())
         self.assertEqual(float(fraction), 1.0)
+
+    def test_counts_use_the_same_safe_logq_path(self) -> None:
+        actual = counts_to_log_q(torch.tensor([1.0, 2.0, 7.0]))
+        expected = torch.log(torch.tensor([0.1, 0.2, 0.7]))
+        torch.testing.assert_close(actual, expected)
 
     def test_batch_size_one_is_finite_in_all_modes(self) -> None:
         query = torch.tensor([[1.0, 2.0]], requires_grad=True)

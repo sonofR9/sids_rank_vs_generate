@@ -36,6 +36,26 @@ def probabilities_to_log_q(
     return values.clamp(min=eps, max=1.0).log()
 
 
+def counts_to_log_q(
+    counts: torch.Tensor,
+    *,
+    eps: float = 1e-12,
+) -> torch.Tensor:
+    """Convert item occurrence counts to safe sampling log-probabilities."""
+
+    if eps <= 0 or eps > 1:
+        raise ValueError("logq eps must be in (0, 1]")
+    values = torch.as_tensor(counts).to(dtype=torch.float32)
+    if values.ndim != 1 or values.numel() == 0:
+        raise ValueError("counts must be a non-empty 1D tensor")
+    values = torch.nan_to_num(values, nan=0.0, posinf=0.0, neginf=0.0)
+    values = values.clamp_min(0.0)
+    total = values.sum()
+    if total <= 0:
+        return torch.full_like(values, math.log(eps))
+    return probabilities_to_log_q(values / total, eps=eps)
+
+
 def sanitize_log_q(
     log_q: torch.Tensor,
     *,
@@ -51,6 +71,22 @@ def sanitize_log_q(
     values = torch.nan_to_num(values, nan=lower, neginf=lower, posinf=0.0)
     values = values.clamp(min=lower, max=0.0)
     return values, invalid.float().mean()
+
+
+def apply_log_q_to_logits(
+    logits: torch.Tensor,
+    log_q: torch.Tensor,
+) -> torch.Tensor:
+    """Apply a broadcastable LogQ correction in stable float32 precision."""
+
+    if logits.ndim == 0:
+        raise ValueError("logits must have at least one dimension")
+    correction = torch.as_tensor(log_q, device=logits.device, dtype=torch.float32)
+    try:
+        torch.broadcast_shapes(tuple(logits.shape), tuple(correction.shape))
+    except RuntimeError as error:
+        raise ValueError("log_q is not broadcastable to logits") from error
+    return logits.float() - correction
 
 
 def apply_logq_correction(
@@ -74,7 +110,7 @@ def apply_logq_correction(
     # The model score is already temperature-scaled. Sampled-softmax importance
     # correction is therefore score / temperature - log Q, not
     # (score - log Q) / temperature: logQ lives in softmax-logit units.
-    corrected = logits - log_q.unsqueeze(0)
+    corrected = apply_log_q_to_logits(logits, log_q.unsqueeze(0))
     if preserve_positive:
         positive = logits.gather(1, labels.unsqueeze(1))
         corrected.scatter_(1, labels.unsqueeze(1), positive)

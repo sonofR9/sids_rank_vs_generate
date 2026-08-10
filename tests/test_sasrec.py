@@ -181,11 +181,12 @@ class SASRecSmokeTest(unittest.TestCase):
         logits = torch.zeros((2, 3), dtype=torch.float32)
         negative_ids = torch.tensor([[0, 1], [2, 0]], dtype=torch.long)
         q_counts = torch.tensor([1.0, 2.0, 4.0])
+        item_log_q = torch.log(q_counts / q_counts.sum())
 
         corrected = _apply_negative_logq_correction(
             logits,
             negative_ids,
-            q_counts,
+            item_log_q,
         )
         expected_negative_logits = torch.log(torch.tensor(7.0)) - torch.log(
             q_counts[negative_ids]
