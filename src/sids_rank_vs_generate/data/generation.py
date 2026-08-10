@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import math
 import random
+from collections import Counter
 from functools import partial
 
 import polars as pl
@@ -20,6 +22,29 @@ class GenerationDataset(Dataset):
 
     def __getitem__(self, index: int) -> dict:
         return self.examples[index]
+
+
+def attach_item_log_q(
+    examples: list[dict],
+    *,
+    eps: float = 1e-12,
+) -> list[dict]:
+    """Attach log item frequencies for the actual uniformly sampled examples."""
+
+    if not examples:
+        raise ValueError("cannot estimate item sampling probabilities from no examples")
+    if eps <= 0 or eps > 1:
+        raise ValueError("logq eps must be in (0, 1]")
+    counts = Counter(int(example["target"]) for example in examples)
+    total = len(examples)
+    log_q_by_item = {
+        item: math.log(max(count / total, eps))
+        for item, count in counts.items()
+    }
+    return [
+        {**example, "log_q": log_q_by_item[int(example["target"])]}
+        for example in examples
+    ]
 
 
 def prepare_generation_examples(
@@ -97,7 +122,7 @@ def collate_generation(
     sid = torch.tensor([example["sid"] for example in batch], dtype=torch.long)
     if sid.shape != (batch_size, num_levels):
         raise ValueError(f"Unexpected SID shape: {tuple(sid.shape)}")
-    return {
+    result = {
         "history": history,
         "positions": positions,
         "mask": mask,
@@ -106,6 +131,14 @@ def collate_generation(
         ),
         "sid": sid,
     }
+    has_log_q = ["log_q" in example for example in batch]
+    if any(has_log_q) and not all(has_log_q):
+        raise ValueError("either every example or no example must provide log_q")
+    if all(has_log_q):
+        result["log_q"] = torch.tensor(
+            [example["log_q"] for example in batch], dtype=torch.float32
+        )
+    return result
 
 
 def build_generation_loaders(train_examples, validation_examples, config):
