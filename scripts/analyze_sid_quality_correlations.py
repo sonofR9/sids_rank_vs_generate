@@ -283,7 +283,6 @@ def _draw_panel(
     order_column: str,
     title: str,
     sweep_label: str,
-    sweep_label_x: float,
     present_methods: list[str],
     x_limits: tuple[float, float],
     y_limits: tuple[float, float],
@@ -353,27 +352,16 @@ def _draw_panel(
     axis.xaxis.set_major_locator(MaxNLocator(nbins=6))
     axis.yaxis.set_major_locator(MaxNLocator(nbins=7))
     axis.text(
-        0.025,
-        0.975,
-        f"n = {len(panel_frame)}",
-        transform=axis.transAxes,
-        ha="left",
-        va="top",
-        fontsize=8.5,
-        color="#374151",
-        bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.82, "pad": 2.0},
-        zorder=5,
-    )
-    axis.text(
-        sweep_label_x,
-        0.91,
+        0.5,
+        -0.17,
         sweep_label,
         transform=axis.transAxes,
-        ha="left",
-        va="center",
-        fontsize=8.2,
+        ha="center",
+        va="top",
+        fontsize=8.5,
         color="#4B5563",
         alpha=0.86,
+        clip_on=False,
         zorder=5,
     )
 
@@ -437,7 +425,6 @@ def _plot_metric(
         order_column="num_levels",
         title="Varying number of codebooks (C=256)",
         sweep_label="L: 2 → 3 → 4",
-        sweep_label_x=0.36,
         present_methods=present_methods,
         x_limits=x_limits,
         y_limits=y_limits,
@@ -451,14 +438,13 @@ def _plot_metric(
         order_column="codebook_size",
         title="Varying codebook size (L=3)",
         sweep_label="C: 128 → 256 → 512 → 1024",
-        sweep_label_x=0.04,
         present_methods=present_methods,
         x_limits=x_limits,
         y_limits=y_limits,
         baseline_recall=baseline_recall,
         show_baseline_label=True,
     )
-    figure.supxlabel(spec.label, fontsize=12, y=0.17)
+    figure.supxlabel(spec.label, fontsize=12, y=0.13)
     figure.supylabel("Recall@100", fontsize=12, x=0.018)
 
     handles = [
@@ -484,7 +470,13 @@ def _plot_metric(
         handlelength=1.8,
         columnspacing=1.15,
     )
-    figure.tight_layout(rect=(0.035, 0.20, 0.995, 0.90), w_pad=2.0)
+    figure.subplots_adjust(
+        left=0.075,
+        right=0.985,
+        top=0.90,
+        bottom=0.31,
+        wspace=0.06,
+    )
     for suffix in ("png", "pdf", "svg"):
         figure.savefig(
             output_dir / f"recall100_vs_{spec.file_stem}.{suffix}",
