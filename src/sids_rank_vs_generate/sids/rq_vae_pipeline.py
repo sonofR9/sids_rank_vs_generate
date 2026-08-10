@@ -13,6 +13,7 @@ from .config import AssignmentMethod, RQVAEConfig
 from .pure_semantic import allocate_semantic_ids
 from .rq_kmeans import RQKMeans
 from .rq_vae import RQVAE
+from ..reproducibility import SID_EXPERIMENT_SEED, seed_everything
 
 
 class RQVAEPipeline(ISidPipeline):
@@ -95,6 +96,7 @@ class RQVAEPipeline(ISidPipeline):
         return torch.cat(latents, dim=0)
 
     def train(self, df: pl.DataFrame) -> None:
+        seed_everything(SID_EXPERIMENT_SEED)
         parameters = self._training_parameters()
         dimension = len(df["normalized_embed"][0])
         self.model = RQVAE(dim=dimension, **parameters)

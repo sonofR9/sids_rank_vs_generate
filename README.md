@@ -43,6 +43,16 @@ the configured item-core filter, creates one dense item mapping, and creates one
 chronological train/test boundary. Ranking and generation receive stage-specific
 views of this same prepared data and catalog.
 
+By default, preprocessing and history construction use the latest 365 days. A
+regular run trains on the 270 days immediately preceding the fixed 7-day test and
+does not create a validation split. Hyperparameter-tuning configurations set
+`RankingConfig(hyperparameter_tuning=True)` to train on 270 days and evaluate the
+following fixed 7-day validation window without inspecting test. Earlier
+interactions remain available when constructing each candidate's history. The
+ranking defaults use model-specific FP32 schedules selected on that 7-day
+validation window: DCNv2 uses batch 32,768 for two epochs at `2e-3`, while
+TransAct uses batch 8,192 for one epoch at `5e-4`.
+
 ## Experiment configuration
 
 An experiment file contains the instantiated SID pipeline. The two ranking
@@ -155,6 +165,15 @@ Ranking uses the existing listen labels and all prepared DCNv2 lag features.
 Both models consume the same dense counters, user and candidate SID features,
 and multivalent artist/album IDs. The TransAct variant adds the latest like
 history strictly preceding each ranking timestamp to that same DCNv2 input.
+Ranking defaults are tuned for a 48 GiB V100: DCNv2 uses batch size 32,768 and
+TransAct uses batch size 8,192. Both train in FP32 with PyTorch float32 matmul
+precision set to `high`.
+Pairwise accuracy on adjacent opposite-label events within 15-minute user gaps
+is the primary reporting metric. ROC-AUC selects checkpoints during tuning;
+PR-AUC and log loss remain secondary diagnostics. Attention is
+explicitly restricted to the
+math backend, so runs do not depend on Flash Attention support. Columnar batch
+assembly is prefetched on CPU while the current batch trains on GPU.
 
 Generation predicts the target item's SID autoregressively from item history.
 Collision resolution can append a final disambiguation level; without it, beams

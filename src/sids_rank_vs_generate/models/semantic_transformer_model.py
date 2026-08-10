@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from ..losses.logq_retrieval import InBatchRetrievalLoss
 from .history_transformer_encoder import HistoryTransformerEncoder
 
 class SemanticTransformerModel(nn.Module):
@@ -95,6 +96,15 @@ class SemanticTransformerModel(nn.Module):
         )
         if self.ranking_temperature <= 0:
             raise ValueError("ranking temperature must be positive")
+        self.retrieval_loss = InBatchRetrievalLoss(
+            temperature=self.ranking_temperature,
+            logq_mode=getattr(self.cfg, "logq_mode", "none"),
+            eps=float(getattr(self.cfg, "logq_eps", 1e-12)),
+            debug=bool(getattr(self.cfg, "logq_debug", False)),
+            gather_distributed=bool(
+                getattr(self.cfg, "gather_distributed_negatives", False)
+            ),
+        )
 
     def make_decoder_input(self, sid):
         # sid: [B, M]
@@ -131,17 +141,13 @@ class SemanticTransformerModel(nn.Module):
             additional_item_embeddings=self._semantic_history_embeddings(history),
         )
 
-    def _ranking_loss(self, pooled_history, target):
+    def _ranking_loss(self, pooled_history, target, log_q=None):
         if target.ndim != 1 or target.size(0) != pooled_history.size(0):
             raise ValueError("target must contain one item ID per history")
         target_embeddings = self.encoder.item_emb(target)
-        user_vectors = F.normalize(pooled_history, dim=-1)
-        item_vectors = F.normalize(target_embeddings, dim=-1)
-        logits = user_vectors @ item_vectors.T / self.ranking_temperature
-        labels = torch.arange(target.size(0), device=target.device)
-        return F.cross_entropy(logits, labels)
+        return self.retrieval_loss(pooled_history, target_embeddings, log_q)
 
-    def forward(self, history, positions, mask, sid, target=None):
+    def forward(self, history, positions, mask, sid, target=None, log_q=None):
         # history: [B, L]
         # sid: [B, M]
         # TODO: encode history
@@ -179,8 +185,11 @@ class SemanticTransformerModel(nn.Module):
 
         sid_loss = torch.stack(losses).mean()
         ranking_loss = None
+        ranking_diagnostics = {}
         if target is not None and self.auxiliary_item_loss_weight != 0:
-            ranking_loss = self._ranking_loss(pooled_history, target)
+            ranking_output = self._ranking_loss(pooled_history, target, log_q)
+            ranking_loss = ranking_output.loss
+            ranking_diagnostics = ranking_output.diagnostics
         total_loss = sid_loss
         if ranking_loss is not None:
             total_loss = total_loss + self.auxiliary_item_loss_weight * ranking_loss
@@ -189,5 +198,6 @@ class SemanticTransformerModel(nn.Module):
             "loss": total_loss,
             "sid_loss": sid_loss,
             "ranking_loss": ranking_loss,
+            "ranking_diagnostics": ranking_diagnostics,
             "preds": torch.stack(preds, dim=1),
         }

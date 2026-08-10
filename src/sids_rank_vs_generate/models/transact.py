@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import torch
 from torch import nn
-from torch.nn.utils.rnn import pad_sequence
 
 def init_embedding(embedding, padding_idx=None):
     nn.init.trunc_normal_(
@@ -430,19 +429,21 @@ def flat_tokens_to_padded(
         False = настоящий токен
         True  = padding
     """
-    token_chunks = torch.split(
-        tokens_flat,
-        lengths.tolist(),
-        dim=0,
+    batch_size = lengths.numel()
+    max_length = int(lengths.max())
+    padded_tokens = tokens_flat.new_zeros(
+        batch_size,
+        max_length,
+        tokens_flat.size(-1),
     )
-
-    padded_tokens = pad_sequence(
-        token_chunks,
-        batch_first=True,
-        padding_value=0.0,
+    row_indices = torch.repeat_interleave(
+        torch.arange(batch_size, device=lengths.device), lengths
     )
-
-    max_length = padded_tokens.size(1)
+    starts = torch.cumsum(lengths, dim=0) - lengths
+    column_indices = torch.arange(
+        tokens_flat.size(0), device=lengths.device
+    ) - torch.repeat_interleave(starts, lengths)
+    padded_tokens[row_indices, column_indices] = tokens_flat
 
     positions = torch.arange(
         max_length,
