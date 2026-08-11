@@ -9,6 +9,7 @@ from .config import PlumRQVAEConfig, RQKMeansConfig, RQVAEConfig
 from .plum_rq_vae_pipeline import PlumRQVAEPipeline
 from .rq_kmeans_pipeline import RQKMeansPipeline
 from .rq_vae_pipeline import RQVAEPipeline
+from .bpe_rq_vae_pipeline import BPERQVAEPipeline, BPE_RQVAEConfig
 
 __all__ = [
     "ISidPipeline",
@@ -18,4 +19,6 @@ __all__ = [
     "RQKMeansPipeline",
     "RQVAEConfig",
     "RQVAEPipeline",
+    "BPERQVAEPipeline",
+    "BPE_RQVAEConfig",
 ]
