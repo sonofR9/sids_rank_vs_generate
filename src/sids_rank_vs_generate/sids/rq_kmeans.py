@@ -41,7 +41,6 @@ class RQKMeans:
         X= self.converter(X)
         residual = X.copy()
         self.codebooks = []
-<<<<<<< HEAD
         for current_codebook_size in self.codebook_sizes:
             kmeans = MiniBatchKMeans(
                 n_clusters = current_codebook_size,
@@ -49,15 +48,6 @@ class RQKMeans:
                 init='k-means++',
                 tol=10**(-5),
                 random_state=SID_EXPERIMENT_SEED
-=======
-        for level in range(self.num_levels):
-            kmeans = MiniBatchKMeans(
-                n_clusters = self.codebook_size,
-                batch_size = self.kmeans_batch_size,
-                init='k-means++',
-                tol=10**(-5),
-                random_state=self.random_state
->>>>>>> 9de0dba (Implement rq(vae/kmeans))
             )
             classes = kmeans.fit_predict(residual)
             codebook = kmeans.cluster_centers_
@@ -92,8 +82,4 @@ class RQKMeans:
     
     def fit_transform(self, items_df: pl.DataFrame) -> pl.DataFrame:
         self.fit(items_df)
-<<<<<<< HEAD
         return self.transform(items_df)
-=======
-        return self.transform(items_df)
->>>>>>> 9de0dba (Implement rq(vae/kmeans))
