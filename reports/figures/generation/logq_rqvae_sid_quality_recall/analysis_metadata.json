@@ -1,0 +1,62 @@
+{
+  "tracking_uri": "http://51.250.47.231:5000",
+  "experiments": {
+    "logq-rqvae-generation": "13",
+    "sid-quality-only-full-v2": "12"
+  },
+  "logq_experiments": [
+    "logq-rqvae-generation"
+  ],
+  "quality_experiments": [
+    "sid-quality-only-full-v2"
+  ],
+  "filters": {
+    "sid_model": "RQ-VAE only",
+    "logq": "explicit enabled mode only; none/baseline rejected",
+    "one_point_per_mlflow_run": true,
+    "plain_rqvae_excluded": true,
+    "other_sid_families_excluded": true
+  },
+  "metric_mapping": {
+    "recall_at_100": "metrics.evaluations.generation.recall_at_100",
+    "sid": {
+      "icr": "metrics.sid.independent_code_rate",
+      "collision_rate": "metrics.sid.collision_rate",
+      "p95_collision_group_size": "metrics.sid.collision_percentiles.p95",
+      "g_max": "metrics.sid.max_collision",
+      "cur_total": "metrics.sid.codebook_quality.codebook_utilization_rate_total",
+      "code_gini": "metrics.sid.code_gini",
+      "code_entropy": "metrics.sid.code_entropy",
+      "intra_code_similarity": "metrics.sid.intra_code_similarity",
+      "prefix_coherence_1": "metrics.sid.prefix_coherence_at_1",
+      "prefix_coherence_2": "metrics.sid.prefix_coherence_at_2",
+      "prefix_coherence_3": "metrics.sid.prefix_coherence_at_3",
+      "valid_sid_rate": "metrics.sid.valid_sid_rate"
+    }
+  },
+  "rqvae_logq_runs_found": 6,
+  "matched_runs": 6,
+  "unmatched_runs": 0,
+  "rejected_runs": 0,
+  "logq_mode_counts": {
+    "corrected": 6
+  },
+  "plotted_sid_metrics": [
+    "icr",
+    "collision_rate",
+    "p95_collision_group_size",
+    "g_max",
+    "cur_total",
+    "code_gini",
+    "code_entropy",
+    "intra_code_similarity",
+    "prefix_coherence_1",
+    "prefix_coherence_2",
+    "prefix_coherence_3",
+    "valid_sid_rate"
+  ],
+  "generation_child_recall_rows": 0,
+  "timestamp": "2026-08-11T16:44:30.265809+00:00",
+  "git_commit": "",
+  "git_branch": ""
+}
