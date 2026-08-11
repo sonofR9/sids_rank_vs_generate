@@ -1,0 +1,13 @@
+metric,num_runs
+CUR_Total,30
+Code Entropy,30
+Code Gini,30
+Collision Rate,30
+G_max,30
+Prefix Coherence@1,30
+Prefix Coherence@2,30
+Raw independent code rate (ICR),30
+Valid SID Rate,30
+p95 Collision Group Size,30
+Intra-code Similarity,24
+Prefix Coherence@3,19
