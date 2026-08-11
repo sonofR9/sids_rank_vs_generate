@@ -20,6 +20,7 @@ from torch.utils.data import DataLoader, Dataset
 from ..data import PreparedInteractions, build_histories, build_targets
 from ..datasets import resolve_dataset
 from ..evaluation import evaluate_ranking
+from ..losses import apply_log_q_to_logits, counts_to_log_q
 from ..pipeline import PipelineConfig, run_pipeline
 from ..reproducibility import seed_everything
 
@@ -632,11 +633,9 @@ def _build_in_batch_item_counts(
 def _apply_negative_logq_correction(
     logits: torch.Tensor,
     negative_item_ids: torch.Tensor,
-    q_counts: torch.Tensor,
-    *,
-    eps: float = 1e-12,
+    item_log_q: torch.Tensor,
 ) -> torch.Tensor:
-    """Apply original sampled-softmax LogQ correction to negative logits."""
+    """Apply shared LogQ correction while preserving SASRec's positive column."""
 
     if logits.ndim != 2 or negative_item_ids.ndim != 2:
         raise ValueError("logits and negative_item_ids must be 2D")
@@ -644,17 +643,18 @@ def _apply_negative_logq_correction(
         raise ValueError("logits and negative_item_ids batch sizes differ")
     if logits.shape[1] != negative_item_ids.shape[1] + 1:
         raise ValueError("logits must contain one positive plus all negatives")
-    if q_counts.ndim != 1 or q_counts.numel() == 0:
-        raise ValueError("q_counts must be a non-empty 1D tensor")
-    if eps <= 0:
-        raise ValueError("eps must be positive")
-
-    log_total = torch.log(q_counts.sum().clamp_min(eps))
-    negative_logq = (
-        torch.log(q_counts[negative_item_ids].clamp_min(eps)) - log_total
-    )
+    if item_log_q.ndim != 1 or item_log_q.numel() == 0:
+        raise ValueError("item_log_q must be a non-empty 1D tensor")
+    if torch.any(
+        (negative_item_ids < 0) | (negative_item_ids >= item_log_q.numel())
+    ):
+        raise ValueError("negative item IDs are out of range")
+    negative_log_q = item_log_q[negative_item_ids]
     return torch.cat(
-        (logits[:, :1], logits[:, 1:] - negative_logq),
+        (
+            logits[:, :1].float(),
+            apply_log_q_to_logits(logits[:, 1:], negative_log_q),
+        ),
         dim=1,
     )
 
@@ -683,11 +683,13 @@ def run_sasrec(
     padding_item_id = prepared.catalog_size
     generator = torch.Generator().manual_seed(config.seed)
     negative_generator = torch.Generator().manual_seed(config.seed + 1)
-    q_counts = (
-        _build_in_batch_item_counts(
-            histories,
-            num_items=prepared.catalog_size,
-            max_seq_len=config.max_seq_len,
+    item_log_q = (
+        counts_to_log_q(
+            _build_in_batch_item_counts(
+                histories,
+                num_items=prepared.catalog_size,
+                max_seq_len=config.max_seq_len,
+            )
         ).to(device)
         if config.training_objective == "in-batch-logq"
         else None
@@ -764,11 +766,11 @@ def run_sasrec(
                     batch["target"],
                     batch["negative_item_id"],
                 )
-                if q_counts is not None:
+                if item_log_q is not None:
                     logits = _apply_negative_logq_correction(
                         logits,
                         batch["negative_item_id"],
-                        q_counts,
+                        item_log_q,
                     )
                 labels = torch.zeros(
                     logits.shape[0],

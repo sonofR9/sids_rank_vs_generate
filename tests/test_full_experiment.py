@@ -10,7 +10,10 @@ import polars as pl
 
 from sids_rank_vs_generate.data.ranking import DENSE_COLUMNS
 from sids_rank_vs_generate.evaluation.generation_stage import GenerationConfig
-from sids_rank_vs_generate.evaluation.ranking_stage import RankingConfig
+from sids_rank_vs_generate.evaluation.ranking_stage import (
+    RankingConfig,
+    RankingTrainingSchedule,
+)
 from sids_rank_vs_generate.experiment import (
     ExperimentConfig,
     TrainingConfig,
@@ -142,8 +145,8 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                     ranking=RankingConfig(
                         max_history_len=4,
                         min_history_len=1,
-                        batch_size=16,
-                        epochs=1,
+                        dcnv2_training=RankingTrainingSchedule(16, 1, 2e-3),
+                        transact_training=RankingTrainingSchedule(16, 1, 5e-4),
                         embedding_dim=4,
                         hidden_dim=8,
                         dense_bins=2,
@@ -200,6 +203,26 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                 result["evaluations"]["ranking"]["models"]["transact"],
             )
             ranking_features = result["evaluations"]["ranking"]["features"]
+            self.assertEqual(
+                result["evaluations"]["ranking"]["primary_metric"],
+                "pairwise_accuracy",
+            )
+            ranking_result = result["evaluations"]["ranking"]
+            self.assertEqual(ranking_result["examples"]["validation"], 0)
+            self.assertEqual(
+                ranking_result["train_end_timestamp"],
+                ranking_result["test_start_timestamp"],
+            )
+            for model_name in ("dcnv2", "transact"):
+                model_result = ranking_result["models"][model_name]
+                self.assertEqual(model_result["mode"], "test")
+                self.assertIsNone(model_result["best_validation"])
+                self.assertIsNotNone(model_result["test"])
+                self.assertIn("pairwise_accuracy", model_result["test"])
+                self.assertIn("roc_auc", model_result["test"])
+            self.assertIn(
+                "train_start_timestamp", result["evaluations"]["ranking"]
+            )
             self.assertEqual(ranking_features["dense"], list(DENSE_COLUMNS))
             self.assertEqual(
                 ranking_features["multivalent"], ["artist_ids", "album_ids"]
@@ -227,6 +250,9 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                     for name in metrics
                 }
                 self.assertIn("train.loss", metric_names)
+                if run_name.startswith("ranking."):
+                    self.assertIn("test.pairwise_accuracy", metric_names)
+                    self.assertIn("test.roc_auc", metric_names)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from ..data.embedding_dataset import EmbeddingDataset
+from ..reproducibility import SID_EXPERIMENT_SEED
 from ..tracking import ExperimentTracker, NullTracker
 
 

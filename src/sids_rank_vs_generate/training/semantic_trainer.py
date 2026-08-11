@@ -59,6 +59,8 @@ def train_semantic(
         model.train()
         loss_sum = 0.0
         sample_count = 0
+        diagnostic_sums: dict[str, float] = {}
+        diagnostic_batches = 0
 
         for batch in train_loader:
             batch = move_to_device(batch, cfg.device)
@@ -70,6 +72,7 @@ def train_semantic(
                     batch["mask"],
                     batch["sid"],
                     target=batch["target"],
+                    log_q=batch.get("log_q"),
                 )
 
             loss = output["loss"]
@@ -82,6 +85,13 @@ def train_semantic(
             batch_size = batch["sid"].size(0)
             loss_sum += loss.item() * batch_size
             sample_count += batch_size
+            diagnostics = output.get("ranking_diagnostics", {})
+            if diagnostics:
+                diagnostic_batches += 1
+                for name, value in diagnostics.items():
+                    diagnostic_sums[name] = diagnostic_sums.get(name, 0.0) + float(
+                        value.detach().float().item()
+                    )
 
         train_loss = loss_sum / max(sample_count, 1)
 
@@ -93,9 +103,15 @@ def train_semantic(
         )
 
         current_metric = metrics[metric_name]
+        train_diagnostics = {
+            f"train.logq.{name}": value / diagnostic_batches
+            for name, value in diagnostic_sums.items()
+            if diagnostic_batches
+        }
         tracker.log_metrics(
             {
                 "train.loss": train_loss,
+                **train_diagnostics,
                 **{
                     f"validation.{name}": value
                     for name, value in metrics.items()

@@ -56,9 +56,9 @@ class RQVAEConfig:
 class PlumRQVAEConfig:
     hidden_dim: int = 128
     latent_dim: int = 128
-    num_levels: int = 3
-    codebook_size: int = 1024
-    codebooks_sizes: tuple[int, ...] | None = None
+    num_levels: int = 2
+    codebook_size: int = 512
+    codebook_sizes: tuple[int, ...] = (512, 256)
     batch_size: int = 256
     num_epochs: int = 50
     lr: float = 5e-4
@@ -67,3 +67,14 @@ class PlumRQVAEConfig:
     device: str | None = None
     pretrain_epochs: int = 3
     pretrain_lr: float = 5e-3
+
+@dataclass(frozen=True)
+class BalanceRQKMeansConfig:
+    num_levels: int | None = 3
+    codebook_size: int | None = 512
+    codebook_sizes: tuple[int, ...] | None = None
+
+    kmeans_batch_size: int = 65_536
+    predict_batch_size: int = 16_384
+    max_iter: int = 50
+    device: str | None = None

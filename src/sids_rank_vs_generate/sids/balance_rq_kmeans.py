@@ -3,6 +3,7 @@ import polars as pl
 import torch
 
 from ..reproducibility import SID_EXPERIMENT_SEED
+from ..tracking import ExperimentTracker, NullTracker
 
 
 class BalanceRQKMeans:
@@ -234,7 +235,10 @@ class BalanceRQKMeans:
     def fit(
         self,
         X: pl.Series | pl.DataFrame | np.ndarray | torch.Tensor,
+        *,
+        tracker: ExperimentTracker | None = None,
     ):
+        tracker = tracker or NullTracker()
         X = self.converter(X)
         residual = X.clone()
 
@@ -271,6 +275,13 @@ class BalanceRQKMeans:
             fit_codes[:, level] = labels.to(torch.int32)
 
             residual -= codebook[labels]
+            tracker.log_metrics(
+                {
+                    "fit.kmeans_iterations": n_iter,
+                    "fit.residual_mse": torch.mean(residual.square()).item(),
+                },
+                step=level + 1,
+            )
 
         self.fit_codes_ = fit_codes.cpu()
 
@@ -340,8 +351,10 @@ class BalanceRQKMeans:
     def fit_transform(
         self,
         items_df: pl.DataFrame,
+        *,
+        tracker: ExperimentTracker | None = None,
     ) -> pl.DataFrame:
-        self.fit(items_df)
+        self.fit(items_df, tracker=tracker)
 
         return self.codes_to_dataframe(
             item_ids=items_df["item_id"],

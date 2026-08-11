@@ -6,7 +6,6 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from ..data.embedding_dataset import EmbeddingDataset
 from ..tracking import ExperimentTracker, NullTracker
-from .rq_kmeans import RQKMeans
 
 
 class RQVAE(nn.Module):
@@ -28,11 +27,6 @@ class RQVAE(nn.Module):
         pretrain_lr=5e-3,
     ):
         super().__init__()
-        torch.manual_seed(SID_EXPERIMENT_SEED)
-        np.random.seed(SID_EXPERIMENT_SEED)
-
-        if torch.cuda.is_available():
-            torch.cuda.manual_seed_all(SID_EXPERIMENT_SEED)
         self.num_levels = num_levels
         self.codebook_size = codebook_size
         self.batch_size = batch_size
@@ -308,6 +302,11 @@ class RQVAE(nn.Module):
                 for level in range(self.num_levels)
             },
         })
-    def fit_transform(self, df):
-        self.fit(df)
+    def fit_transform(
+        self,
+        df,
+        *,
+        tracker: ExperimentTracker | None = None,
+    ):
+        self.fit(df, tracker=tracker)
         return self.transform(df)
