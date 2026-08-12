@@ -94,6 +94,7 @@ class RankingStage(IEvaluationStage):
             hyperparameter_tuning=self.config.hyperparameter_tuning,
             train_days=self.config.train_days,
             max_rows=context.max_rows,
+            user_sid_pipeline=context.user_sid_pipeline,
         )
         model_factories = {
             "dcnv2": (DcnV2Ranker, self.config.dcnv2_training),

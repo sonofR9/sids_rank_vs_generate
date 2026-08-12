@@ -3,6 +3,7 @@ from __future__ import annotations
 import tempfile
 import unittest
 from contextlib import contextmanager
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -20,7 +21,13 @@ from sids_rank_vs_generate.experiment import (
     YambdaDatasetConfig,
     run_experiment,
 )
-from sids_rank_vs_generate.sids import RQKMeansConfig, RQKMeansPipeline
+from sids_rank_vs_generate.sids import (
+    RQKMeansConfig,
+    RQKMeansPipeline,
+    UserAwareRQKMeansConfig,
+    UserAwareRQKMeansPipeline,
+    UserSidMapperConfig,
+)
 from sids_rank_vs_generate.tracking import ExperimentTracker
 
 
@@ -64,6 +71,13 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
             ExperimentConfig(
                 sid_pipeline=RQKMeansPipeline(RQKMeansConfig()),
                 seed=7,
+            )
+
+    def test_user_aware_experiment_requires_fit_catalog(self) -> None:
+        with self.assertRaisesRegex(ValueError, "catalog_from_fit"):
+            ExperimentConfig(
+                sid_pipeline=RQKMeansPipeline(RQKMeansConfig()),
+                user_sid_pipeline=UserAwareRQKMeansPipeline(),
             )
 
     def test_rqkmeans_runs_ranking_and_generation(self) -> None:
@@ -179,6 +193,7 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                         device="cpu",
                     ),
                 ),
+                catalog_from_fit=True,
                 reports_dir=root / "reports",
             )
 
@@ -253,6 +268,155 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                 if run_name.startswith("ranking."):
                     self.assertIn("test.pairwise_accuracy", metric_names)
                     self.assertIn("test.roc_auc", metric_names)
+
+            user_tracker = RecordingTracker()
+            user_aware_config = replace(
+                config,
+                user_sid_pipeline=UserAwareRQKMeansPipeline(
+                    UserAwareRQKMeansConfig(
+                        num_levels=2,
+                        codebook_size=2,
+                        kmeans_batch_size=16,
+                        predict_batch_size=16,
+                    )
+                ),
+                training=replace(
+                    config.training,
+                    generation=replace(
+                        config.training.generation,
+                        max_history_len=64,
+                        d_model=6,
+                        d_ff=12,
+                        use_user_profile=True,
+                        initialize_item_embeddings_from_content=True,
+                        auxiliary_item_loss_weight=0.1,
+                        sid_only_validation_during_training=True,
+                        validation_metric="sid_beam_recall@4",
+                        run_diagnostics=True,
+                        mapper=UserSidMapperConfig(
+                            kind="transformer",
+                            d_model=8,
+                            d_ff=16,
+                            num_heads=2,
+                            num_encoder_layers=1,
+                            num_decoder_layers=1,
+                            dropout=0.0,
+                            batch_size=16,
+                            inference_batch_size=16,
+                            max_epochs=1,
+                            early_stopping_patience=1,
+                        ),
+                    ),
+                ),
+            )
+            with patch(
+                "sids_rank_vs_generate.experiment.create_tracker",
+                return_value=user_tracker,
+            ):
+                user_aware_result = run_experiment(user_aware_config)
+
+            self.assertEqual(
+                user_aware_result["evaluations"]["generation"]["target_sid_type"],
+                "personalized",
+            )
+            generation_config = user_aware_result["evaluations"]["generation"][
+                "config"
+            ]
+            self.assertTrue(generation_config["use_user_profile"])
+            self.assertTrue(
+                generation_config["initialize_item_embeddings_from_content"]
+            )
+            self.assertEqual(generation_config["max_history_len"], 64)
+            self.assertIsNotNone(user_aware_result["user_sid"])
+            self.assertTrue(
+                all(
+                    column.startswith("usid_")
+                    for column in user_aware_result["evaluations"]["ranking"][
+                        "features"
+                    ]["sparse"][1:]
+                )
+            )
+            self.assertIn(
+                "test",
+                user_aware_result["evaluations"]["generation"]["mapper"],
+            )
+            self.assertIn(
+                "sid_beam_recall@4",
+                user_aware_result["evaluations"]["generation"]["metrics"],
+            )
+            self.assertIn(
+                "diagnostics",
+                user_aware_result["evaluations"]["generation"]["mapper"],
+            )
+            self.assertEqual(
+                user_aware_result["evaluations"]["generation"]["mapper"]["type"],
+                "transformer",
+            )
+            self.assertTrue(
+                Path(
+                    user_aware_result["evaluations"]["generation"]["mapper"][
+                        "checkpoint"
+                    ]
+                ).is_file()
+            )
+            self.assertEqual(
+                set(user_tracker.runs),
+                {
+                    "RQKMeansPipeline",
+                    "sid",
+                    "user_sid",
+                    "ranking.dcnv2",
+                    "ranking.transact",
+                    "generation",
+                    "generation.mapper",
+                },
+            )
+            mapper_metric_names = {
+                name
+                for _step, metrics in user_tracker.runs["generation.mapper"]["metrics"]
+                for name in metrics
+            }
+            self.assertIn("train.loss", mapper_metric_names)
+
+            generation_result = user_aware_result["evaluations"]["generation"]
+            loaded_config = replace(
+                user_aware_config,
+                training=replace(
+                    user_aware_config.training,
+                    generation=replace(
+                        user_aware_config.training.generation,
+                        load_checkpoint_path=Path(generation_result["checkpoint"]),
+                        mapper=replace(
+                            user_aware_config.training.generation.mapper,
+                            load_checkpoint_path=Path(
+                                generation_result["mapper"]["checkpoint"]
+                            ),
+                        ),
+                    ),
+                ),
+            )
+            loaded_tracker = RecordingTracker()
+            with patch(
+                "sids_rank_vs_generate.experiment.create_tracker",
+                return_value=loaded_tracker,
+            ):
+                loaded_result = run_experiment(
+                    loaded_config,
+                    run_ranking=False,
+                )
+
+            loaded_generation = loaded_result["evaluations"]["generation"]
+            self.assertEqual(
+                Path(loaded_generation["loaded_checkpoint"]),
+                Path(generation_result["checkpoint"]),
+            )
+            loaded_metric_names = {
+                name
+                for _step, metrics in loaded_tracker.runs["generation"]["metrics"]
+                for name in metrics
+            }
+            self.assertNotIn("train.loss", loaded_metric_names)
+            self.assertIn("final.test.sid_beam_recall@4", loaded_metric_names)
 
 
 if __name__ == "__main__":

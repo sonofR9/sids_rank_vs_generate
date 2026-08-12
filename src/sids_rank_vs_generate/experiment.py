@@ -10,10 +10,20 @@ from types import ModuleType
 from typing import Any, Sequence
 
 from .datasets import DatasetFiles, resolve_dataset
+from .data.protocols import (
+    POSTER_FULL_33148_PROTOCOL_ID,
+    THREE_WAY_PROTOCOL_ID,
+    expected_catalog_size,
+    validate_protocol_id,
+)
 from .evaluation.generation_stage import GenerationConfig, GenerationStage
 from .evaluation.ranking_stage import RankingConfig, RankingStage
+from .evaluation.sid_quality import (
+    SID_QUALITY_SCHEMA_VERSION,
+    UserCatalogQualityConfig,
+)
 from .sid_experiment import SidExperimentConfig, run_sid_experiment
-from .sids import ISidPipeline
+from .sids import ISidPipeline, IUserAwareSidPipeline
 from .tracking import MLflowConfig, create_tracker, flatten_parameters
 
 
@@ -30,6 +40,22 @@ class YambdaDatasetConfig:
     history_days: float | None = None
     test_days: float = 7.0
     timestamp_unit_seconds: float = 5.0
+    validation_fraction: float = 0.1
+    protocol_id: str = THREE_WAY_PROTOCOL_ID
+
+    def __post_init__(self) -> None:
+        validate_protocol_id(self.protocol_id)
+        if self.protocol_id == POSTER_FULL_33148_PROTOCOL_ID:
+            if self.size != "50m":
+                raise ValueError("poster protocol requires the 50m dataset")
+            if self.core_min_interactions_per_item != 5:
+                raise ValueError("poster protocol requires item core 5")
+            if self.history_days is not None:
+                raise ValueError("poster protocol requires the full history")
+            if self.test_days != 7.0:
+                raise ValueError("poster protocol requires a 7-day heldout")
+            if self.timestamp_unit_seconds != 5.0:
+                raise ValueError("poster protocol requires 5-second timestamps")
 
     def resolve(self) -> DatasetFiles:
         if self.interactions_path is not None or self.embeddings_path is not None:
@@ -69,7 +95,7 @@ class YambdaDatasetConfig:
 
 @dataclass(frozen=True)
 class TrainingConfig:
-    """Optional hyperparameter overrides; model and stage choices stay fixed."""
+    """Настройки обучения моделей"""
 
     ranking: RankingConfig = RankingConfig()
     generation: GenerationConfig = GenerationConfig()
@@ -78,14 +104,39 @@ class TrainingConfig:
 @dataclass(frozen=True)
 class ExperimentConfig:
     sid_pipeline: ISidPipeline
+    user_sid_pipeline: IUserAwareSidPipeline | None = None
     dataset: YambdaDatasetConfig = YambdaDatasetConfig()
     training: TrainingConfig = TrainingConfig()
     tracking: MLflowConfig = MLflowConfig()
     reports_dir: Path = Path("reports/experiments")
+    catalog_from_fit: bool = False
+    user_catalog_quality: UserCatalogQualityConfig = UserCatalogQualityConfig()
 
     def __post_init__(self) -> None:
         if not isinstance(self.sid_pipeline, ISidPipeline):
             raise TypeError("sid_pipeline must implement ISidPipeline")
+        if self.user_sid_pipeline is not None and not isinstance(
+            self.user_sid_pipeline,
+            IUserAwareSidPipeline,
+        ):
+            raise TypeError("user_sid_pipeline must implement IUserAwareSidPipeline")
+        legacy_user_aware = (
+            self.dataset.protocol_id == POSTER_FULL_33148_PROTOCOL_ID
+            and not self.catalog_from_fit
+        )
+        if (
+            self.user_sid_pipeline is not None
+            and not self.catalog_from_fit
+            and not legacy_user_aware
+        ):
+            raise ValueError("user-aware experiments require catalog_from_fit=True")
+        if (
+            self.dataset.protocol_id == POSTER_FULL_33148_PROTOCOL_ID
+            and self.catalog_from_fit
+        ):
+            raise ValueError("poster protocol requires a full-data catalog")
+        if self.user_catalog_quality.enabled and self.user_sid_pipeline is None:
+            raise ValueError("user catalog quality requires a user SID pipeline")
 
 
 def _load_module(path: Path) -> ModuleType:
@@ -153,6 +204,19 @@ def run_experiment(
     run_name = config.tracking.run_name or type(config.sid_pipeline).__name__
     tags = {
         "pipeline": type(config.sid_pipeline).__name__,
+        "protocol_id": config.dataset.protocol_id,
+        "data_scope": (
+            "full" if config.dataset.history_days is None else "windowed"
+        ),
+        "user_pipeline": (
+            type(config.user_sid_pipeline).__name__
+            if config.user_sid_pipeline is not None
+            else "content-only"
+        ),
+        "quality_metric_schema": SID_QUALITY_SCHEMA_VERSION,
+        "user_catalog_quality": (
+            "enabled" if config.user_catalog_quality.enabled else "disabled"
+        ),
         **dict(config.tracking.tags),
     }
     with tracker.start_run(run_name, tags=tags):
@@ -160,7 +224,21 @@ def run_experiment(
             flatten_parameters(
                 {
                     "dataset": asdict(config.dataset),
+                    "data_contract": {
+                        "protocol_id": config.dataset.protocol_id,
+                        "expected_catalog_size": expected_catalog_size(
+                            config.dataset.protocol_id
+                        ),
+                    },
                     "training": asdict(config.training),
+                    "user_sid_pipeline": (
+                        type(config.user_sid_pipeline).__name__
+                        if config.user_sid_pipeline is not None
+                        else None
+                    ),
+                    "user_catalog_quality": asdict(
+                        config.user_catalog_quality
+                    ),
                     "enabled_stages": list(enabled_stages),
                     "max_rows": max_rows,
                 }
@@ -170,6 +248,7 @@ def run_experiment(
             SidExperimentConfig(
                 dataset=dataset,
                 sid_pipeline=config.sid_pipeline,
+                user_sid_pipeline=config.user_sid_pipeline,
                 enabled_stages=enabled_stages,
                 reports_dir=config.reports_dir,
                 core_min_interactions_per_item=(
@@ -178,6 +257,10 @@ def run_experiment(
                 history_days=config.dataset.history_days,
                 test_days=config.dataset.test_days,
                 timestamp_unit_seconds=config.dataset.timestamp_unit_seconds,
+                validation_fraction=config.dataset.validation_fraction,
+                catalog_from_fit=config.catalog_from_fit,
+                protocol_id=config.dataset.protocol_id,
+                user_catalog_quality=config.user_catalog_quality,
                 latest_interactions=max_rows,
                 tracker=tracker,
             ),

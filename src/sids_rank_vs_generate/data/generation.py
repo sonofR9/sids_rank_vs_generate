@@ -4,6 +4,7 @@ import math
 import random
 from collections import Counter
 from collections.abc import Sequence
+from dataclasses import dataclass
 from functools import partial
 from typing import Any
 
@@ -12,7 +13,9 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 from ..sids.collision_resolution import get_sid_cols
+from ..sids.user_aware import user_sid_columns
 from .preprocessing import PreparedInteractions
+from .protocols import uses_legacy_heldout
 
 
 class GenerationDataset(Dataset):
@@ -116,6 +119,44 @@ class SIDLogQTable:
         )
 
 
+@dataclass(frozen=True)
+class UserProfileTable:
+    user_to_index: dict[Any, int]
+    values: torch.Tensor
+
+    @classmethod
+    def from_frame(cls, frame: pl.DataFrame) -> "UserProfileTable":
+        required = {"uid", "user_feature"}
+        if not required.issubset(frame.columns):
+            raise ValueError("user features must contain uid and user_feature")
+        if frame.is_empty() or frame["uid"].n_unique() != frame.height:
+            raise ValueError("user features must contain one row per uid")
+        users = frame["uid"].to_list()
+        values = torch.tensor(
+            frame["user_feature"].to_list(),
+            dtype=torch.float32,
+        )
+        if values.ndim != 2 or values.size(1) == 0:
+            raise ValueError("user features must form a non-empty matrix")
+        if not torch.isfinite(values).all():
+            raise ValueError("user features must contain only finite values")
+        return cls(
+            user_to_index={uid: index for index, uid in enumerate(users)},
+            values=values,
+        )
+
+    @property
+    def dimension(self) -> int:
+        return int(self.values.size(1))
+
+    def lookup(self, users: list[Any]) -> torch.Tensor:
+        try:
+            indices = [self.user_to_index[uid] for uid in users]
+        except KeyError as error:
+            raise ValueError("user features do not cover the whole batch") from error
+        return self.values[indices]
+
+
 def attach_item_log_q(
     examples: list[dict],
     *,
@@ -143,25 +184,34 @@ def prepare_generation_examples(
     prepared: PreparedInteractions,
     semantic_df: pl.DataFrame,
     config,
+    pair_semantic_df: pl.DataFrame | None = None,
 ):
-    sid_columns = get_sid_cols(semantic_df)
-    if len(sid_columns) != config.num_levels:
+    global_sid_columns = get_sid_cols(semantic_df)
+    target_sid_columns = global_sid_columns
+    if pair_semantic_df is not None:
+        target_sid_columns = user_sid_columns(pair_semantic_df)
+    if len(target_sid_columns) != config.num_levels:
         raise ValueError(
-            f"Expected {config.num_levels} SID levels, received {len(sid_columns)}"
+            f"Expected {config.num_levels} SID levels, "
+            f"received {len(target_sid_columns)}"
         )
-    frame = (
-        prepared.data.join(
-            semantic_df.select("item_id", *sid_columns),
-            on="item_id",
+    frame = prepared.data.join(
+        semantic_df.select("item_id", *global_sid_columns),
+        on="item_id",
+        how="inner",
+    ).sort(["uid", "timestamp"])
+    if pair_semantic_df is not None:
+        frame = frame.join(
+            pair_semantic_df.select("uid", "item_id", *target_sid_columns),
+            on=["uid", "item_id"],
             how="inner",
-        )
-        .sort(["uid", "timestamp"])
-    )
+        ).sort(["uid", "timestamp"])
     item_ids = sorted(frame["item_id"].unique().to_list())
     item2idx = {item_id: index + 1 for index, item_id in enumerate(item_ids)}
 
     train_examples = []
     validation_examples = []
+    test_examples = []
     history = []
     current_uid = None
     for row in frame.iter_rows(named=True):
@@ -171,16 +221,26 @@ def prepare_generation_examples(
         item_idx = item2idx[row["item_id"]]
         if len(history) >= config.min_history_len:
             example = {
+                "uid": row["uid"],
                 "history": history[-config.max_history_len :],
                 "target": item_idx,
-                "sid": [int(row[column]) for column in sid_columns],
+                "sid": [int(row[column]) for column in target_sid_columns],
+                "global_sid": [int(row[column]) for column in global_sid_columns],
             }
-            if row["timestamp"] >= prepared.test_start_timestamp:
+            if (
+                uses_legacy_heldout(prepared.protocol_id)
+                and row["timestamp"] >= prepared.test_start_timestamp
+            ):
+                validation_examples.append(example)
+                test_examples.append(example)
+            elif row["timestamp"] >= prepared.test_start_timestamp:
+                test_examples.append(example)
+            elif row["timestamp"] >= prepared.validation_start_timestamp:
                 validation_examples.append(example)
             else:
                 train_examples.append(example)
         history.append(item_idx)
-    return train_examples, validation_examples, item2idx
+    return train_examples, validation_examples, test_examples, item2idx
 
 
 def limit_examples(
@@ -200,6 +260,7 @@ def collate_generation(
     *,
     num_levels: int,
     sid_logq_table: SIDLogQTable | None = None,
+    user_profiles: UserProfileTable | None = None,
 ) -> dict[str, Any]:
     batch_size = len(batch)
     max_length = max(len(example["history"]) for example in batch)
@@ -224,6 +285,21 @@ def collate_generation(
         ),
         "sid": sid,
     }
+    has_uid = ["uid" in example for example in batch]
+    if any(has_uid) and not all(has_uid):
+        raise ValueError("either every example or no example must provide uid")
+    if all(has_uid):
+        result["uid"] = [example["uid"] for example in batch]
+    has_global_sid = ["global_sid" in example for example in batch]
+    if any(has_global_sid) and not all(has_global_sid):
+        raise ValueError(
+            "either every example or no example must provide global_sid"
+        )
+    if all(has_global_sid):
+        result["global_sid"] = torch.tensor(
+            [example["global_sid"] for example in batch],
+            dtype=torch.long,
+        )
     has_log_q = ["log_q" in example for example in batch]
     if any(has_log_q) and not all(has_log_q):
         raise ValueError("either every example or no example must provide log_q")
@@ -250,13 +326,19 @@ def collate_generation(
                 rows.append(batch_cache[prefix])
             level_rows.append(torch.stack(rows))
         result["sid_log_q"] = tuple(level_rows)
+    if user_profiles is not None:
+        if "uid" not in result:
+            raise ValueError("uid is required when user profiles are enabled")
+        result["user_features"] = user_profiles.lookup(result["uid"])
     return result
 
 
 def build_generation_loaders(
     train_examples,
     validation_examples,
+    test_examples,
     config,
+    user_profiles: UserProfileTable | None = None,
     *,
     sid_logq_table: SIDLogQTable | None = None,
 ):
@@ -264,6 +346,7 @@ def build_generation_loaders(
         collate_generation,
         num_levels=config.num_levels,
         sid_logq_table=sid_logq_table,
+        user_profiles=user_profiles,
     )
     train_loader = DataLoader(
         GenerationDataset(train_examples),
@@ -281,4 +364,12 @@ def build_generation_loaders(
         pin_memory=str(config.device).startswith("cuda"),
         num_workers=config.num_workers,
     )
-    return train_loader, validation_loader
+    test_loader = DataLoader(
+        GenerationDataset(test_examples),
+        batch_size=config.batch_size_val,
+        shuffle=False,
+        collate_fn=collator,
+        pin_memory=str(config.device).startswith("cuda"),
+        num_workers=config.num_workers,
+    )
+    return train_loader, validation_loader, test_loader

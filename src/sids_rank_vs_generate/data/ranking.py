@@ -9,6 +9,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 from ..datasets import DatasetFiles
+from ..sids.user_aware import IUserAwareSidPipeline, user_sid_columns
 from .preprocessing import PreparedInteractions, timestamp_days_before
 
 
@@ -216,6 +217,7 @@ def prepare_ranking_data(
     hyperparameter_tuning: bool,
     train_days: float,
     max_rows: int | None,
+    user_sid_pipeline: IUserAwareSidPipeline | None = None,
 ) -> RankingData:
     """Merge DCNv2 features with the latest like history before each candidate."""
 
@@ -260,6 +262,20 @@ def prepare_ranking_data(
         train_start,
         max_rows,
     ).join(sid_paths, on=sid_columns, how="inner").sort(["uid", "timestamp"])
+    candidate_sid_columns = sid_columns
+    if user_sid_pipeline is not None:
+        candidate_pairs = (
+            candidates.select("uid", "item_id")
+            .unique()
+            .sort(["uid", "item_id"])
+        )
+        candidate_user_sids = user_sid_pipeline.update(candidate_pairs)
+        candidate_sid_columns = tuple(user_sid_columns(candidate_user_sids))
+        candidates = candidates.join(
+            candidate_user_sids,
+            on=["uid", "item_id"],
+            how="inner",
+        )
     histories = _history_snapshots(
         prepared,
         history_item_mapping,
@@ -280,7 +296,7 @@ def prepare_ranking_data(
     user_mapping = merged.select("uid").unique().sort("uid").with_row_index("user_idx")
     merged = _add_hashed_features(
         merged.join(user_mapping, on="uid", how="inner"),
-        sid_columns,
+        candidate_sid_columns,
     )
 
     train = merged.filter(
@@ -310,7 +326,7 @@ def prepare_ranking_data(
         validation=validation,
         test=test,
         dense_train=train.select(DENSE_COLUMNS),
-        sid_columns=sid_columns,
+        sid_columns=candidate_sid_columns,
         num_users=user_mapping.height,
         num_history_items=sid_paths.height + 1,
         train_start_timestamp=train_start,
@@ -372,9 +388,13 @@ def collate_ranking(batch: list[dict[str, Any]]) -> dict[str, Any]:
             (
                 column
                 for column in batch[0]
-                if column.startswith("sid_") and column[4:].isdigit()
+                if (
+                    (column.startswith("sid_") and column[4:].isdigit())
+                    or (column.startswith("usid_") and column[5:].isdigit())
+                )
+                and f"{column}_hash" in batch[0]
             ),
-            key=lambda column: int(column[4:]),
+            key=lambda column: int(column.rsplit("_", 1)[1]),
         )
     )
     sparse = {
@@ -476,9 +496,13 @@ def collate_ranking_frame(
             (
                 column
                 for column in frame.columns
-                if column.startswith("sid_") and column[4:].isdigit()
+                if (
+                    (column.startswith("sid_") and column[4:].isdigit())
+                    or (column.startswith("usid_") and column[5:].isdigit())
+                )
+                and f"{column}_hash" in frame.columns
             ),
-            key=lambda column: int(column[4:]),
+            key=lambda column: int(column.rsplit("_", 1)[1]),
         )
     )
     sparse = {

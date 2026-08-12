@@ -34,6 +34,7 @@ class FakeMlflow:
         self.experiment_name = None
         self.runs = []
         self.stack = []
+        self.artifacts = []
 
     def set_tracking_uri(self, uri: str) -> None:
         self.tracking_uri = uri
@@ -66,6 +67,9 @@ class FakeMlflow:
 
     def log_metrics(self, metrics, *, step=None) -> None:
         self.stack[-1].metrics.append((step, metrics))
+
+    def log_artifact(self, path) -> None:
+        self.artifacts.append((self.stack[-1].name, path))
 
 
 class TrackingTest(unittest.TestCase):
@@ -111,6 +115,7 @@ class TrackingTest(unittest.TestCase):
             tracker.log_params({"seed": 42})
             with tracker.start_run("generation", nested=True) as child:
                 child.log_metrics({"train.loss": 0.5}, step=1)
+                child.log_artifact(Path("metrics.json"))
                 self.assertEqual(child.info()["run_id"], "run-2")
 
         self.assertEqual(fake.tracking_uri, "file:./mlruns")
@@ -120,6 +125,10 @@ class TrackingTest(unittest.TestCase):
         self.assertTrue(fake.runs[1].nested)
         self.assertEqual(fake.runs[0].params, {"seed": 42})
         self.assertEqual(fake.runs[1].metrics, [(1, {"train.loss": 0.5})])
+        self.assertEqual(
+            fake.artifacts,
+            [("generation", "metrics.json")],
+        )
 
     def test_mlflow_tracker_sanitizes_at_sign_in_metric_names(self) -> None:
         fake = FakeMlflow()

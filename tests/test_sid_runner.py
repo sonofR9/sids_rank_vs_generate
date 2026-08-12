@@ -4,22 +4,29 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import polars as pl
 
 from sids_rank_vs_generate.cli import main
-from sids_rank_vs_generate.datasets import DatasetFiles, resolve_dataset
+from sids_rank_vs_generate.datasets import (
+    HF_DATASET_REVISION,
+    HF_RANKING_REVISION,
+    DatasetFiles,
+    resolve_dataset,
+)
 from sids_rank_vs_generate.evaluation import (
     DEFAULT_STAGE_FACTORIES,
     EvaluationContext,
     IEvaluationStage,
+    UserCatalogQualityConfig,
 )
 from sids_rank_vs_generate.sid_experiment import (
     SidExperimentConfig,
     run_sid_experiment,
 )
-from sids_rank_vs_generate.sids import ISidPipeline
+from sids_rank_vs_generate.sids import ISidPipeline, IUserAwareSidPipeline
 from tests.test_preprocessing import sample_interactions
 
 
@@ -40,6 +47,38 @@ class FakeSid(ISidPipeline):
         return df.with_columns(
             (pl.col("item_id") % 2).cast(pl.Int32).alias("sid_0"),
             (pl.col("item_id") // 2).cast(pl.Int32).alias("sid_1"),
+        )
+
+
+class FitCatalogFakeSid(FakeSid):
+    def train(self, df: pl.DataFrame) -> None:
+        if "embed" not in df.columns or df.is_empty():
+            raise AssertionError("SID did not receive the fit catalog")
+        self.trained = True
+
+
+class FakeUserSid(IUserAwareSidPipeline):
+    def __init__(self) -> None:
+        self.config = SimpleNamespace(
+            num_levels=1,
+            codebook_size=2,
+            codebook_sizes=None,
+        )
+        self.trained = False
+
+    def train(self, data) -> None:
+        self.trained = True
+
+    def update(self, pairs: pl.DataFrame) -> pl.DataFrame:
+        if not self.trained:
+            raise RuntimeError("train must run before update")
+        return pairs.with_columns(
+            (pl.col("item_id") % 2).cast(pl.Int32).alias("usid_0")
+        )
+
+    def user_features(self, users: pl.DataFrame) -> pl.DataFrame:
+        return users.select("uid").with_columns(
+            pl.lit([1.0]).alias("user_feature")
         )
 
 
@@ -141,6 +180,43 @@ class SidRunnerTest(unittest.TestCase):
             run_dir = Path(result["artifacts"]["directory"])
             self.assertTrue((run_dir / "ranking" / "curve.txt").is_file())
 
+    def test_user_catalog_quality_is_saved_separately_from_pair_stats(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            directory = Path(tmpdir)
+            dataset = self._write_inputs(directory)
+            result = run_sid_experiment(
+                SidExperimentConfig(
+                    dataset=dataset,
+                    sid_spec="tests.test_sid_runner:FitCatalogFakeSid",
+                    user_sid_pipeline=FakeUserSid(),
+                    reports_dir=directory / "reports",
+                    core_min_interactions_per_item=2,
+                    test_days=1,
+                    catalog_from_fit=True,
+                    user_catalog_quality=UserCatalogQualityConfig(
+                        enabled=True,
+                        max_users=2,
+                    ),
+                )
+            )
+
+            assert result["user_sid"] is not None
+            observed = result["user_sid"]["statistics"]
+            quality = result["user_sid"]["catalog_quality"]
+            self.assertIn("pair_count", observed)
+            self.assertEqual(quality["aggregation"], "per_user_catalog_macro")
+            self.assertEqual(quality["user_count"], 2)
+            self.assertEqual(
+                quality["catalog_items_per_user"],
+                result["data"]["catalog_size"],
+            )
+            quality_path = Path(
+                result["artifacts"]["user_sid_catalog_quality"]
+            )
+            self.assertTrue(quality_path.is_file())
+            payload = json.loads(quality_path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["user_sample"]["selected_user_count"], 2)
+
     def test_cli_uses_only_shared_dataset_and_report_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             directory = Path(tmpdir)
@@ -207,13 +283,17 @@ class SidRunnerTest(unittest.TestCase):
             source.mkdir()
             inputs = self._write_inputs(source)
 
+            downloads = []
+
+            def fake_download(repo_id, **kwargs):
+                downloads.append((repo_id, kwargs))
+                return str(inputs.interactions_path)
+
             dataset = resolve_dataset(
                 "50m",
                 cache_root=directory / "cache",
                 source_embeddings_path=inputs.embeddings_path,
-                downloader=lambda *_args, **_kwargs: str(
-                    inputs.interactions_path
-                ),
+                downloader=fake_download,
             )
 
             self.assertTrue(dataset.interactions_path.is_file())
@@ -223,6 +303,18 @@ class SidRunnerTest(unittest.TestCase):
             self.assertEqual(
                 prepared_embeddings.columns,
                 ["item_id", "normalized_embed"],
+            )
+            revisions = {
+                repo_id: kwargs.get("revision")
+                for repo_id, kwargs in downloads
+            }
+            self.assertEqual(
+                revisions["yandex/yambda"],
+                HF_DATASET_REVISION,
+            )
+            self.assertEqual(
+                revisions["matfu21/yambda-50m-lag-features"],
+                HF_RANKING_REVISION,
             )
 
     def test_sid_is_required_by_the_common_runner(self) -> None:
