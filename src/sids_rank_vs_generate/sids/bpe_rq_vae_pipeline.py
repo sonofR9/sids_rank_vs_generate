@@ -17,6 +17,10 @@ class BPERQVAEPipeline(RQVAEPipeline):
             num_merges=config.bpe_num_merges,
             min_frequency=config.bpe_min_frequency,
         )
+        self.pad_id = (
+            config.codebook_size * config.num_levels
+            + config.bpe_num_merges
+        )
         super().__init__(RQVAEConfig(**{
             field.name: getattr(config, field.name)
             for field in fields(RQVAEConfig)
@@ -52,4 +56,5 @@ class BPERQVAEPipeline(RQVAEPipeline):
         return self.bpe.transform_polars(
             sids,
             sid_columns=sid_columns,
+            pad_id=self.pad_id,
         )

@@ -58,14 +58,20 @@ class SemanticIDCatalog:
 
 
 def _model_codebook_sizes(model) -> tuple[int, ...]:
-    configured = getattr(model, "codebook_sizes", None)
+    configured = getattr(model, "head_sizes", None)
+
+    if configured is None:
+        configured = getattr(model, "codebook_sizes", None)
+
     if configured is None:
         configured = (model.codebook_size,) * model.num_levels
+
     sizes = tuple(int(size) for size in configured)
+
     if len(sizes) != model.num_levels:
         raise ValueError("model codebook sizes do not match its number of levels")
-    return sizes
 
+    return sizes    
 
 def _model_codebook_offsets(model, device: torch.device) -> torch.Tensor:
     configured = getattr(model, "codebook_offsets", None)

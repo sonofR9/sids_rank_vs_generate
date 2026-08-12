@@ -118,6 +118,7 @@ class BPE:
         self,
         df: pl.DataFrame,
         sid_columns: list[str],
+        pad_id: int,
     ) -> pl.DataFrame:
         if not self._fitted:
             raise RuntimeError("Сначала вызови BPE.fit()")
@@ -137,10 +138,8 @@ class BPE:
             for sequence in encoded
         ]
 
-        max_length = max(
-            len(sequence)
-            for sequence in encoded_ids
-        )
+        # Всегда оставляем столько же SID-позиций, сколько было уровней RQ.
+        max_length = len(sid_columns)
 
         data = {
             "item_id": df["item_id"],
@@ -148,11 +147,12 @@ class BPE:
 
         for i in range(max_length):
             data[f"sid_{i}"] = [
-                sequence[i] if i < len(sequence) else None
+                sequence[i] if i < len(sequence) else pad_id
                 for sequence in encoded_ids
             ]
 
         return pl.DataFrame(data)
+
 
     def _token_to_id(self, token: Token) -> int:
         if token[0] == "bpe":

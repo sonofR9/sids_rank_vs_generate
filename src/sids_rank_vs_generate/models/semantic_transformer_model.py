@@ -26,13 +26,15 @@ class SemanticTransformerModel(nn.Module):
         if any(size <= 0 for size in self.codebook_sizes):
             raise ValueError("codebook sizes must be positive")
 
+        self.pad_id = getattr(self.cfg, "pad_id", None)
+        self.head_sizes = self.codebook_sizes
         offsets = torch.tensor(
-            [0, *self.codebook_sizes[:-1]],
+            [0, *self.head_sizes[:-1]],
             dtype=torch.long,
         ).cumsum(dim=0)
         self.register_buffer("codebook_offsets", offsets, persistent=False)
-        self.codebook_size = self.codebook_sizes[0]
-        self.bos_id = sum(self.codebook_sizes)
+        self.bos_id = sum(self.head_sizes)
+
         self.encoder = HistoryTransformerEncoder(num_items, self.cfg)
 
         if initial_item_embeddings is not None:
@@ -66,7 +68,7 @@ class SemanticTransformerModel(nn.Module):
         # TODO: prediction heads for each semantic level
         self.heads = nn.ModuleList([
             nn.Linear(self.cfg.d_model, size)
-            for size in self.codebook_sizes
+            for size in self.head_sizes
         ])
 
         if item_sid_codes is not None:
@@ -77,7 +79,7 @@ class SemanticTransformerModel(nn.Module):
                     f"item SID codes have shape {tuple(item_sid_codes.shape)}; "
                     f"expected {expected_shape}"
                 )
-            for level, size in enumerate(self.codebook_sizes):
+            for level, size in enumerate(self.head_sizes):
                 tokens = item_sid_codes[:, level]
                 if torch.any((tokens < -1) | (tokens >= size)):
                     raise ValueError(f"item SID codes at level {level} are out of range")
@@ -127,6 +129,8 @@ class SemanticTransformerModel(nn.Module):
 
         codes = self.item_sid_codes[history]
         valid = codes >= 0
+        if self.pad_id is not None:
+            valid = valid & (codes != self.pad_id)
         token_ids = codes.clamp_min(0) + self.codebook_offsets.view(1, 1, -1)
         embeddings = self.decoder_embed(token_ids)
         embeddings = embeddings * valid.unsqueeze(-1)
