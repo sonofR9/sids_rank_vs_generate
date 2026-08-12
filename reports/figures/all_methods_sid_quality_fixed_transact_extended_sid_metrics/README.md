@@ -11,6 +11,8 @@ files. The source report directory is left unchanged.
 - `extended_sid_metrics/` contains the 44 new SID metrics plotted against
   Recall@100, DCNv2 ROC-AUC, and TransAct pairwise accuracy in PNG, PDF, and SVG
   formats.
+- `correlation_heatmaps/` contains Pearson and Spearman heatmaps for all 56 SID
+  metrics against Recall@100, pairwise accuracy, and ROC-AUC targets.
 - `extended_sid_metrics_metadata.json` records the input paths, compact item-ID
   alignment, metric names, and output counts.
 - The original plots and CSV files are retained so this directory can be used
@@ -24,6 +26,7 @@ Reproduce the report from the repository root with:
 
 ```bash
 python scripts/calculate_and_plot_extended_sid_metrics.py
+python scripts/plot_extended_sid_quality_correlation_heatmaps.py
 ```
 
 Use `--embeddings`, `--runs-root`, `--source-dir`, or `--output-dir` to override
