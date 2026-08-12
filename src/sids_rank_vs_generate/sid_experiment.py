@@ -418,7 +418,28 @@ def run_sid_experiment(
     )
     run_dir.mkdir(parents=True, exist_ok=True)
     semantic_ids_path = run_dir / "semantic_ids.parquet"
+    # Keep the canonical internal-catalog artifact used by global SID anchors.
     sid_output.select("item_id", *sid_columns).write_parquet(semantic_ids_path)
+
+    # Export original item IDs separately for downstream mapping analysis.
+    sid_mapping_dir = run_dir / "sid_mapping"
+    sid_mapping_dir.mkdir(parents=True, exist_ok=True)
+    item_sid_mapping_path = sid_mapping_dir / "semantic_ids.parquet"
+    (
+        prepared.item_mapping.join(
+            sid_output.select("item_id", *sid_columns),
+            on="item_id",
+            how="inner",
+        )
+        .rename(
+            {
+                "original_item_id": "item_id",
+                "item_id": "catalog_item_idx",
+            }
+        )
+        .select("item_id", "catalog_item_idx", *sid_columns)
+        .write_parquet(item_sid_mapping_path)
+    )
     user_semantic_ids_path: Path | None = None
     if fit_user_sids is not None:
         user_semantic_ids_path = run_dir / "user_semantic_ids_fit.parquet"
@@ -523,6 +544,7 @@ def run_sid_experiment(
                 "directory": run_dir,
                 "metrics_json": metrics_path,
                 "semantic_ids": semantic_ids_path,
+                "item_sid_mapping": item_sid_mapping_path,
                 "user_semantic_ids_fit": user_semantic_ids_path,
                 "user_sid_catalog_quality": user_catalog_quality_path,
             },
@@ -535,6 +557,13 @@ def run_sid_experiment(
     config.tracker.log_artifact(metrics_path)
     if user_catalog_quality_path is not None:
         config.tracker.log_artifact(user_catalog_quality_path)
+
+    # In a complete experiment the parent MLflow run is still active here.
+    if config.tracker.info().get("run_id") is not None:
+        config.tracker.log_artifact(
+            item_sid_mapping_path,
+            artifact_path="sid_mapping",
+        )
     evaluation_metrics: dict[str, Any] = {}
     for stage_name, stage_result in evaluations.items():
         if isinstance(stage_result, Mapping) and "metrics" in stage_result:

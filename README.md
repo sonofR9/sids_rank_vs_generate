@@ -167,8 +167,22 @@ best suited to controlled comparisons.
 Enable MLflow for the complete experiment with `--mlflow`. The runner creates
 one parent run and child runs for SID training, DCNv2, TransAct, and semantic
 generation. Custom PyTorch loops log their train and validation metrics once per
-epoch; the parent run stores final SID and downstream metrics. Checkpoints and
-other generated files remain in the local report directory printed by the run.
+epoch; the parent run stores final SID and downstream metrics, plus
+`sid_mapping/semantic_ids.parquet` and `sid_mapping/metrics.json`. The Parquet
+has the original catalog `item_id`, `catalog_item_idx`, and `sid_0`, ... columns.
+Checkpoints and other generated files remain in the local report directory printed
+by the run.
+
+To export all SID mappings without ranking or generation, use
+`scripts/export_sid_mapping_matrix.sh`. It runs the historical SID matrix and
+uploads each mapping under `sid_mapping/semantic_ids.parquet`:
+
+```bash
+tmux new -s sid-mappings
+RUN_SET=all GPU=0 bash scripts/export_sid_mapping_matrix.sh 2>&1 | tee sid-mappings.log
+```
+
+The same script accepts `RUN_SET=rqkmeans`, `rqvae`, `r3vae`, or `balance`.
 
 ```bash
 python run.py experiments/rqkmeans_full.py \

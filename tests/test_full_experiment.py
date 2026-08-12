@@ -43,6 +43,7 @@ class RecordingTracker(ExperimentTracker):
             "tags": dict(tags or {}),
             "params": {},
             "metrics": [],
+            "artifacts": [],
         }
         self.stack.append(run_name)
         try:
@@ -56,6 +57,11 @@ class RecordingTracker(ExperimentTracker):
     def log_metrics(self, metrics, *, step=None) -> None:
         self.runs[self.stack[-1]]["metrics"].append((step, dict(metrics)))
 
+    def log_artifact(self, local_path, *, artifact_path=None) -> None:
+        self.runs[self.stack[-1]]["artifacts"].append(
+            (Path(local_path), artifact_path)
+        )
+
     def info(self):
         return {
             "enabled": True,
@@ -64,6 +70,37 @@ class RecordingTracker(ExperimentTracker):
 
 
 class FullRQKMeansExperimentTest(unittest.TestCase):
+    def test_sid_only_run_does_not_require_downstream_stages(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            interactions_path = root / "interactions.parquet"
+            embeddings_path = root / "embeddings.parquet"
+            pl.DataFrame(
+                {"uid": [1, 1, 2, 2], "item_id": [10, 20, 10, 20], "timestamp": [0, 1, 2, 3]}
+            ).write_parquet(interactions_path)
+            pl.DataFrame(
+                {"item_id": [10, 20], "normalized_embed": [[1.0, 0.0], [0.0, 1.0]]}
+            ).write_parquet(embeddings_path)
+            config = ExperimentConfig(
+                dataset=YambdaDatasetConfig(
+                    interactions_path=interactions_path,
+                    embeddings_path=embeddings_path,
+                    core_min_interactions_per_item=1,
+                    test_days=1,
+                ),
+                sid_pipeline=RQKMeansPipeline(RQKMeansConfig(num_levels=1, codebook_size=2)),
+                reports_dir=root / "reports",
+            )
+            tracker = RecordingTracker()
+            with patch("sids_rank_vs_generate.experiment.create_tracker", return_value=tracker):
+                result = run_experiment(
+                    config,
+                    run_ranking=False,
+                    run_generation=False,
+                    sid_only=True,
+                )
+            self.assertEqual(result["evaluations"], {})
+            self.assertTrue(Path(result["artifacts"]["semantic_ids"]).is_file())
     def test_sid_and_experiment_configs_do_not_accept_seed_overrides(self) -> None:
         with self.assertRaises(TypeError):
             RQKMeansConfig(random_state=7)
@@ -257,6 +294,13 @@ class FullRQKMeansExperimentTest(unittest.TestCase):
                     "ranking.transact",
                     "generation",
                 },
+            )
+            self.assertEqual(
+                [(path.name, directory) for path, directory in tracker.runs["RQKMeansPipeline"]["artifacts"]],
+                [
+                    ("metrics.json", None),
+                    ("semantic_ids.parquet", "sid_mapping"),
+                ],
             )
             for run_name in ("ranking.dcnv2", "ranking.transact", "generation"):
                 metric_names = {

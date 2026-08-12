@@ -181,10 +181,11 @@ def run_experiment(
     *,
     run_ranking: bool = True,
     run_generation: bool = True,
+    sid_only: bool = False,
     max_rows: int | None = None,
 ) -> dict[str, Any]:
-    if not run_ranking and not run_generation:
-        raise ValueError("at least one evaluation stage must run")
+    if not run_ranking and not run_generation and not sid_only:
+        raise ValueError("at least one evaluation stage must run unless sid_only=True")
     if max_rows is not None and max_rows <= 0:
         raise ValueError("max_rows must be positive")
     dataset = config.dataset.resolve()
@@ -325,6 +326,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Skip TIGER-like generation.",
     )
     parser.add_argument(
+        "--sid-only",
+        action="store_true",
+        help="Train the SID and save its item_id -> SID mapping without downstream evaluation.",
+    )
+    parser.add_argument(
         "--max-rows",
         type=int,
         help="Use only the latest N rows from each interaction source.",
@@ -448,8 +454,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
     result = run_experiment(
         config,
-        run_ranking=not args.skip_ranking,
-        run_generation=not args.skip_generation,
+        run_ranking=not args.skip_ranking and not args.sid_only,
+        run_generation=not args.skip_generation and not args.sid_only,
+        sid_only=args.sid_only,
         max_rows=args.max_rows,
     )
     print(json.dumps(result, ensure_ascii=False, indent=2))
