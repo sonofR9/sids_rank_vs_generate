@@ -1,40 +1,37 @@
-# SID Quality Figure Reports
+# Correlation Figure Reports
 
-All committed visual reports live here. Every report contains rendered figures
-(PNG/PDF/SVG), source CSV tables, and metadata. Checkpoints, raw training
-artifacts, tmux logs, and compressed delivery archives are deliberately kept
-out of Git.
+This directory contains immutable, unpacked analysis outputs. Each report keeps
+its figures (PNG/PDF/SVG), source tables, analysis metadata, and execution log
+together so results can be inspected without access to MLflow.
 
-## Generation
+## Layout
 
-- `generation/rqvae_item_logq_recall/`: prior RQ-VAE item-level LogQ
-  Recall@100 analysis; it can include auxiliary item loss configurations.
-- `generation/rqvae_pure_sid_logq_recall/`: pure SID-level correction
-  `score(SID) - log q(SID)`, with item LogQ disabled and auxiliary item loss
-  equal to zero. The current report contains `L=2,C=256` and `L=3,C=256`.
-- `generation/raw_sid_recall/`: final raw-SID Recall@100 report. It supersedes
-  the intermediate snapshot and retains the additional raw-run matching table.
-- `generation/poster_plum_balance_recall/`: poster generation
-  Recall@100 export including PLUM and BalanceRQKMeans.
-- `generation/all_methods_recall/`: combined poster-style Code Entropy versus
-  Recall@100 figure across raw-SID and LogQ method families. PLUM and Balance
-  points are included only when their run names identify the compatible 33k
-  catalog.
+- `generation/logq_rqvae_sid_quality_recall/`: RQ-VAE + LogQ-only Recall@100
+  analysis.
+- `generation/poster_raw_sid/`: final raw-SID poster generation report,
+  previously stored under `reports/poster/sid_quality_recall`.
+- `generation/poster_raw_sid_with_plum_balance/`: updated poster
+  generation export including PLUM and BalanceRQKMeans. This report is produced
+  on the GPU server by `scripts/analyze_generation_sid_quality.py`.
+- `ranking/sid_quality_correlations/`: DCNv2 and TransAct correlations against
+  SID quality metrics.
+- `all_methods_sid_quality/`: combined two-panel figures. For each SID metric,
+  it contains Recall@100, DCNv2 Pairwise Accuracy, and TransAct Pairwise
+  Accuracy views across all compatible method families, including both LogQ
+variants. PLUM and BalanceRQKMeans require the 33,148-item catalog tag.
 
-## Ranking
-
-- `ranking/`: DCNv2 and TransAct Pairwise Accuracy and ROC-AUC correlations
-  against SID quality metrics. The `dcnv2/` and `transact/` directories hold
-  model-specific figures; shared CSV summaries live directly here.
+The intermediate raw-SID snapshot from `sid_quality_correlations.zip` is not
+kept separately: the later export contains the final figures and one additional
+raw-run matching table. Compressed source archives are intentionally not
+committed after their contents have been unpacked here.
 
 ## Reproduction
 
-`scripts/analyze_generation_sid_quality.py`,
-`scripts/analyze_logq_rqvae_sid_quality_recall.py`, and
-`scripts/analyze_ranking_sid_quality.py` recreate their corresponding reports
-from MLflow. The PLUM/Balance generation export additionally uses local run
-reports and cached embeddings to backfill metrics absent from the original
-parent runs.
+The analysis scripts in `scripts/` recreate the reports from MLflow. The
+generation export with PLUM/Balance additionally reads the local run reports
+and cached embeddings to backfill SID metrics that were not logged by the
+original parent runs.
 
-`scripts/plot_all_generation_methods.py` combines the committed generation
-report tables into the all-methods figure without querying MLflow.
+`scripts/plot_all_generation_methods.py` creates the combined figures from the
+committed CSVs. It recognizes both this layout and the flattened layout on
+current `main`.
