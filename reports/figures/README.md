@@ -16,6 +16,10 @@ out of Git.
   the intermediate snapshot and retains the additional raw-run matching table.
 - `generation/poster_plum_balance_recall/`: poster generation
   Recall@100 export including PLUM and BalanceRQKMeans.
+- `generation/all_methods_recall/`: combined poster-style Code Entropy versus
+  Recall@100 figure across raw-SID and LogQ method families. PLUM and Balance
+  points are included only when their run names identify the compatible 33k
+  catalog.
 
 ## Ranking
 
@@ -31,3 +35,6 @@ out of Git.
 from MLflow. The PLUM/Balance generation export additionally uses local run
 reports and cached embeddings to backfill metrics absent from the original
 parent runs.
+
+`scripts/plot_all_generation_methods.py` combines the committed generation
+report tables into the all-methods figure without querying MLflow.
