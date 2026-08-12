@@ -18,7 +18,7 @@ from .reproducibility import SID_EXPERIMENT_SEED, seed_everything
 class PipelineConfig:
     interactions_path: Path
     core_min_interactions_per_item: int = 5
-    history_days: float | None = 365.0
+    history_days: float | None = None
     test_days: float = 7.0
     timestamp_unit_seconds: float = 1.0
     latest_interactions: int | None = None
