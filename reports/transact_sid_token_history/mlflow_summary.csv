@@ -1,0 +1,45 @@
+run_id,mlflow.runName,method,method_key,num_levels,codebook_size,status,pairwise_accuracy,roc_auc
+78e92c9ff66f40829e8b39deaffdd827,transact-sid-tokens-balance-l3-c128-full-seed42,BalanceRQKMeans,balance,3,128,FINISHED,0.6326767206192017,0.9279552698135376
+23d0fe85e2ee4262b580a15477df0ac8,transact-sid-tokens-balance-l3-c256-full-seed42,BalanceRQKMeans,balance,3,256,FINISHED,0.6323870420455933,0.9289332032203674
+75c21dabbec74da49d8b792fc9ff587f,transact-sid-tokens-balance-l3-c512-full-seed42,BalanceRQKMeans,balance,3,512,FINISHED,0.6289107799530029,0.9256415963172913
+16272a790ccb452fb0262d1780118ade,transact-sid-tokens-plum-l3-c128-full-seed42,PLUM,plum,3,128,FINISHED,0.6170336008071899,0.9295673966407776
+35ed1bc4b1d6412bbdbcfd2d082b73d9,transact-sid-tokens-plum-l3-c256-full-seed42,PLUM,plum,3,256,FINISHED,0.637601375579834,0.9254741668701172
+d8ce45962c3d45798369667aa4ee0c20,transact-sid-tokens-plum-l3-c512-full-seed42,PLUM,plum,3,512,FINISHED,0.6268829703330994,0.9294686913490295
+4ff70b795abd41f4bd4f23b7ae62136b,transact-sid-tokens-r3vae_rqkmeans-l2-c256-full-seed42,R3VAE (rqkmeans),r3vae_rqkmeans,2,256,FINISHED,0.635283887386322,0.9272528886795044
+d1601be2ba974d9283864e09557bf81f,transact-sid-tokens-r3vae_rqkmeans-l3-c128-full-seed42,R3VAE (rqkmeans),r3vae_rqkmeans,3,128,FINISHED,0.6297798156738281,0.9293670654296875
+c4348feb956a4b25bdb772ed2ecadc7f,transact-sid-tokens-r3vae_rqkmeans-l3-c256-full-seed42,R3VAE (rqkmeans),r3vae_rqkmeans,3,256,FINISHED,0.6223776340484619,0.930387020111084
+6e6637f27c60438eb55ab114f1b5f610,transact-sid-tokens-r3vae_rqkmeans-l3-c512-full-seed42,R3VAE (rqkmeans),r3vae_rqkmeans,3,512,FINISHED,0.6159673929214478,0.927763044834137
+81158e4f357a4af7b95b36c50d8857e8,transact-sid-tokens-r3vae_rqkmeans-l4-c256-full-seed42,R3VAE (rqkmeans),r3vae_rqkmeans,4,256,FINISHED,0.6354895234107971,0.9254965782165527
+6d4b86ba07ba4709b4b0a30c48254cb3,transact-sid-tokens-r3vae_spherical-l2-c256-full-seed42,R3VAE (spherical),r3vae_spherical,2,256,FINISHED,0.628496527671814,0.9282988905906677
+08ee59ef0249408ea917c108175116e4,transact-sid-tokens-r3vae_spherical-l3-c1024-full-seed42,R3VAE (spherical),r3vae_spherical,3,1024,FINISHED,0.6194638609886169,0.9267627000808716
+a2b2c66a801d4d0fa616f0eacfd5a886,transact-sid-tokens-r3vae_spherical-l3-c128-full-seed42,R3VAE (spherical),r3vae_spherical,3,128,FINISHED,0.618881106376648,0.9290438294410706
+dd7dfdbe528f4101b9cd24698e2e3c79,transact-sid-tokens-r3vae_spherical-l3-c256-full-seed42,R3VAE (spherical),r3vae_spherical,3,256,FINISHED,0.6302447319030762,0.9291842579841614
+389fee2062fb4bd8a9f05f7a023193bb,transact-sid-tokens-r3vae_spherical-l3-c512-full-seed42,R3VAE (spherical),r3vae_spherical,3,512,FINISHED,0.6305361390113831,0.930141031742096
+edc9642cfd9d43cf8c365f8657a7db15,transact-sid-tokens-r3vae_spherical-l4-c256-full-seed42,R3VAE (spherical),r3vae_spherical,4,256,FINISHED,0.6337412595748901,0.9287049770355225
+a029ffb107d94dc5ac1493d4d2097e46,transact-sid-tokens-rqkmeans-l2-c256-full-seed42,RQKMeans,rqkmeans,2,256,FINISHED,0.6293706297874451,0.9281224608421326
+9e3f4d5c50c543acbdf7355af2cd07c3,transact-sid-tokens-rqkmeans-l3-c128-full-seed42,RQKMeans,rqkmeans,3,128,FINISHED,0.6133449673652649,0.9262944459915161
+f810c937d2cd4c318b274751ae4f0934,transact-sid-tokens-rqkmeans-l3-c256-full-seed42,RQKMeans,rqkmeans,3,256,FINISHED,0.6133449673652649,0.9287610650062561
+b6127a66bf7040eab1a38d8284f6e7f8,transact-sid-tokens-rqkmeans-l3-c512-full-seed42,RQKMeans,rqkmeans,3,512,FINISHED,0.6168414950370789,0.9302668571472168
+10dd2d821aab4a22a141e35f97cf64a2,transact-sid-tokens-rqkmeans-l4-c256-full-seed42,RQKMeans,rqkmeans,4,256,FINISHED,0.6349067687988281,0.9245799779891968
+3b962924ac3746eca33fb3cfa4d5047b,transact-sid-tokens-rqvae-l2-c256-full-seed42,RQVAE,rqvae,2,256,FINISHED,0.6287878751754761,0.9272482395172119
+a81b0fd857a048f69fb318af76cf56f9,transact-sid-tokens-rqvae-l3-c1024-full-seed42,RQVAE,rqvae,3,1024,FINISHED,0.6381118893623352,0.925833523273468
+30b13aafdf1841878e8706cb8fe33d80,transact-sid-tokens-rqvae-l3-c128-full-seed42,RQVAE,rqvae,3,128,FINISHED,0.6308274865150452,0.9278980493545532
+5413eb4b1b8c443bae33c388ed2db520,transact-sid-tokens-rqvae-l3-c256-full-seed42,RQVAE,rqvae,3,256,FINISHED,0.623251736164093,0.928223192691803
+2d653d164b994da5a944d2772ab130ab,transact-sid-tokens-rqvae-l3-c512-full-seed42,RQVAE,rqvae,3,512,FINISHED,0.6314102411270142,0.9279207587242126
+e2a1ec2f635e4ef6b8a6298e93b9d8e8,transact-sid-tokens-rqvae-l4-c256-full-seed42,RQVAE,rqvae,4,256,FINISHED,0.6180070042610168,0.928814172744751
+57cca9908cdc4693a2542911009b1b5b,transact-sid-tokens-rqvae_ecm-l3-c128-full-seed42,RQVAE (ECM),rqvae_ecm,3,128,FINISHED,0.6302447319030762,0.9274159073829651
+c9ba94e0bdd84925b1c02335e0426578,transact-sid-tokens-rqvae_ecm-l3-c256-full-seed42,RQVAE (ECM),rqvae_ecm,3,256,FINISHED,0.6287878751754761,0.9271391034126282
+13cddf59f4004cf28ebbab30e9edab03,transact-sid-tokens-rqvae_ecm-l3-c512-full-seed42,RQVAE (ECM),rqvae_ecm,3,512,FINISHED,0.628496527671814,0.930977463722229
+93d5a3aea9fd4a97b76589b4f874d88d,transact-sid-tokens-rqvae_rrs-l3-c128-full-seed42,RQVAE (RRS),rqvae_rrs,3,128,FINISHED,0.6357808709144592,0.9266840219497681
+4a08aa438a574e55a85f68f097c9966a,transact-sid-tokens-rqvae_rrs-l3-c256-full-seed42,RQVAE (RRS),rqvae_rrs,3,256,FINISHED,0.6264568567276001,0.9270577430725098
+fcabf5c171e24d64836a4e891c0755ea,transact-sid-tokens-rqvae_rrs-l3-c512-full-seed42,RQVAE (RRS),rqvae_rrs,3,512,FINISHED,0.6293706297874451,0.9304338097572327
+da2b7895c06d4b0cacddcac23e103722,transact-sid-tokens-rqvae_item_logq-l2-c256-full-seed42,RQVAE + item LogQ,rqvae_item_logq,2,256,FINISHED,0.6287878751754761,0.9272482395172119
+5c37e5998a8f4d57ae88d5b159639a3f,transact-sid-tokens-rqvae_item_logq-l3-c1024-full-seed42,RQVAE + item LogQ,rqvae_item_logq,3,1024,FINISHED,0.6381118893623352,0.925833523273468
+281d9176e0614ec3a344a7ce65e0e6d4,transact-sid-tokens-rqvae_item_logq-l3-c128-full-seed42,RQVAE + item LogQ,rqvae_item_logq,3,128,FINISHED,0.6308274865150452,0.9278980493545532
+3f5de335eec54b8aa91c76fb17493639,transact-sid-tokens-rqvae_item_logq-l3-c256-full-seed42,RQVAE + item LogQ,rqvae_item_logq,3,256,FINISHED,0.623251736164093,0.928223192691803
+e88d2b992f73492fb9f8195813a65633,transact-sid-tokens-rqvae_item_logq-l3-c512-full-seed42,RQVAE + item LogQ,rqvae_item_logq,3,512,FINISHED,0.6314102411270142,0.9279207587242126
+824390b904fc401b9683f3cf52232009,transact-sid-tokens-rqvae_item_logq-l4-c256-full-seed42,RQVAE + item LogQ,rqvae_item_logq,4,256,FINISHED,0.6180070042610168,0.928814172744751
+5520908e18f44238b4355786307c7f4e,transact-sid-tokens-rqvae_sid_logq-l2-c256-full-seed42,RQVAE + pure SID LogQ,rqvae_sid_logq,2,256,FINISHED,0.6287878751754761,0.9272482395172119
+23ea27d48de64c91b086006ac02f37ea,transact-sid-tokens-rqvae_sid_logq-l3-c256-full-seed42,RQVAE + pure SID LogQ,rqvae_sid_logq,3,256,FINISHED,0.623251736164093,0.928223192691803
+d6694a7a7cca4320ab3bc69c2aeb1014,transact-sid-tokens-rqvae_token-l2-c256-full-seed42,RQVAE-token,rqvae_token,2,256,FINISHED,0.6340326070785522,0.9249159097671509
+4f6b6bf088d041b4b49e301598c0af4a,transact-sid-tokens-rqvae_token-l3-c256-full-seed42,RQVAE-token,rqvae_token,3,256,FINISHED,0.626165509223938,0.9230295419692993

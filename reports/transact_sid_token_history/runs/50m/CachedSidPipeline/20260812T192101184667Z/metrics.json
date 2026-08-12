@@ -1,0 +1,259 @@
+{
+  "experiment": "sid_evaluation",
+  "data": {
+    "interactions": 634642,
+    "train_interactions": 630095,
+    "test_interactions": 4547,
+    "users": 8032,
+    "catalog_size": 33148,
+    "test_start_timestamp": "25878770.0"
+  },
+  "sid": {
+    "pipeline": "sids_experiment_4823559505994033748:CachedSidPipeline",
+    "class": "CachedSidPipeline",
+    "config": {
+      "codebook_sizes": [
+        512,
+        512,
+        512
+      ],
+      "kmeans_batch_size": 65536,
+      "predict_batch_size": 16384,
+      "max_iter": 50,
+      "device": "cuda",
+      "seed": 42
+    },
+    "item_count": 33148,
+    "columns": [
+      "sid_0",
+      "sid_1",
+      "sid_2"
+    ],
+    "statistics": {
+      "item_count": 33148,
+      "levels": {
+        "sid_0": {
+          "used_codes": 512,
+          "min_code": 0,
+          "max_code": 511,
+          "min_items_per_code": 64,
+          "max_items_per_code": 65,
+          "mean_items_per_code": 64.7421875
+        },
+        "sid_1": {
+          "used_codes": 512,
+          "min_code": 0,
+          "max_code": 511,
+          "min_items_per_code": 64,
+          "max_items_per_code": 65,
+          "mean_items_per_code": 64.7421875
+        },
+        "sid_2": {
+          "used_codes": 512,
+          "min_code": 0,
+          "max_code": 511,
+          "min_items_per_code": 64,
+          "max_items_per_code": 65,
+          "mean_items_per_code": 64.7421875
+        }
+      },
+      "unique_paths": 31104,
+      "independent_code_rate": 0.9383371545794618,
+      "collision_rate": 0.06166284542053824,
+      "singleton_count": 29519,
+      "singleton_rate": 0.8905212984192108,
+      "max_collision": 28,
+      "collision_percentiles": {
+        "p90": 3,
+        "p99": 6,
+        "p999": 25
+      },
+      "prefix_coherence_at_1": 0.7296980607301845,
+      "prefix_coherence_at_2": 0.856741357494735,
+      "prefix_coherence_at_3": 0.9247424290529598,
+      "path_average_similarity": 0.9247424290529598,
+      "intra_code_similarity_v2": 0.42102767788245493,
+      "adjusted_semantic_variance_explained_at_1": 0.6812677346387723,
+      "adjusted_semantic_variance_explained_at_2": 0.820470966221897,
+      "adjusted_semantic_variance_explained_at_3": 0.8896256656810076,
+      "collision_item_rate": 0.10947870158078919,
+      "pair_collision_probability": 6.636591729862364e-06,
+      "normalized_conditional_entropy_at_1_layer": 0.9999963319604405,
+      "pair_refinement_rate_at_1_layer": 0.9980768955563082,
+      "mean_active_branch_fraction_at_1_layer": 1.0,
+      "normalized_conditional_entropy_at_2_layer": 0.5826165369920329,
+      "pair_refinement_rate_at_2_layer": 0.98142567240126,
+      "mean_active_branch_fraction_at_2_layer": 0.08670806884765625,
+      "normalized_conditional_entropy_at_3_layer": 0.07009936386617166,
+      "pair_refinement_rate_at_3_layer": 0.8142070933550754,
+      "mean_active_branch_fraction_at_3_layer": 0.0026726792784865817,
+      "codebook_quality": {
+        "load_balance_p25_at_1_layer": 0.9885362616145771,
+        "load_balance_p75_at_1_layer": 1.0039821407023048,
+        "load_balance_p90_at_1_layer": 1.0039821407023048,
+        "codebook_coverage_at_1_layer": 1.0,
+        "codebook_utilization_rate_at_1_layer": 1.0,
+        "load_balance_p25_at_2_layer": 0.9885362616145771,
+        "load_balance_p75_at_2_layer": 1.0039821407023048,
+        "load_balance_p90_at_2_layer": 1.0039821407023048,
+        "codebook_coverage_at_2_layer": 0.08670806884765625,
+        "codebook_utilization_rate_at_2_layer": 1.0,
+        "load_balance_p25_at_3_layer": 0.9885362616145771,
+        "load_balance_p75_at_3_layer": 1.0039821407023048,
+        "load_balance_p90_at_3_layer": 1.0039821407023048,
+        "codebook_coverage_at_3_layer": 0.00023174285888671875,
+        "codebook_utilization_rate_at_3_layer": 1.0,
+        "load_balance_p25_mean": 0.9885362616145771,
+        "load_balance_p75_mean": 1.0039821407023048,
+        "load_balance_p90_mean": 1.0039821407023048,
+        "codebook_utilization_rate_total": 1.0
+      },
+      "p95_collision_group_size": 3.0,
+      "cur_total": 1.0,
+      "code_gini": 0.05915824274633619,
+      "code_entropy": 10.310155420096583,
+      "intra_code_similarity": 0.9247424290529598,
+      "valid_sid_rate": 1.0
+    },
+    "details": null
+  },
+  "item_features": {
+    "source_items": 170787,
+    "catalog_items": 33148,
+    "columns": [
+      "normalized_embed"
+    ]
+  },
+  "evaluations": {
+    "ranking": {
+      "config": {
+        "enabled_models": [
+          "transact"
+        ],
+        "max_history_len": 50,
+        "min_history_len": 2,
+        "validation_days": 7.0,
+        "hyperparameter_tuning": false,
+        "train_days": 270.0,
+        "dcnv2_training": {
+          "batch_size": 32768,
+          "epochs": 2,
+          "learning_rate": 0.002
+        },
+        "transact_training": {
+          "batch_size": 8192,
+          "epochs": 1,
+          "learning_rate": 0.0005
+        },
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "embedding_dim": 32,
+        "hidden_dim": 128,
+        "dense_bins": 32,
+        "dense_train_rows": 1000000,
+        "dcn_cross_layers": 3,
+        "dcn_deep_units": [
+          256,
+          128,
+          64
+        ],
+        "dcn_num_experts": 4,
+        "dcn_low_rank": 32,
+        "transact_d_model": 64,
+        "transact_heads": 4,
+        "transact_layers": 1,
+        "transact_ff_dim": 256,
+        "dropout": 0.2,
+        "num_workers": 0,
+        "show_progress": true,
+        "device": "auto"
+      },
+      "primary_metric": "pairwise_accuracy",
+      "features": {
+        "dense": [
+          "user_lag_listen_cnt",
+          "user_lag_like_cnt",
+          "user_lag_full_play_cnt",
+          "user_lag_skip_cnt",
+          "item_lag_listen_cnt",
+          "item_lag_like_cnt",
+          "item_lag_full_play_cnt",
+          "item_lag_skip_cnt",
+          "ui_lag_listen_cnt",
+          "ui_lag_like_cnt",
+          "ui_lag_full_play_cnt",
+          "ui_lag_skip_cnt",
+          "user_lag_avg_played_ratio",
+          "item_lag_avg_played_ratio",
+          "ui_lag_avg_played_ratio"
+        ],
+        "sparse": [
+          "uid",
+          "sid_0",
+          "sid_1",
+          "sid_2"
+        ],
+        "multivalent": [
+          "artist_ids",
+          "album_ids"
+        ],
+        "transact_history": "preceding generation likes"
+      },
+      "examples": {
+        "train": 2967415,
+        "validation": 0,
+        "test": 89650
+      },
+      "train_start_timestamp": "21213170.0",
+      "train_end_timestamp": "25878770.0",
+      "test_start_timestamp": "25878770.0",
+      "models": {
+        "transact": {
+          "device": "cuda",
+          "mode": "test",
+          "primary_metric": "pairwise_accuracy",
+          "checkpoint_metric": null,
+          "trained_epochs": 1,
+          "best_epoch": null,
+          "best_validation": null,
+          "test": {
+            "pairwise_accuracy": 0.6289107799530029,
+            "pairwise_comparisons": 1726,
+            "pairwise_users": 524,
+            "pairwise_accuracy_std_error": 0.014760258607566357,
+            "pairwise_accuracy_ci95_low": 0.5999806523323059,
+            "pairwise_accuracy_ci95_high": 0.6578409075737,
+            "roc_auc": 0.9256415963172913,
+            "pr_auc": 0.43461206555366516,
+            "logloss": 0.06825561076402664
+          },
+          "checkpoint": "reports/transact_sid_token_history/runs/50m/CachedSidPipeline/20260812T192101184667Z/ranking/transact.pt"
+        }
+      }
+    }
+  },
+  "config": {
+    "dataset_size": "50m",
+    "core_min_interactions_per_item": 5,
+    "test_days": 7.0,
+    "timestamp_unit_seconds": 5.0,
+    "latest_interactions": null,
+    "enabled_stages": [
+      "ranking"
+    ]
+  },
+  "reproducibility": {
+    "seed": 42
+  },
+  "tracking": {
+    "enabled": true,
+    "experiment_name": "transact-sid-token-history-20260812",
+    "run_id": "75c21dabbec74da49d8b792fc9ff587f"
+  },
+  "artifacts": {
+    "run_id": "20260812T192101184667Z",
+    "directory": "reports/transact_sid_token_history/runs/50m/CachedSidPipeline/20260812T192101184667Z",
+    "metrics_json": "reports/transact_sid_token_history/runs/50m/CachedSidPipeline/20260812T192101184667Z/metrics.json",
+    "semantic_ids": "reports/transact_sid_token_history/runs/50m/CachedSidPipeline/20260812T192101184667Z/semantic_ids.parquet"
+  }
+}
