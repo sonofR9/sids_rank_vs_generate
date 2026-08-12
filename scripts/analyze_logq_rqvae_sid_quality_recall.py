@@ -388,8 +388,23 @@ def rqvae_evidence(row: pd.Series, config: dict[str, Any]) -> tuple[bool, str]:
 
 
 def logq_evidence(row: pd.Series, run_name: str) -> tuple[bool, str, str, str]:
+    # Pure SID-level LogQ deliberately keeps the older item-level LogQ mode
+    # disabled, so it must take precedence over ``logq_mode=none``.
+    sid_values = []
+    for column in LOGQ_MODE_COLUMNS:
+        if "sid_logq" not in column:
+            continue
+        value = text(row.get(column)).lower()
+        if value:
+            sid_values.append((column, value))
+    if sid_values:
+        column, mode = sid_values[0]
+        return mode not in DISABLED_LOGQ_VALUES, mode, f"{column}={mode}", "sid"
+
     values = []
     for column in LOGQ_MODE_COLUMNS:
+        if "sid_logq" in column:
+            continue
         value = text(row.get(column)).lower()
         if value:
             values.append((column, value))
@@ -409,6 +424,44 @@ def logq_evidence(row: pd.Series, run_name: str) -> tuple[bool, str, str, str]:
     if target in {"true", "1", "yes"} and "baseline" not in name:
         return True, "enabled", "tags.logq_target=true", "item"
     return False, "none", "no enabled LogQ evidence", "none"
+
+
+def is_pure_sid_logq(row: pd.Series) -> bool:
+    """Accept only the SID-level correction requested for this report."""
+    sid_mode = text(
+        first(
+            row,
+            "tags.sid_logq_mode",
+            "params.training.generation.sid_logq_mode",
+            "params.config.sid_logq_mode",
+        )
+    ).lower()
+    item_mode = text(
+        first(
+            row,
+            "tags.logq_mode",
+            "params.training.generation.logq_mode",
+            "params.config.logq_mode",
+        ),
+        "none",
+    ).lower()
+    auxiliary_weight = text(
+        first(
+            row,
+            "tags.auxiliary_item_loss_weight",
+            "params.training.generation.auxiliary_item_loss_weight",
+        ),
+        "0",
+    )
+    try:
+        auxiliary_disabled = float(auxiliary_weight) == 0.0
+    except ValueError:
+        auxiliary_disabled = False
+    return (
+        sid_mode not in DISABLED_LOGQ_VALUES
+        and item_mode in DISABLED_LOGQ_VALUES
+        and auxiliary_disabled
+    )
 
 
 def logq_signature(row: pd.Series, mode: str) -> str:
@@ -458,6 +511,8 @@ def collect_logq_runs(
     runs: pd.DataFrame,
     recall_column: str | None,
     sid_mapping: dict[str, str | None],
+    *,
+    pure_sid_only: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     accepted = []
     rejected = []
@@ -489,6 +544,9 @@ def collect_logq_runs(
             continue
         if not has_logq:
             rejected.append({**base, "rejection_reason": "LogQ disabled or unproven"})
+            continue
+        if pure_sid_only and not is_pure_sid_logq(row):
+            rejected.append({**base, "rejection_reason": "not pure SID LogQ"})
             continue
         base["logq_signature"] = logq_signature(row, mode)
         for spec in SID_METRICS:
@@ -899,6 +957,11 @@ def main() -> None:
         help="Optional quality-only experiments used to backfill SID metrics.",
     )
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument(
+        "--pure-sid-logq-only",
+        action="store_true",
+        help="Keep only SID LogQ with item LogQ disabled and auxiliary item loss equal to zero.",
+    )
     args = parser.parse_args()
 
     logq_experiments = split_csv(args.logq_experiments) or ["sid-comparison", "test"]
@@ -922,7 +985,12 @@ def main() -> None:
         print(f"  {spec.label:<34} -> {(resolved or '<missing>').removeprefix('metrics.')}")
 
     quality_runs = collect_quality_runs(runs, sid_mapping)
-    logq_runs, rejected = collect_logq_runs(runs, recall_column, sid_mapping)
+    logq_runs, rejected = collect_logq_runs(
+        runs,
+        recall_column,
+        sid_mapping,
+        pure_sid_only=args.pure_sid_logq_only,
+    )
     matched, unmatched = match_quality(logq_runs, quality_runs)
     matched = ensure_columns(matched, MATCHED_COLUMNS)
 
@@ -975,6 +1043,7 @@ def main() -> None:
         "filters": {
             "sid_model": "RQ-VAE only",
             "logq": "explicit enabled mode only; none/baseline rejected",
+            "pure_sid_logq_only": args.pure_sid_logq_only,
             "one_point_per_mlflow_run": True,
             "plain_rqvae_excluded": True,
             "other_sid_families_excluded": True,

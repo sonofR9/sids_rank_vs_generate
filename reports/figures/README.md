@@ -8,6 +8,9 @@ together so results can be inspected without access to MLflow.
 
 - `generation/logq_rqvae_sid_quality_recall/`: RQ-VAE + LogQ-only Recall@100
   analysis.
+- `generation/pure_sid_logq_recall/`: mentor-requested pure SID LogQ
+  Recall@100 export. It contains only `sid_logq_mode=standard`, with item
+  LogQ disabled and auxiliary item loss equal to zero.
 - `generation/poster_raw_sid_2026-08-10_2122/`: archived raw-SID poster
   generation snapshot from `sid_quality_correlations.zip`.
 - `generation/poster_raw_sid_2026-08-10_2242/`: later raw-SID poster
