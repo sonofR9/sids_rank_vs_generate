@@ -12,10 +12,9 @@ out of Git.
 - `generation/rqvae_pure_sid_logq_recall/`: pure SID-level correction
   `score(SID) - log q(SID)`, with item LogQ disabled and auxiliary item loss
   equal to zero. The current report contains `L=2,C=256` and `L=3,C=256`.
-- `generation/raw_sid_recall_2026-08-10_2122/` and
-  `generation/raw_sid_recall_2026-08-10_2242/`: historical raw-SID Recall@100
-  snapshots. They are kept separately because their source tables differ.
-- `generation/poster_plum_balance_recall_2026-08-12/`: poster generation
+- `generation/raw_sid_recall/`: final raw-SID Recall@100 report. It supersedes
+  the intermediate snapshot and retains the additional raw-run matching table.
+- `generation/poster_plum_balance_recall/`: poster generation
   Recall@100 export including PLUM and BalanceRQKMeans.
 
 ## Ranking
