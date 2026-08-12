@@ -10,6 +10,7 @@ def validate_semantic_model_without_collisions(
     val_loader,
     cfg,
     sid_catalog=None,
+    sid_logq_table=None,
 ):
     model.eval()
 
@@ -23,12 +24,15 @@ def validate_semantic_model_without_collisions(
         batch = move_to_device(batch, cfg.device)
 
         with autocast(batch["history"].device, cfg.use_bf16):
+            model_kwargs = {}
+            if "sid_log_q" in batch:
+                model_kwargs["sid_log_q"] = batch["sid_log_q"]
             out = model(
                 batch["history"],
                 batch["positions"],
                 batch["mask"],
                 batch["sid"],
-                target=batch["target"],
+                **model_kwargs,
             )
 
         preds = out["preds"]
@@ -45,6 +49,7 @@ def validate_semantic_model_without_collisions(
             beam_size=cfg.num_beams,
             use_bf16=cfg.use_bf16,
             sid_catalog=sid_catalog,
+            sid_logq_table=sid_logq_table,
         )
 
         beams = beams[:, : cfg.recall_k]

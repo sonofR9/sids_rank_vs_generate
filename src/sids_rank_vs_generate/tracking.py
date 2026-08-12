@@ -112,6 +112,16 @@ class ExperimentTracker:
     ) -> None:
         del metrics, step
 
+    def log_artifact(
+        self,
+        local_path: Path,
+        *,
+        artifact_path: str | None = None,
+    ) -> None:
+        """Upload a completed local artifact when the tracker supports it."""
+
+        del local_path, artifact_path
+
     def info(self) -> dict[str, Any]:
         return {"enabled": False}
 
@@ -174,6 +184,16 @@ class MlflowTracker(ExperimentTracker):
         }
         if finite_metrics:
             self._mlflow.log_metrics(finite_metrics, step=step)
+
+    def log_artifact(
+        self,
+        local_path: Path,
+        *,
+        artifact_path: str | None = None,
+    ) -> None:
+        if not local_path.is_file():
+            raise FileNotFoundError(f"artifact file not found: {local_path}")
+        self._mlflow.log_artifact(str(local_path), artifact_path=artifact_path)
 
     def info(self) -> dict[str, Any]:
         active_run = self._mlflow.active_run()

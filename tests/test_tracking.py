@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 from contextlib import contextmanager
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -50,6 +51,7 @@ class FakeMlflow:
             tags=tags,
             params={},
             metrics=[],
+            artifacts=[],
         )
         self.runs.append(run)
         self.stack.append(run)
@@ -66,6 +68,9 @@ class FakeMlflow:
 
     def log_metrics(self, metrics, *, step=None) -> None:
         self.stack[-1].metrics.append((step, metrics))
+
+    def log_artifact(self, local_path, artifact_path=None) -> None:
+        self.stack[-1].artifacts.append((local_path, artifact_path))
 
 
 class TrackingTest(unittest.TestCase):
@@ -135,6 +140,20 @@ class TrackingTest(unittest.TestCase):
             fake.runs[0].metrics,
             [(1, {"validation.recall_at_100": 0.25})],
         )
+
+    def test_mlflow_tracker_logs_artifact_to_requested_directory(self) -> None:
+        fake = FakeMlflow()
+        tracker = MlflowTracker(MLflowConfig(enabled=True), mlflow_module=fake)
+        with TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "semantic_ids.parquet"
+            artifact.write_text("mapping", encoding="utf-8")
+            with tracker.start_run("parent"):
+                tracker.log_artifact(artifact, artifact_path="sid_mapping")
+
+            self.assertEqual(
+                fake.runs[0].artifacts,
+                [(str(artifact), "sid_mapping")],
+            )
 
     def test_enabled_tracking_has_actionable_missing_dependency_error(self) -> None:
         with patch(

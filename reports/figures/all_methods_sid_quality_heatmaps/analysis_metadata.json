@@ -1,0 +1,29 @@
+{
+  "input": "/Users/konstantinryadinskiy/Desktop/sids_rank_vs_generate/reports/figures/all_methods_sid_quality",
+  "pooling": "all available SID methods and configurations",
+  "targets": [
+    "recall100",
+    "dcnv2",
+    "dcnv2_roc_auc",
+    "transact",
+    "transact_roc_auc"
+  ],
+  "sid_metrics": [
+    "icr",
+    "collision_rate",
+    "p95_collision_group_size",
+    "g_max",
+    "cur_total",
+    "code_gini",
+    "code_entropy",
+    "intra_code_similarity",
+    "prefix_coherence_1",
+    "prefix_coherence_2",
+    "prefix_coherence_3",
+    "valid_sid_rate"
+  ],
+  "generation_rows": 44,
+  "ranking_rows": 28,
+  "maximum_generation_recall": null,
+  "filter_counts": null
+}

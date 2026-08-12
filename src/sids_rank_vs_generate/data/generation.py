@@ -3,7 +3,9 @@ from __future__ import annotations
 import math
 import random
 from collections import Counter
+from collections.abc import Sequence
 from functools import partial
+from typing import Any
 
 import polars as pl
 import torch
@@ -22,6 +24,96 @@ class GenerationDataset(Dataset):
 
     def __getitem__(self, index: int) -> dict:
         return self.examples[index]
+
+
+class SIDLogQTable:
+    """Train-only prefix probabilities for autoregressive SID LogQ.
+
+    The empirical SID distribution is factorized as
+    ``q(sid) = product_l q(z_l | z_<l)``. Additive smoothing is applied to
+    every codebook token so validation/catalog prefixes unseen in train remain
+    finite. There is deliberately no tunable alpha: consumers subtract these
+    log-probabilities with coefficient one.
+    """
+
+    def __init__(
+        self,
+        examples: Sequence[dict],
+        *,
+        codebook_sizes: Sequence[int],
+        beta: float = 1.0,
+    ) -> None:
+        self.codebook_sizes = tuple(int(size) for size in codebook_sizes)
+        if not self.codebook_sizes or any(
+            size <= 0 for size in self.codebook_sizes
+        ):
+            raise ValueError("codebook_sizes must contain positive sizes")
+        if beta <= 0 or not math.isfinite(beta):
+            raise ValueError("SID LogQ beta must be finite and positive")
+        if not examples:
+            raise ValueError("cannot estimate SID LogQ from no train examples")
+        self.beta = float(beta)
+
+        prefix_counts: list[dict[tuple[int, ...], Counter[int]]] = [
+            {} for _ in self.codebook_sizes
+        ]
+        unique_sids: set[tuple[int, ...]] = set()
+        for example in examples:
+            sid = tuple(int(token) for token in example["sid"])
+            if len(sid) != len(self.codebook_sizes):
+                raise ValueError("SID length does not match codebook sizes")
+            unique_sids.add(sid)
+            for level, (token, size) in enumerate(zip(sid, self.codebook_sizes)):
+                if not 0 <= token < size:
+                    raise ValueError(f"SID token at level {level} is out of range")
+                prefix = sid[:level]
+                counter = prefix_counts[level].setdefault(prefix, Counter())
+                counter[token] += 1
+
+        uniform: list[torch.Tensor] = []
+        for size in self.codebook_sizes:
+            uniform.append(
+                torch.full((size,), -math.log(size), dtype=torch.float32)
+            )
+        # Keep counts sparse. Materializing a dense C-vector for every deep
+        # prefix can consume hundreds of MB for C=1024; batches cache only the
+        # prefixes they actually use.
+        self._prefix_counts = tuple(prefix_counts)
+        self._uniform = tuple(uniform)
+        self.num_train_interactions = len(examples)
+        self.num_unique_sids = len(unique_sids)
+
+    def log_q_for_prefix(
+        self,
+        prefix: Sequence[int],
+        *,
+        level: int,
+    ) -> torch.Tensor:
+        if not 0 <= level < len(self.codebook_sizes):
+            raise ValueError("SID LogQ level is out of range")
+        key = tuple(int(token) for token in prefix)
+        if len(key) != level:
+            raise ValueError("SID LogQ prefix length must equal level")
+        counts = self._prefix_counts[level].get(key)
+        if counts is None:
+            return self._uniform[level]
+        smoothed = torch.full(
+            (self.codebook_sizes[level],),
+            self.beta,
+            dtype=torch.float64,
+        )
+        for token, count in counts.items():
+            smoothed[token] += count
+        return (smoothed / smoothed.sum()).log().float()
+
+    def log_q_for_sid(self, sid: Sequence[int]) -> tuple[torch.Tensor, ...]:
+        values = tuple(int(token) for token in sid)
+        if len(values) != len(self.codebook_sizes):
+            raise ValueError("SID length does not match SID LogQ levels")
+        return tuple(
+            self.log_q_for_prefix(values[:level], level=level)
+            for level in range(len(values))
+        )
 
 
 def attach_item_log_q(
@@ -107,7 +199,8 @@ def collate_generation(
     batch: list[dict],
     *,
     num_levels: int,
-) -> dict[str, torch.Tensor]:
+    sid_logq_table: SIDLogQTable | None = None,
+) -> dict[str, Any]:
     batch_size = len(batch)
     max_length = max(len(example["history"]) for example in batch)
     history = torch.zeros(batch_size, max_length, dtype=torch.long)
@@ -138,11 +231,40 @@ def collate_generation(
         result["log_q"] = torch.tensor(
             [example["log_q"] for example in batch], dtype=torch.float32
         )
+    if sid_logq_table is not None:
+        sid_values = [
+            tuple(int(token) for token in example["sid"])
+            for example in batch
+        ]
+        level_rows = []
+        for level in range(num_levels):
+            batch_cache: dict[tuple[int, ...], torch.Tensor] = {}
+            rows = []
+            for sid_value in sid_values:
+                prefix = sid_value[:level]
+                if prefix not in batch_cache:
+                    batch_cache[prefix] = sid_logq_table.log_q_for_prefix(
+                        prefix,
+                        level=level,
+                    )
+                rows.append(batch_cache[prefix])
+            level_rows.append(torch.stack(rows))
+        result["sid_log_q"] = tuple(level_rows)
     return result
 
 
-def build_generation_loaders(train_examples, validation_examples, config):
-    collator = partial(collate_generation, num_levels=config.num_levels)
+def build_generation_loaders(
+    train_examples,
+    validation_examples,
+    config,
+    *,
+    sid_logq_table: SIDLogQTable | None = None,
+):
+    collator = partial(
+        collate_generation,
+        num_levels=config.num_levels,
+        sid_logq_table=sid_logq_table,
+    )
     train_loader = DataLoader(
         GenerationDataset(train_examples),
         batch_size=config.batch_size,

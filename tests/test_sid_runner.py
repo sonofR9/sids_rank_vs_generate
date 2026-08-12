@@ -140,6 +140,13 @@ class SidRunnerTest(unittest.TestCase):
             self.assertEqual(result["evaluations"]["candgen"]["recall"], 0.5)
             run_dir = Path(result["artifacts"]["directory"])
             self.assertTrue((run_dir / "ranking" / "curve.txt").is_file())
+            semantic_ids = pl.read_parquet(result["artifacts"]["semantic_ids"])
+            self.assertEqual(
+                semantic_ids.columns,
+                ["item_id", "catalog_item_idx", "sid_0", "sid_1"],
+            )
+            self.assertEqual(semantic_ids["item_id"].to_list(), [10, 20, 30])
+            self.assertEqual(semantic_ids["catalog_item_idx"].to_list(), [0, 1, 2])
 
     def test_cli_uses_only_shared_dataset_and_report_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

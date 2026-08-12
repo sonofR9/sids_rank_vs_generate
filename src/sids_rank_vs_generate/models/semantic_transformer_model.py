@@ -147,7 +147,16 @@ class SemanticTransformerModel(nn.Module):
         target_embeddings = self.encoder.item_emb(target)
         return self.retrieval_loss(pooled_history, target_embeddings, log_q)
 
-    def forward(self, history, positions, mask, sid, target=None, log_q=None):
+    def forward(
+        self,
+        history,
+        positions,
+        mask,
+        sid,
+        target=None,
+        log_q=None,
+        sid_log_q=None,
+    ):
         # history: [B, L]
         # sid: [B, M]
         # TODO: encode history
@@ -175,13 +184,26 @@ class SemanticTransformerModel(nn.Module):
         losses = []
         preds = []
 
+        if sid_log_q is not None and len(sid_log_q) != self.num_levels:
+            raise ValueError("sid_log_q must contain one tensor per SID level")
+
         for level in range(self.num_levels):
             # TODO: predict sid[:, level] from decoder output at this level
             logits = self.heads[level](dec[:,level])
-            loss = F.cross_entropy(logits, sid[:, level])
+            loss_logits = logits
+            if sid_log_q is not None:
+                level_log_q = sid_log_q[level]
+                if level_log_q.shape != logits.shape:
+                    raise ValueError(
+                        "each sid_log_q tensor must match its level logits"
+                    )
+                # Fixed-coefficient LogQ adjustment. There is intentionally no
+                # alpha: q is part of the categorical training objective.
+                loss_logits = logits.float() - level_log_q.float()
+            loss = F.cross_entropy(loss_logits, sid[:, level])
 
             losses.append(loss)
-            preds.append(logits.argmax(dim=-1))
+            preds.append(loss_logits.argmax(dim=-1))
 
         sid_loss = torch.stack(losses).mean()
         ranking_loss = None

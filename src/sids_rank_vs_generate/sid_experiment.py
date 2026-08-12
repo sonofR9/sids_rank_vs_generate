@@ -250,7 +250,21 @@ def run_sid_experiment(
     )
     run_dir.mkdir(parents=True, exist_ok=True)
     semantic_ids_path = run_dir / "semantic_ids.parquet"
-    sid_output.select("item_id", *sid_columns).write_parquet(semantic_ids_path)
+    (
+        prepared.item_mapping.join(
+            sid_output.select("item_id", *sid_columns),
+            on="item_id",
+            how="inner",
+        )
+        .rename(
+            {
+                "original_item_id": "item_id",
+                "item_id": "catalog_item_idx",
+            }
+        )
+        .select("item_id", "catalog_item_idx", *sid_columns)
+        .write_parquet(semantic_ids_path)
+    )
     evaluations: dict[str, Any] = {}
     for stage_name in config.enabled_stages:
         evaluator = stage_resolver(stage_name)
@@ -320,6 +334,10 @@ def run_sid_experiment(
         json.dumps(result, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+    # In a complete experiment the parent MLflow run is still active here.
+    if config.tracker.info().get("run_id") is not None:
+        config.tracker.log_artifact(semantic_ids_path, artifact_path="sid_mapping")
+        config.tracker.log_artifact(metrics_path, artifact_path="sid_mapping")
     evaluation_metrics: dict[str, Any] = {}
     for stage_name, stage_result in evaluations.items():
         if isinstance(stage_result, Mapping) and "metrics" in stage_result:
