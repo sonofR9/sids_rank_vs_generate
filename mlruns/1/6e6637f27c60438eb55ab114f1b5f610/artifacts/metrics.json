@@ -1,0 +1,290 @@
+{
+  "experiment": "sid_evaluation",
+  "data": {
+    "interactions": 634642,
+    "train_interactions": 630107,
+    "fit_interactions": 568448,
+    "validation_interactions": 61659,
+    "test_interactions": 4535,
+    "users": 8032,
+    "catalog_size": 33148,
+    "test_start_timestamp": "25879010.0",
+    "validation_start_timestamp": "24244930.0",
+    "fit_fingerprint": "dca1a2c484e9b135759a75f111966c5f89ac611fcb8c17dd757fce394d58537d",
+    "protocol_id": "three-way",
+    "validation_reuses_test": false
+  },
+  "sid": {
+    "pipeline": "sids_experiment_1586219794187024666:CachedSidPipeline",
+    "class": "CachedSidPipeline",
+    "config": {
+      "codebook_sizes": [
+        512,
+        512,
+        512
+      ],
+      "top_k": 1,
+      "epochs": 20,
+      "batch_size": 1024,
+      "learning_rate": 0.0005,
+      "weight_decay": 1e-05,
+      "reconstruction_loss_weight": 1.0,
+      "semantic_cohesion_loss_weight": 0.1,
+      "preference_discrimination_loss_weight": 0.05,
+      "pd_temperature": 2.0,
+      "pd_chunk_size": 2048,
+      "kmeans_init": true,
+      "kmeans_init_method": "rqkmeans",
+      "kmeans_iterations": 20,
+      "seed": 42,
+      "device": "cuda",
+      "feature_column": null
+    },
+    "item_count": 33148,
+    "columns": [
+      "sid_0",
+      "sid_1",
+      "sid_2"
+    ],
+    "statistics": {
+      "item_count": 33148,
+      "levels": {
+        "sid_0": {
+          "used_codes": 512,
+          "min_code": 0,
+          "max_code": 511,
+          "min_items_per_code": 5,
+          "max_items_per_code": 235,
+          "mean_items_per_code": 64.7421875
+        },
+        "sid_1": {
+          "used_codes": 512,
+          "min_code": 0,
+          "max_code": 511,
+          "min_items_per_code": 4,
+          "max_items_per_code": 158,
+          "mean_items_per_code": 64.7421875
+        },
+        "sid_2": {
+          "used_codes": 512,
+          "min_code": 0,
+          "max_code": 511,
+          "min_items_per_code": 20,
+          "max_items_per_code": 174,
+          "mean_items_per_code": 64.7421875
+        }
+      },
+      "unique_paths": 31657,
+      "independent_code_rate": 0.9550199107035116,
+      "collision_rate": 0.044980089296488446,
+      "singleton_count": 30367,
+      "singleton_rate": 0.91610353565826,
+      "max_collision": 14,
+      "collision_percentiles": {
+        "p90": 3,
+        "p99": 4,
+        "p999": 6
+      },
+      "prefix_coherence_at_1": 0.7566213529932015,
+      "prefix_coherence_at_2": 0.8954178250684348,
+      "prefix_coherence_at_3": 0.9720244786362356,
+      "path_average_similarity": 0.9720244786362356,
+      "intra_code_similarity_v2": 0.4661405149444226,
+      "adjusted_semantic_variance_explained_at_1": 0.7210324998463572,
+      "adjusted_semantic_variance_explained_at_2": 0.8793618931376539,
+      "adjusted_semantic_variance_explained_at_3": 0.9662951266476653,
+      "collision_item_rate": 0.08389646434174007,
+      "pair_collision_probability": 3.300093474010002e-06,
+      "normalized_conditional_entropy_at_1_layer": 0.9842429035362811,
+      "pair_refinement_rate_at_1_layer": 0.9976599606910631,
+      "mean_active_branch_fraction_at_1_layer": 1.0,
+      "normalized_conditional_entropy_at_2_layer": 0.5954925902504491,
+      "pair_refinement_rate_at_2_layer": 0.9839961666719821,
+      "mean_active_branch_fraction_at_2_layer": 0.08612442016601562,
+      "normalized_conditional_entropy_at_3_layer": 0.07813077320338488,
+      "pair_refinement_rate_at_3_layer": 0.9118790706717216,
+      "mean_active_branch_fraction_at_3_layer": 0.002738631267440315,
+      "codebook_quality": {
+        "load_balance_p25_at_1_layer": 0.6796186798600217,
+        "load_balance_p75_at_1_layer": 1.2047785688427657,
+        "load_balance_p90_at_1_layer": 1.6063714251236878,
+        "codebook_coverage_at_1_layer": 1.0,
+        "codebook_utilization_rate_at_1_layer": 1.0,
+        "load_balance_p25_at_2_layer": 0.7414021962109328,
+        "load_balance_p75_at_2_layer": 1.2356703270182212,
+        "load_balance_p90_at_2_layer": 1.4828043924218657,
+        "codebook_coverage_at_2_layer": 0.08612442016601562,
+        "codebook_utilization_rate_at_2_layer": 1.0,
+        "load_balance_p25_at_3_layer": 0.7259563171232051,
+        "load_balance_p75_at_3_layer": 1.2047785688427657,
+        "load_balance_p90_at_3_layer": 1.4982502715095933,
+        "codebook_coverage_at_3_layer": 0.00023586302995681763,
+        "codebook_utilization_rate_at_3_layer": 1.0,
+        "load_balance_p25_mean": 0.7156590643980532,
+        "load_balance_p75_mean": 1.2150758215679176,
+        "load_balance_p90_mean": 1.529142029685049,
+        "codebook_utilization_rate_total": 1.0
+      },
+      "p95_collision_group_size": 3.0,
+      "cur_total": 1.0,
+      "code_gini": 0.043371913864398426,
+      "code_entropy": 10.342307958386758,
+      "intra_code_similarity": 0.9720244786362356,
+      "valid_sid_rate": 1.0
+    },
+    "details": null
+  },
+  "user_sid": null,
+  "item_features": {
+    "source_items": 170787,
+    "catalog_items": 33148,
+    "columns": [
+      "normalized_embed"
+    ]
+  },
+  "evaluations": {
+    "ranking": {
+      "config": {
+        "enabled_models": [
+          "transact"
+        ],
+        "max_history_len": 50,
+        "min_history_len": 2,
+        "validation_days": 7.0,
+        "hyperparameter_tuning": false,
+        "train_days": 270.0,
+        "dcnv2_training": {
+          "batch_size": 32768,
+          "epochs": 2,
+          "learning_rate": 0.002
+        },
+        "transact_training": {
+          "batch_size": 8192,
+          "epochs": 1,
+          "learning_rate": 0.0005
+        },
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "embedding_dim": 32,
+        "hidden_dim": 128,
+        "dense_bins": 32,
+        "dense_train_rows": 1000000,
+        "dcn_cross_layers": 3,
+        "dcn_deep_units": [
+          256,
+          128,
+          64
+        ],
+        "dcn_num_experts": 4,
+        "dcn_low_rank": 32,
+        "transact_d_model": 64,
+        "transact_heads": 4,
+        "transact_layers": 1,
+        "transact_ff_dim": 256,
+        "dropout": 0.2,
+        "num_workers": 0,
+        "show_progress": true,
+        "device": "auto"
+      },
+      "primary_metric": "pairwise_accuracy",
+      "features": {
+        "dense": [
+          "user_lag_listen_cnt",
+          "user_lag_like_cnt",
+          "user_lag_full_play_cnt",
+          "user_lag_skip_cnt",
+          "item_lag_listen_cnt",
+          "item_lag_like_cnt",
+          "item_lag_full_play_cnt",
+          "item_lag_skip_cnt",
+          "ui_lag_listen_cnt",
+          "ui_lag_like_cnt",
+          "ui_lag_full_play_cnt",
+          "ui_lag_skip_cnt",
+          "user_lag_avg_played_ratio",
+          "item_lag_avg_played_ratio",
+          "ui_lag_avg_played_ratio"
+        ],
+        "sparse": [
+          "uid",
+          "sid_0",
+          "sid_1",
+          "sid_2"
+        ],
+        "multivalent": [
+          "artist_ids",
+          "album_ids"
+        ],
+        "transact_history": "preceding generation likes"
+      },
+      "examples": {
+        "train": 2967449,
+        "validation": 0,
+        "test": 89407
+      },
+      "train_start_timestamp": "21213410.0",
+      "train_end_timestamp": "25879010.0",
+      "test_start_timestamp": "25879010.0",
+      "models": {
+        "transact": {
+          "device": "cuda",
+          "mode": "test",
+          "primary_metric": "pairwise_accuracy",
+          "checkpoint_metric": null,
+          "trained_epochs": 1,
+          "best_epoch": null,
+          "best_validation": null,
+          "test": {
+            "pairwise_accuracy": 0.6159673929214478,
+            "pairwise_comparisons": 1716,
+            "pairwise_users": 523,
+            "pairwise_accuracy_std_error": 0.014374414458870888,
+            "pairwise_accuracy_ci95_low": 0.5877935290336609,
+            "pairwise_accuracy_ci95_high": 0.6441412568092346,
+            "roc_auc": 0.927763044834137,
+            "pr_auc": 0.4411202669143677,
+            "logloss": 0.06711344420909882
+          },
+          "checkpoint": "reports/transact_sid_token_history/runs/50m/CachedSidPipeline/20260812T193057280699Z/ranking/transact.pt"
+        }
+      }
+    }
+  },
+  "config": {
+    "dataset_size": "50m",
+    "core_min_interactions_per_item": 5,
+    "test_days": 7.0,
+    "timestamp_unit_seconds": 5.0,
+    "validation_fraction": 0.1,
+    "catalog_from_fit": false,
+    "latest_interactions": null,
+    "enabled_stages": [
+      "ranking"
+    ],
+    "protocol_id": "three-way",
+    "user_catalog_quality": {
+      "enabled": false,
+      "max_users": 256,
+      "selection": "stable_hash",
+      "seed": 42
+    },
+    "expected_catalog_size": null
+  },
+  "reproducibility": {
+    "seed": 42
+  },
+  "tracking": {
+    "enabled": true,
+    "experiment_name": "transact-sid-token-history-20260812",
+    "run_name": "transact-sid-tokens-r3vae_rqkmeans-l3-c512-full-seed42",
+    "run_id": "6e6637f27c60438eb55ab114f1b5f610"
+  },
+  "artifacts": {
+    "run_id": "20260812T193057280699Z",
+    "directory": "reports/transact_sid_token_history/runs/50m/CachedSidPipeline/20260812T193057280699Z",
+    "metrics_json": "reports/transact_sid_token_history/runs/50m/CachedSidPipeline/20260812T193057280699Z/metrics.json",
+    "semantic_ids": "reports/transact_sid_token_history/runs/50m/CachedSidPipeline/20260812T193057280699Z/semantic_ids.parquet",
+    "user_semantic_ids_fit": null,
+    "user_sid_catalog_quality": null
+  }
+}

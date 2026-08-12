@@ -110,13 +110,13 @@
 {
     {\fontsize{30}{37}\selectfont
 
-Semantic IDs (SIDs) используются для дискретного представления объектов в генеративных рекомендательных системах. 
-При этом качество SID часто оценивается через свойства самого представления, которые не обязательно коррелируют с 
+Semantic IDs (SIDs) используются для дискретного представления объектов в генеративных рекомендательных системах.
+При этом качество SID часто оценивается через свойства самого представления, которые не обязательно коррелируют с
 качеством итоговых рекомендаций.
 
     \vspace{1cm}
 
-    \textbf{Цель нашей работы} - исследовать эту связь: сравнить различные методы построения Semantic IDs и определить, 
+    \textbf{Цель нашей работы} - исследовать эту связь: сравнить различные методы построения Semantic IDs и определить,
     какие свойства SID действительно отражаются на финальных метриках рекомендательной системы.
     }
 };
@@ -132,51 +132,75 @@ Semantic IDs (SIDs) используются для дискретного пр�
 ] at ([xshift=2.8cm,yshift=-31.0cm]current page.north west)
 {
     {\fontsize{26}{33}\selectfont
-
 \textbf{\textcolor{purple}{Что хотим выяснить}}
 
 Хотим изучить зависимость между \textbf{метриками Semantic ID} и
 \textbf{downstream-метриками} рекомендательных моделей.
 
-Рассматриваем два сценария: \textbf{генерацию} следующего объекта и
+Рассматриваем: \textbf{генерацию} следующих объектов и
 \textbf{ранжирование} кандидатов.
 
 \textbf{\textcolor{orange}{Генерация}}
 
-\textbf{TIGER-like} авторегрессионно предсказывает SID следующего объекта.
-Качество измеряем по \textbf{Recall@100}.
+\textbf{TIGER} авторегрессионно предсказывает SID следующего объекта.
 
-В качестве ориентира используем \textbf{SASRec}, который предсказывает
+В качестве baseline используем \textbf{SASRec}, который предсказывает
 следующий объект напрямую по item ID.
 
 \vspace{0.7cm}
 
 \textbf{\textcolor{teal}{Ранжирование}}
 
-\textbf{DCNv2} ранжирует объект по счётчикам и категориальным признакам.
-SID целевого объекта подаётся в модель как дополнительный категориальный признак.
+\textbf{DCNv2} ранжирует объект по счётчикам и признакам.
+SID целевого объекта подаётся в модель как дополнительный признак.
 
 \textbf{TransAct-like} расширяет DCNv2 пользовательской историей: помимо тех же
-признаков модель получает последовательность взаимодействий, в которой item ID
+признаков модель получает историю взаимодействий пользователя, в которой item ID
 заменены на SID соответствующих объектов.
-
-Качество измеряем по \textbf{ROC-AUC} и \textbf{pairwise accuracy}.
 
 \vspace{0.7cm}
 
 \textbf{\textcolor{blue}{Датасет и разбиение}}
 
-Все варианты SID и downstream-модели сравниваем на датасете
-\textbf{Yambda-50M} с \textbf{time split}.
+Все эксперименты ставим на датасете \textbf{Yambda-50M} с \textbf{time split}.
+
+\vspace{0.7cm}
+
+{\fontsize{34}{40}\selectfont
+\textcolor{teal}{Downstream-метрики}}
+
+{\fontsize{30}{37}\selectfont
+Для генерации: Recall@100.\\[0.25cm]
+Для ранжирования: ROC-AUC и pairwise accuracy.}
 
 }
 };
 % Middle column: methods grid
 \posterbox{40.3}{10.4}{37.8}{20.2}{blue}{fillblue}{Balanced RQ-KMeans / RQ-VAE}
 
+\node[
+    anchor=north,
+    text=ink,
+    inner sep=0pt,
+    font=\bfseries\fontsize{22}{27}\selectfont
+] at ([xshift=49.6cm,yshift=-12.8cm]current page.north west)
+  {Balanced RQ-KMeans};
+
 \node[anchor=north, inner sep=0pt]
-  at ([xshift=59.2cm,yshift=-13.0cm]current page.north west)
-  {\includegraphics[width=33.5cm]{rq-rqvae.png}};
+  at ([xshift=49.6cm,yshift=-14.2cm]current page.north west)
+  {\includegraphics[width=17.0cm,trim=0 85bp 0 85bp,clip]{балан картинка.png}};
+
+\node[
+    anchor=north,
+    text=ink,
+    inner sep=0pt,
+    font=\bfseries\fontsize{22}{27}\selectfont
+] at ([xshift=68.7cm,yshift=-12.8cm]current page.north west)
+  {RQ-VAE};
+
+\node[anchor=north, inner sep=0pt]
+  at ([xshift=68.7cm,yshift=-15.2cm]current page.north west)
+  {\includegraphics[width=17.0cm]{rq-rqvae.png}};
 
 \node[
     anchor=south east,

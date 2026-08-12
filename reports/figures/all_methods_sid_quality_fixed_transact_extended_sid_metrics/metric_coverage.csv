@@ -1,0 +1,1849 @@
+target,sid_metric,method,num_points
+recall100,icr,R3VAE (rqkmeans),5
+recall100,icr,R3VAE (spherical),6
+recall100,icr,RQKMeans,5
+recall100,icr,RQVAE (ECM),3
+recall100,icr,RQVAE,6
+recall100,icr,RQVAE (RRS),3
+recall100,icr,RQVAE-token,2
+recall100,icr,PLUM,3
+recall100,icr,BalanceRQKMeans,3
+recall100,icr,RQVAE + item LogQ,6
+recall100,icr,RQVAE + pure SID LogQ,2
+recall100,collision_rate,R3VAE (rqkmeans),5
+recall100,collision_rate,R3VAE (spherical),6
+recall100,collision_rate,RQKMeans,5
+recall100,collision_rate,RQVAE (ECM),3
+recall100,collision_rate,RQVAE,6
+recall100,collision_rate,RQVAE (RRS),3
+recall100,collision_rate,RQVAE-token,2
+recall100,collision_rate,PLUM,3
+recall100,collision_rate,BalanceRQKMeans,3
+recall100,collision_rate,RQVAE + item LogQ,6
+recall100,collision_rate,RQVAE + pure SID LogQ,2
+recall100,p95_collision_group_size,R3VAE (rqkmeans),5
+recall100,p95_collision_group_size,R3VAE (spherical),6
+recall100,p95_collision_group_size,RQKMeans,5
+recall100,p95_collision_group_size,RQVAE (ECM),3
+recall100,p95_collision_group_size,RQVAE,6
+recall100,p95_collision_group_size,RQVAE (RRS),3
+recall100,p95_collision_group_size,RQVAE-token,0
+recall100,p95_collision_group_size,PLUM,3
+recall100,p95_collision_group_size,BalanceRQKMeans,3
+recall100,p95_collision_group_size,RQVAE + item LogQ,6
+recall100,p95_collision_group_size,RQVAE + pure SID LogQ,2
+recall100,g_max,R3VAE (rqkmeans),5
+recall100,g_max,R3VAE (spherical),6
+recall100,g_max,RQKMeans,5
+recall100,g_max,RQVAE (ECM),3
+recall100,g_max,RQVAE,6
+recall100,g_max,RQVAE (RRS),3
+recall100,g_max,RQVAE-token,2
+recall100,g_max,PLUM,3
+recall100,g_max,BalanceRQKMeans,3
+recall100,g_max,RQVAE + item LogQ,6
+recall100,g_max,RQVAE + pure SID LogQ,2
+recall100,cur_total,R3VAE (rqkmeans),5
+recall100,cur_total,R3VAE (spherical),6
+recall100,cur_total,RQKMeans,5
+recall100,cur_total,RQVAE (ECM),3
+recall100,cur_total,RQVAE,6
+recall100,cur_total,RQVAE (RRS),3
+recall100,cur_total,RQVAE-token,0
+recall100,cur_total,PLUM,3
+recall100,cur_total,BalanceRQKMeans,3
+recall100,cur_total,RQVAE + item LogQ,6
+recall100,cur_total,RQVAE + pure SID LogQ,2
+recall100,code_gini,R3VAE (rqkmeans),5
+recall100,code_gini,R3VAE (spherical),6
+recall100,code_gini,RQKMeans,5
+recall100,code_gini,RQVAE (ECM),3
+recall100,code_gini,RQVAE,6
+recall100,code_gini,RQVAE (RRS),3
+recall100,code_gini,RQVAE-token,0
+recall100,code_gini,PLUM,3
+recall100,code_gini,BalanceRQKMeans,3
+recall100,code_gini,RQVAE + item LogQ,6
+recall100,code_gini,RQVAE + pure SID LogQ,2
+recall100,code_entropy,R3VAE (rqkmeans),5
+recall100,code_entropy,R3VAE (spherical),6
+recall100,code_entropy,RQKMeans,5
+recall100,code_entropy,RQVAE (ECM),3
+recall100,code_entropy,RQVAE,6
+recall100,code_entropy,RQVAE (RRS),3
+recall100,code_entropy,RQVAE-token,0
+recall100,code_entropy,PLUM,3
+recall100,code_entropy,BalanceRQKMeans,3
+recall100,code_entropy,RQVAE + item LogQ,6
+recall100,code_entropy,RQVAE + pure SID LogQ,2
+recall100,intra_code_similarity,R3VAE (rqkmeans),5
+recall100,intra_code_similarity,R3VAE (spherical),6
+recall100,intra_code_similarity,RQKMeans,5
+recall100,intra_code_similarity,RQVAE (ECM),0
+recall100,intra_code_similarity,RQVAE,6
+recall100,intra_code_similarity,RQVAE (RRS),0
+recall100,intra_code_similarity,RQVAE-token,0
+recall100,intra_code_similarity,PLUM,2
+recall100,intra_code_similarity,BalanceRQKMeans,2
+recall100,intra_code_similarity,RQVAE + item LogQ,6
+recall100,intra_code_similarity,RQVAE + pure SID LogQ,2
+recall100,prefix_coherence_1,R3VAE (rqkmeans),5
+recall100,prefix_coherence_1,R3VAE (spherical),6
+recall100,prefix_coherence_1,RQKMeans,5
+recall100,prefix_coherence_1,RQVAE (ECM),3
+recall100,prefix_coherence_1,RQVAE,6
+recall100,prefix_coherence_1,RQVAE (RRS),3
+recall100,prefix_coherence_1,RQVAE-token,0
+recall100,prefix_coherence_1,PLUM,3
+recall100,prefix_coherence_1,BalanceRQKMeans,3
+recall100,prefix_coherence_1,RQVAE + item LogQ,6
+recall100,prefix_coherence_1,RQVAE + pure SID LogQ,2
+recall100,prefix_coherence_2,R3VAE (rqkmeans),5
+recall100,prefix_coherence_2,R3VAE (spherical),6
+recall100,prefix_coherence_2,RQKMeans,5
+recall100,prefix_coherence_2,RQVAE (ECM),3
+recall100,prefix_coherence_2,RQVAE,6
+recall100,prefix_coherence_2,RQVAE (RRS),3
+recall100,prefix_coherence_2,RQVAE-token,0
+recall100,prefix_coherence_2,PLUM,3
+recall100,prefix_coherence_2,BalanceRQKMeans,3
+recall100,prefix_coherence_2,RQVAE + item LogQ,6
+recall100,prefix_coherence_2,RQVAE + pure SID LogQ,2
+recall100,prefix_coherence_3,R3VAE (rqkmeans),4
+recall100,prefix_coherence_3,R3VAE (spherical),5
+recall100,prefix_coherence_3,RQKMeans,4
+recall100,prefix_coherence_3,RQVAE (ECM),0
+recall100,prefix_coherence_3,RQVAE,5
+recall100,prefix_coherence_3,RQVAE (RRS),0
+recall100,prefix_coherence_3,RQVAE-token,0
+recall100,prefix_coherence_3,PLUM,2
+recall100,prefix_coherence_3,BalanceRQKMeans,2
+recall100,prefix_coherence_3,RQVAE + item LogQ,5
+recall100,prefix_coherence_3,RQVAE + pure SID LogQ,1
+recall100,valid_sid_rate,R3VAE (rqkmeans),5
+recall100,valid_sid_rate,R3VAE (spherical),6
+recall100,valid_sid_rate,RQKMeans,5
+recall100,valid_sid_rate,RQVAE (ECM),3
+recall100,valid_sid_rate,RQVAE,6
+recall100,valid_sid_rate,RQVAE (RRS),3
+recall100,valid_sid_rate,RQVAE-token,0
+recall100,valid_sid_rate,PLUM,3
+recall100,valid_sid_rate,BalanceRQKMeans,3
+recall100,valid_sid_rate,RQVAE + item LogQ,6
+recall100,valid_sid_rate,RQVAE + pure SID LogQ,2
+dcnv2,icr,R3VAE (rqkmeans),5
+dcnv2,icr,R3VAE (spherical),6
+dcnv2,icr,RQKMeans,5
+dcnv2,icr,RQVAE (ECM),3
+dcnv2,icr,RQVAE,6
+dcnv2,icr,RQVAE (RRS),3
+dcnv2,icr,RQVAE-token,0
+dcnv2,icr,PLUM,0
+dcnv2,icr,BalanceRQKMeans,0
+dcnv2,icr,RQVAE + item LogQ,0
+dcnv2,icr,RQVAE + pure SID LogQ,0
+dcnv2,collision_rate,R3VAE (rqkmeans),5
+dcnv2,collision_rate,R3VAE (spherical),6
+dcnv2,collision_rate,RQKMeans,5
+dcnv2,collision_rate,RQVAE (ECM),3
+dcnv2,collision_rate,RQVAE,6
+dcnv2,collision_rate,RQVAE (RRS),3
+dcnv2,collision_rate,RQVAE-token,0
+dcnv2,collision_rate,PLUM,0
+dcnv2,collision_rate,BalanceRQKMeans,0
+dcnv2,collision_rate,RQVAE + item LogQ,0
+dcnv2,collision_rate,RQVAE + pure SID LogQ,0
+dcnv2,p95_collision_group_size,R3VAE (rqkmeans),5
+dcnv2,p95_collision_group_size,R3VAE (spherical),6
+dcnv2,p95_collision_group_size,RQKMeans,5
+dcnv2,p95_collision_group_size,RQVAE (ECM),3
+dcnv2,p95_collision_group_size,RQVAE,6
+dcnv2,p95_collision_group_size,RQVAE (RRS),3
+dcnv2,p95_collision_group_size,RQVAE-token,0
+dcnv2,p95_collision_group_size,PLUM,0
+dcnv2,p95_collision_group_size,BalanceRQKMeans,0
+dcnv2,p95_collision_group_size,RQVAE + item LogQ,0
+dcnv2,p95_collision_group_size,RQVAE + pure SID LogQ,0
+dcnv2,g_max,R3VAE (rqkmeans),5
+dcnv2,g_max,R3VAE (spherical),6
+dcnv2,g_max,RQKMeans,5
+dcnv2,g_max,RQVAE (ECM),3
+dcnv2,g_max,RQVAE,6
+dcnv2,g_max,RQVAE (RRS),3
+dcnv2,g_max,RQVAE-token,0
+dcnv2,g_max,PLUM,0
+dcnv2,g_max,BalanceRQKMeans,0
+dcnv2,g_max,RQVAE + item LogQ,0
+dcnv2,g_max,RQVAE + pure SID LogQ,0
+dcnv2,cur_total,R3VAE (rqkmeans),5
+dcnv2,cur_total,R3VAE (spherical),6
+dcnv2,cur_total,RQKMeans,5
+dcnv2,cur_total,RQVAE (ECM),3
+dcnv2,cur_total,RQVAE,6
+dcnv2,cur_total,RQVAE (RRS),3
+dcnv2,cur_total,RQVAE-token,0
+dcnv2,cur_total,PLUM,0
+dcnv2,cur_total,BalanceRQKMeans,0
+dcnv2,cur_total,RQVAE + item LogQ,0
+dcnv2,cur_total,RQVAE + pure SID LogQ,0
+dcnv2,code_gini,R3VAE (rqkmeans),5
+dcnv2,code_gini,R3VAE (spherical),6
+dcnv2,code_gini,RQKMeans,5
+dcnv2,code_gini,RQVAE (ECM),3
+dcnv2,code_gini,RQVAE,6
+dcnv2,code_gini,RQVAE (RRS),3
+dcnv2,code_gini,RQVAE-token,0
+dcnv2,code_gini,PLUM,0
+dcnv2,code_gini,BalanceRQKMeans,0
+dcnv2,code_gini,RQVAE + item LogQ,0
+dcnv2,code_gini,RQVAE + pure SID LogQ,0
+dcnv2,code_entropy,R3VAE (rqkmeans),5
+dcnv2,code_entropy,R3VAE (spherical),6
+dcnv2,code_entropy,RQKMeans,5
+dcnv2,code_entropy,RQVAE (ECM),3
+dcnv2,code_entropy,RQVAE,6
+dcnv2,code_entropy,RQVAE (RRS),3
+dcnv2,code_entropy,RQVAE-token,0
+dcnv2,code_entropy,PLUM,0
+dcnv2,code_entropy,BalanceRQKMeans,0
+dcnv2,code_entropy,RQVAE + item LogQ,0
+dcnv2,code_entropy,RQVAE + pure SID LogQ,0
+dcnv2,intra_code_similarity,R3VAE (rqkmeans),5
+dcnv2,intra_code_similarity,R3VAE (spherical),6
+dcnv2,intra_code_similarity,RQKMeans,5
+dcnv2,intra_code_similarity,RQVAE (ECM),0
+dcnv2,intra_code_similarity,RQVAE,6
+dcnv2,intra_code_similarity,RQVAE (RRS),0
+dcnv2,intra_code_similarity,RQVAE-token,0
+dcnv2,intra_code_similarity,PLUM,0
+dcnv2,intra_code_similarity,BalanceRQKMeans,0
+dcnv2,intra_code_similarity,RQVAE + item LogQ,0
+dcnv2,intra_code_similarity,RQVAE + pure SID LogQ,0
+dcnv2,prefix_coherence_1,R3VAE (rqkmeans),5
+dcnv2,prefix_coherence_1,R3VAE (spherical),6
+dcnv2,prefix_coherence_1,RQKMeans,5
+dcnv2,prefix_coherence_1,RQVAE (ECM),3
+dcnv2,prefix_coherence_1,RQVAE,6
+dcnv2,prefix_coherence_1,RQVAE (RRS),3
+dcnv2,prefix_coherence_1,RQVAE-token,0
+dcnv2,prefix_coherence_1,PLUM,0
+dcnv2,prefix_coherence_1,BalanceRQKMeans,0
+dcnv2,prefix_coherence_1,RQVAE + item LogQ,0
+dcnv2,prefix_coherence_1,RQVAE + pure SID LogQ,0
+dcnv2,prefix_coherence_2,R3VAE (rqkmeans),5
+dcnv2,prefix_coherence_2,R3VAE (spherical),6
+dcnv2,prefix_coherence_2,RQKMeans,5
+dcnv2,prefix_coherence_2,RQVAE (ECM),3
+dcnv2,prefix_coherence_2,RQVAE,6
+dcnv2,prefix_coherence_2,RQVAE (RRS),3
+dcnv2,prefix_coherence_2,RQVAE-token,0
+dcnv2,prefix_coherence_2,PLUM,0
+dcnv2,prefix_coherence_2,BalanceRQKMeans,0
+dcnv2,prefix_coherence_2,RQVAE + item LogQ,0
+dcnv2,prefix_coherence_2,RQVAE + pure SID LogQ,0
+dcnv2,prefix_coherence_3,R3VAE (rqkmeans),4
+dcnv2,prefix_coherence_3,R3VAE (spherical),5
+dcnv2,prefix_coherence_3,RQKMeans,4
+dcnv2,prefix_coherence_3,RQVAE (ECM),0
+dcnv2,prefix_coherence_3,RQVAE,5
+dcnv2,prefix_coherence_3,RQVAE (RRS),0
+dcnv2,prefix_coherence_3,RQVAE-token,0
+dcnv2,prefix_coherence_3,PLUM,0
+dcnv2,prefix_coherence_3,BalanceRQKMeans,0
+dcnv2,prefix_coherence_3,RQVAE + item LogQ,0
+dcnv2,prefix_coherence_3,RQVAE + pure SID LogQ,0
+dcnv2,valid_sid_rate,R3VAE (rqkmeans),5
+dcnv2,valid_sid_rate,R3VAE (spherical),6
+dcnv2,valid_sid_rate,RQKMeans,5
+dcnv2,valid_sid_rate,RQVAE (ECM),3
+dcnv2,valid_sid_rate,RQVAE,6
+dcnv2,valid_sid_rate,RQVAE (RRS),3
+dcnv2,valid_sid_rate,RQVAE-token,0
+dcnv2,valid_sid_rate,PLUM,0
+dcnv2,valid_sid_rate,BalanceRQKMeans,0
+dcnv2,valid_sid_rate,RQVAE + item LogQ,0
+dcnv2,valid_sid_rate,RQVAE + pure SID LogQ,0
+transact,icr,R3VAE (rqkmeans),5
+transact,icr,R3VAE (spherical),6
+transact,icr,RQKMeans,5
+transact,icr,RQVAE (ECM),3
+transact,icr,RQVAE,6
+transact,icr,RQVAE (RRS),3
+transact,icr,RQVAE-token,2
+transact,icr,PLUM,3
+transact,icr,BalanceRQKMeans,3
+transact,icr,RQVAE + item LogQ,6
+transact,icr,RQVAE + pure SID LogQ,2
+transact,collision_rate,R3VAE (rqkmeans),5
+transact,collision_rate,R3VAE (spherical),6
+transact,collision_rate,RQKMeans,5
+transact,collision_rate,RQVAE (ECM),3
+transact,collision_rate,RQVAE,6
+transact,collision_rate,RQVAE (RRS),3
+transact,collision_rate,RQVAE-token,2
+transact,collision_rate,PLUM,3
+transact,collision_rate,BalanceRQKMeans,3
+transact,collision_rate,RQVAE + item LogQ,6
+transact,collision_rate,RQVAE + pure SID LogQ,2
+transact,p95_collision_group_size,R3VAE (rqkmeans),5
+transact,p95_collision_group_size,R3VAE (spherical),6
+transact,p95_collision_group_size,RQKMeans,5
+transact,p95_collision_group_size,RQVAE (ECM),3
+transact,p95_collision_group_size,RQVAE,6
+transact,p95_collision_group_size,RQVAE (RRS),3
+transact,p95_collision_group_size,RQVAE-token,0
+transact,p95_collision_group_size,PLUM,3
+transact,p95_collision_group_size,BalanceRQKMeans,3
+transact,p95_collision_group_size,RQVAE + item LogQ,6
+transact,p95_collision_group_size,RQVAE + pure SID LogQ,2
+transact,g_max,R3VAE (rqkmeans),5
+transact,g_max,R3VAE (spherical),6
+transact,g_max,RQKMeans,5
+transact,g_max,RQVAE (ECM),3
+transact,g_max,RQVAE,6
+transact,g_max,RQVAE (RRS),3
+transact,g_max,RQVAE-token,2
+transact,g_max,PLUM,3
+transact,g_max,BalanceRQKMeans,3
+transact,g_max,RQVAE + item LogQ,6
+transact,g_max,RQVAE + pure SID LogQ,2
+transact,cur_total,R3VAE (rqkmeans),5
+transact,cur_total,R3VAE (spherical),6
+transact,cur_total,RQKMeans,5
+transact,cur_total,RQVAE (ECM),3
+transact,cur_total,RQVAE,6
+transact,cur_total,RQVAE (RRS),3
+transact,cur_total,RQVAE-token,0
+transact,cur_total,PLUM,3
+transact,cur_total,BalanceRQKMeans,3
+transact,cur_total,RQVAE + item LogQ,6
+transact,cur_total,RQVAE + pure SID LogQ,2
+transact,code_gini,R3VAE (rqkmeans),5
+transact,code_gini,R3VAE (spherical),6
+transact,code_gini,RQKMeans,5
+transact,code_gini,RQVAE (ECM),3
+transact,code_gini,RQVAE,6
+transact,code_gini,RQVAE (RRS),3
+transact,code_gini,RQVAE-token,0
+transact,code_gini,PLUM,3
+transact,code_gini,BalanceRQKMeans,3
+transact,code_gini,RQVAE + item LogQ,6
+transact,code_gini,RQVAE + pure SID LogQ,2
+transact,code_entropy,R3VAE (rqkmeans),5
+transact,code_entropy,R3VAE (spherical),6
+transact,code_entropy,RQKMeans,5
+transact,code_entropy,RQVAE (ECM),3
+transact,code_entropy,RQVAE,6
+transact,code_entropy,RQVAE (RRS),3
+transact,code_entropy,RQVAE-token,0
+transact,code_entropy,PLUM,3
+transact,code_entropy,BalanceRQKMeans,3
+transact,code_entropy,RQVAE + item LogQ,6
+transact,code_entropy,RQVAE + pure SID LogQ,2
+transact,intra_code_similarity,R3VAE (rqkmeans),5
+transact,intra_code_similarity,R3VAE (spherical),6
+transact,intra_code_similarity,RQKMeans,5
+transact,intra_code_similarity,RQVAE (ECM),0
+transact,intra_code_similarity,RQVAE,6
+transact,intra_code_similarity,RQVAE (RRS),0
+transact,intra_code_similarity,RQVAE-token,0
+transact,intra_code_similarity,PLUM,2
+transact,intra_code_similarity,BalanceRQKMeans,2
+transact,intra_code_similarity,RQVAE + item LogQ,6
+transact,intra_code_similarity,RQVAE + pure SID LogQ,2
+transact,prefix_coherence_1,R3VAE (rqkmeans),5
+transact,prefix_coherence_1,R3VAE (spherical),6
+transact,prefix_coherence_1,RQKMeans,5
+transact,prefix_coherence_1,RQVAE (ECM),3
+transact,prefix_coherence_1,RQVAE,6
+transact,prefix_coherence_1,RQVAE (RRS),3
+transact,prefix_coherence_1,RQVAE-token,0
+transact,prefix_coherence_1,PLUM,3
+transact,prefix_coherence_1,BalanceRQKMeans,3
+transact,prefix_coherence_1,RQVAE + item LogQ,6
+transact,prefix_coherence_1,RQVAE + pure SID LogQ,2
+transact,prefix_coherence_2,R3VAE (rqkmeans),5
+transact,prefix_coherence_2,R3VAE (spherical),6
+transact,prefix_coherence_2,RQKMeans,5
+transact,prefix_coherence_2,RQVAE (ECM),3
+transact,prefix_coherence_2,RQVAE,6
+transact,prefix_coherence_2,RQVAE (RRS),3
+transact,prefix_coherence_2,RQVAE-token,0
+transact,prefix_coherence_2,PLUM,3
+transact,prefix_coherence_2,BalanceRQKMeans,3
+transact,prefix_coherence_2,RQVAE + item LogQ,6
+transact,prefix_coherence_2,RQVAE + pure SID LogQ,2
+transact,prefix_coherence_3,R3VAE (rqkmeans),4
+transact,prefix_coherence_3,R3VAE (spherical),5
+transact,prefix_coherence_3,RQKMeans,4
+transact,prefix_coherence_3,RQVAE (ECM),0
+transact,prefix_coherence_3,RQVAE,5
+transact,prefix_coherence_3,RQVAE (RRS),0
+transact,prefix_coherence_3,RQVAE-token,0
+transact,prefix_coherence_3,PLUM,2
+transact,prefix_coherence_3,BalanceRQKMeans,2
+transact,prefix_coherence_3,RQVAE + item LogQ,5
+transact,prefix_coherence_3,RQVAE + pure SID LogQ,1
+transact,valid_sid_rate,R3VAE (rqkmeans),5
+transact,valid_sid_rate,R3VAE (spherical),6
+transact,valid_sid_rate,RQKMeans,5
+transact,valid_sid_rate,RQVAE (ECM),3
+transact,valid_sid_rate,RQVAE,6
+transact,valid_sid_rate,RQVAE (RRS),3
+transact,valid_sid_rate,RQVAE-token,0
+transact,valid_sid_rate,PLUM,3
+transact,valid_sid_rate,BalanceRQKMeans,3
+transact,valid_sid_rate,RQVAE + item LogQ,6
+transact,valid_sid_rate,RQVAE + pure SID LogQ,2
+recall100,singleton_rate,R3VAE (rqkmeans),5
+recall100,singleton_rate,R3VAE (spherical),6
+recall100,singleton_rate,RQKMeans,5
+recall100,singleton_rate,RQVAE (ECM),3
+recall100,singleton_rate,RQVAE,6
+recall100,singleton_rate,RQVAE (RRS),3
+recall100,singleton_rate,RQVAE-token,2
+recall100,singleton_rate,PLUM,3
+recall100,singleton_rate,BalanceRQKMeans,3
+recall100,singleton_rate,RQVAE + item LogQ,6
+recall100,singleton_rate,RQVAE + pure SID LogQ,2
+recall100,collision_item_rate,R3VAE (rqkmeans),5
+recall100,collision_item_rate,R3VAE (spherical),6
+recall100,collision_item_rate,RQKMeans,5
+recall100,collision_item_rate,RQVAE (ECM),3
+recall100,collision_item_rate,RQVAE,6
+recall100,collision_item_rate,RQVAE (RRS),3
+recall100,collision_item_rate,RQVAE-token,2
+recall100,collision_item_rate,PLUM,3
+recall100,collision_item_rate,BalanceRQKMeans,3
+recall100,collision_item_rate,RQVAE + item LogQ,6
+recall100,collision_item_rate,RQVAE + pure SID LogQ,2
+recall100,pair_collision_probability,R3VAE (rqkmeans),5
+recall100,pair_collision_probability,R3VAE (spherical),6
+recall100,pair_collision_probability,RQKMeans,5
+recall100,pair_collision_probability,RQVAE (ECM),3
+recall100,pair_collision_probability,RQVAE,6
+recall100,pair_collision_probability,RQVAE (RRS),3
+recall100,pair_collision_probability,RQVAE-token,2
+recall100,pair_collision_probability,PLUM,3
+recall100,pair_collision_probability,BalanceRQKMeans,3
+recall100,pair_collision_probability,RQVAE + item LogQ,6
+recall100,pair_collision_probability,RQVAE + pure SID LogQ,2
+recall100,intra_code_similarity_v2,R3VAE (rqkmeans),5
+recall100,intra_code_similarity_v2,R3VAE (spherical),6
+recall100,intra_code_similarity_v2,RQKMeans,5
+recall100,intra_code_similarity_v2,RQVAE (ECM),3
+recall100,intra_code_similarity_v2,RQVAE,6
+recall100,intra_code_similarity_v2,RQVAE (RRS),3
+recall100,intra_code_similarity_v2,RQVAE-token,2
+recall100,intra_code_similarity_v2,PLUM,3
+recall100,intra_code_similarity_v2,BalanceRQKMeans,3
+recall100,intra_code_similarity_v2,RQVAE + item LogQ,6
+recall100,intra_code_similarity_v2,RQVAE + pure SID LogQ,2
+recall100,prefix_coherence_4,R3VAE (rqkmeans),1
+recall100,prefix_coherence_4,R3VAE (spherical),1
+recall100,prefix_coherence_4,RQKMeans,1
+recall100,prefix_coherence_4,RQVAE (ECM),0
+recall100,prefix_coherence_4,RQVAE,1
+recall100,prefix_coherence_4,RQVAE (RRS),0
+recall100,prefix_coherence_4,RQVAE-token,0
+recall100,prefix_coherence_4,PLUM,0
+recall100,prefix_coherence_4,BalanceRQKMeans,0
+recall100,prefix_coherence_4,RQVAE + item LogQ,1
+recall100,prefix_coherence_4,RQVAE + pure SID LogQ,0
+recall100,adjusted_semantic_variance_explained_1,R3VAE (rqkmeans),5
+recall100,adjusted_semantic_variance_explained_1,R3VAE (spherical),6
+recall100,adjusted_semantic_variance_explained_1,RQKMeans,5
+recall100,adjusted_semantic_variance_explained_1,RQVAE (ECM),3
+recall100,adjusted_semantic_variance_explained_1,RQVAE,6
+recall100,adjusted_semantic_variance_explained_1,RQVAE (RRS),3
+recall100,adjusted_semantic_variance_explained_1,RQVAE-token,2
+recall100,adjusted_semantic_variance_explained_1,PLUM,3
+recall100,adjusted_semantic_variance_explained_1,BalanceRQKMeans,3
+recall100,adjusted_semantic_variance_explained_1,RQVAE + item LogQ,6
+recall100,adjusted_semantic_variance_explained_1,RQVAE + pure SID LogQ,2
+recall100,normalized_conditional_entropy_1,R3VAE (rqkmeans),5
+recall100,normalized_conditional_entropy_1,R3VAE (spherical),6
+recall100,normalized_conditional_entropy_1,RQKMeans,5
+recall100,normalized_conditional_entropy_1,RQVAE (ECM),3
+recall100,normalized_conditional_entropy_1,RQVAE,6
+recall100,normalized_conditional_entropy_1,RQVAE (RRS),3
+recall100,normalized_conditional_entropy_1,RQVAE-token,2
+recall100,normalized_conditional_entropy_1,PLUM,3
+recall100,normalized_conditional_entropy_1,BalanceRQKMeans,3
+recall100,normalized_conditional_entropy_1,RQVAE + item LogQ,6
+recall100,normalized_conditional_entropy_1,RQVAE + pure SID LogQ,2
+recall100,pair_refinement_rate_1,R3VAE (rqkmeans),5
+recall100,pair_refinement_rate_1,R3VAE (spherical),6
+recall100,pair_refinement_rate_1,RQKMeans,5
+recall100,pair_refinement_rate_1,RQVAE (ECM),3
+recall100,pair_refinement_rate_1,RQVAE,6
+recall100,pair_refinement_rate_1,RQVAE (RRS),3
+recall100,pair_refinement_rate_1,RQVAE-token,2
+recall100,pair_refinement_rate_1,PLUM,3
+recall100,pair_refinement_rate_1,BalanceRQKMeans,3
+recall100,pair_refinement_rate_1,RQVAE + item LogQ,6
+recall100,pair_refinement_rate_1,RQVAE + pure SID LogQ,2
+recall100,mean_active_branch_fraction_1,R3VAE (rqkmeans),5
+recall100,mean_active_branch_fraction_1,R3VAE (spherical),6
+recall100,mean_active_branch_fraction_1,RQKMeans,5
+recall100,mean_active_branch_fraction_1,RQVAE (ECM),3
+recall100,mean_active_branch_fraction_1,RQVAE,6
+recall100,mean_active_branch_fraction_1,RQVAE (RRS),3
+recall100,mean_active_branch_fraction_1,RQVAE-token,2
+recall100,mean_active_branch_fraction_1,PLUM,3
+recall100,mean_active_branch_fraction_1,BalanceRQKMeans,3
+recall100,mean_active_branch_fraction_1,RQVAE + item LogQ,6
+recall100,mean_active_branch_fraction_1,RQVAE + pure SID LogQ,2
+recall100,load_balance_p25_1,R3VAE (rqkmeans),5
+recall100,load_balance_p25_1,R3VAE (spherical),6
+recall100,load_balance_p25_1,RQKMeans,5
+recall100,load_balance_p25_1,RQVAE (ECM),3
+recall100,load_balance_p25_1,RQVAE,6
+recall100,load_balance_p25_1,RQVAE (RRS),3
+recall100,load_balance_p25_1,RQVAE-token,2
+recall100,load_balance_p25_1,PLUM,3
+recall100,load_balance_p25_1,BalanceRQKMeans,3
+recall100,load_balance_p25_1,RQVAE + item LogQ,6
+recall100,load_balance_p25_1,RQVAE + pure SID LogQ,2
+recall100,load_balance_p75_1,R3VAE (rqkmeans),5
+recall100,load_balance_p75_1,R3VAE (spherical),6
+recall100,load_balance_p75_1,RQKMeans,5
+recall100,load_balance_p75_1,RQVAE (ECM),3
+recall100,load_balance_p75_1,RQVAE,6
+recall100,load_balance_p75_1,RQVAE (RRS),3
+recall100,load_balance_p75_1,RQVAE-token,2
+recall100,load_balance_p75_1,PLUM,3
+recall100,load_balance_p75_1,BalanceRQKMeans,3
+recall100,load_balance_p75_1,RQVAE + item LogQ,6
+recall100,load_balance_p75_1,RQVAE + pure SID LogQ,2
+recall100,load_balance_p90_1,R3VAE (rqkmeans),5
+recall100,load_balance_p90_1,R3VAE (spherical),6
+recall100,load_balance_p90_1,RQKMeans,5
+recall100,load_balance_p90_1,RQVAE (ECM),3
+recall100,load_balance_p90_1,RQVAE,6
+recall100,load_balance_p90_1,RQVAE (RRS),3
+recall100,load_balance_p90_1,RQVAE-token,2
+recall100,load_balance_p90_1,PLUM,3
+recall100,load_balance_p90_1,BalanceRQKMeans,3
+recall100,load_balance_p90_1,RQVAE + item LogQ,6
+recall100,load_balance_p90_1,RQVAE + pure SID LogQ,2
+recall100,codebook_coverage_1,R3VAE (rqkmeans),5
+recall100,codebook_coverage_1,R3VAE (spherical),6
+recall100,codebook_coverage_1,RQKMeans,5
+recall100,codebook_coverage_1,RQVAE (ECM),3
+recall100,codebook_coverage_1,RQVAE,6
+recall100,codebook_coverage_1,RQVAE (RRS),3
+recall100,codebook_coverage_1,RQVAE-token,2
+recall100,codebook_coverage_1,PLUM,3
+recall100,codebook_coverage_1,BalanceRQKMeans,3
+recall100,codebook_coverage_1,RQVAE + item LogQ,6
+recall100,codebook_coverage_1,RQVAE + pure SID LogQ,2
+recall100,codebook_utilization_rate_1,R3VAE (rqkmeans),5
+recall100,codebook_utilization_rate_1,R3VAE (spherical),6
+recall100,codebook_utilization_rate_1,RQKMeans,5
+recall100,codebook_utilization_rate_1,RQVAE (ECM),3
+recall100,codebook_utilization_rate_1,RQVAE,6
+recall100,codebook_utilization_rate_1,RQVAE (RRS),3
+recall100,codebook_utilization_rate_1,RQVAE-token,2
+recall100,codebook_utilization_rate_1,PLUM,3
+recall100,codebook_utilization_rate_1,BalanceRQKMeans,3
+recall100,codebook_utilization_rate_1,RQVAE + item LogQ,6
+recall100,codebook_utilization_rate_1,RQVAE + pure SID LogQ,2
+recall100,adjusted_semantic_variance_explained_2,R3VAE (rqkmeans),5
+recall100,adjusted_semantic_variance_explained_2,R3VAE (spherical),6
+recall100,adjusted_semantic_variance_explained_2,RQKMeans,5
+recall100,adjusted_semantic_variance_explained_2,RQVAE (ECM),3
+recall100,adjusted_semantic_variance_explained_2,RQVAE,6
+recall100,adjusted_semantic_variance_explained_2,RQVAE (RRS),3
+recall100,adjusted_semantic_variance_explained_2,RQVAE-token,2
+recall100,adjusted_semantic_variance_explained_2,PLUM,3
+recall100,adjusted_semantic_variance_explained_2,BalanceRQKMeans,3
+recall100,adjusted_semantic_variance_explained_2,RQVAE + item LogQ,6
+recall100,adjusted_semantic_variance_explained_2,RQVAE + pure SID LogQ,2
+recall100,normalized_conditional_entropy_2,R3VAE (rqkmeans),5
+recall100,normalized_conditional_entropy_2,R3VAE (spherical),6
+recall100,normalized_conditional_entropy_2,RQKMeans,5
+recall100,normalized_conditional_entropy_2,RQVAE (ECM),3
+recall100,normalized_conditional_entropy_2,RQVAE,6
+recall100,normalized_conditional_entropy_2,RQVAE (RRS),3
+recall100,normalized_conditional_entropy_2,RQVAE-token,2
+recall100,normalized_conditional_entropy_2,PLUM,3
+recall100,normalized_conditional_entropy_2,BalanceRQKMeans,3
+recall100,normalized_conditional_entropy_2,RQVAE + item LogQ,6
+recall100,normalized_conditional_entropy_2,RQVAE + pure SID LogQ,2
+recall100,pair_refinement_rate_2,R3VAE (rqkmeans),5
+recall100,pair_refinement_rate_2,R3VAE (spherical),6
+recall100,pair_refinement_rate_2,RQKMeans,5
+recall100,pair_refinement_rate_2,RQVAE (ECM),3
+recall100,pair_refinement_rate_2,RQVAE,6
+recall100,pair_refinement_rate_2,RQVAE (RRS),3
+recall100,pair_refinement_rate_2,RQVAE-token,2
+recall100,pair_refinement_rate_2,PLUM,3
+recall100,pair_refinement_rate_2,BalanceRQKMeans,3
+recall100,pair_refinement_rate_2,RQVAE + item LogQ,6
+recall100,pair_refinement_rate_2,RQVAE + pure SID LogQ,2
+recall100,mean_active_branch_fraction_2,R3VAE (rqkmeans),5
+recall100,mean_active_branch_fraction_2,R3VAE (spherical),6
+recall100,mean_active_branch_fraction_2,RQKMeans,5
+recall100,mean_active_branch_fraction_2,RQVAE (ECM),3
+recall100,mean_active_branch_fraction_2,RQVAE,6
+recall100,mean_active_branch_fraction_2,RQVAE (RRS),3
+recall100,mean_active_branch_fraction_2,RQVAE-token,2
+recall100,mean_active_branch_fraction_2,PLUM,3
+recall100,mean_active_branch_fraction_2,BalanceRQKMeans,3
+recall100,mean_active_branch_fraction_2,RQVAE + item LogQ,6
+recall100,mean_active_branch_fraction_2,RQVAE + pure SID LogQ,2
+recall100,load_balance_p25_2,R3VAE (rqkmeans),5
+recall100,load_balance_p25_2,R3VAE (spherical),6
+recall100,load_balance_p25_2,RQKMeans,5
+recall100,load_balance_p25_2,RQVAE (ECM),3
+recall100,load_balance_p25_2,RQVAE,6
+recall100,load_balance_p25_2,RQVAE (RRS),3
+recall100,load_balance_p25_2,RQVAE-token,2
+recall100,load_balance_p25_2,PLUM,3
+recall100,load_balance_p25_2,BalanceRQKMeans,3
+recall100,load_balance_p25_2,RQVAE + item LogQ,6
+recall100,load_balance_p25_2,RQVAE + pure SID LogQ,2
+recall100,load_balance_p75_2,R3VAE (rqkmeans),5
+recall100,load_balance_p75_2,R3VAE (spherical),6
+recall100,load_balance_p75_2,RQKMeans,5
+recall100,load_balance_p75_2,RQVAE (ECM),3
+recall100,load_balance_p75_2,RQVAE,6
+recall100,load_balance_p75_2,RQVAE (RRS),3
+recall100,load_balance_p75_2,RQVAE-token,2
+recall100,load_balance_p75_2,PLUM,3
+recall100,load_balance_p75_2,BalanceRQKMeans,3
+recall100,load_balance_p75_2,RQVAE + item LogQ,6
+recall100,load_balance_p75_2,RQVAE + pure SID LogQ,2
+recall100,load_balance_p90_2,R3VAE (rqkmeans),5
+recall100,load_balance_p90_2,R3VAE (spherical),6
+recall100,load_balance_p90_2,RQKMeans,5
+recall100,load_balance_p90_2,RQVAE (ECM),3
+recall100,load_balance_p90_2,RQVAE,6
+recall100,load_balance_p90_2,RQVAE (RRS),3
+recall100,load_balance_p90_2,RQVAE-token,2
+recall100,load_balance_p90_2,PLUM,3
+recall100,load_balance_p90_2,BalanceRQKMeans,3
+recall100,load_balance_p90_2,RQVAE + item LogQ,6
+recall100,load_balance_p90_2,RQVAE + pure SID LogQ,2
+recall100,codebook_coverage_2,R3VAE (rqkmeans),5
+recall100,codebook_coverage_2,R3VAE (spherical),6
+recall100,codebook_coverage_2,RQKMeans,5
+recall100,codebook_coverage_2,RQVAE (ECM),3
+recall100,codebook_coverage_2,RQVAE,6
+recall100,codebook_coverage_2,RQVAE (RRS),3
+recall100,codebook_coverage_2,RQVAE-token,2
+recall100,codebook_coverage_2,PLUM,3
+recall100,codebook_coverage_2,BalanceRQKMeans,3
+recall100,codebook_coverage_2,RQVAE + item LogQ,6
+recall100,codebook_coverage_2,RQVAE + pure SID LogQ,2
+recall100,codebook_utilization_rate_2,R3VAE (rqkmeans),5
+recall100,codebook_utilization_rate_2,R3VAE (spherical),6
+recall100,codebook_utilization_rate_2,RQKMeans,5
+recall100,codebook_utilization_rate_2,RQVAE (ECM),3
+recall100,codebook_utilization_rate_2,RQVAE,6
+recall100,codebook_utilization_rate_2,RQVAE (RRS),3
+recall100,codebook_utilization_rate_2,RQVAE-token,2
+recall100,codebook_utilization_rate_2,PLUM,3
+recall100,codebook_utilization_rate_2,BalanceRQKMeans,3
+recall100,codebook_utilization_rate_2,RQVAE + item LogQ,6
+recall100,codebook_utilization_rate_2,RQVAE + pure SID LogQ,2
+recall100,adjusted_semantic_variance_explained_3,R3VAE (rqkmeans),4
+recall100,adjusted_semantic_variance_explained_3,R3VAE (spherical),5
+recall100,adjusted_semantic_variance_explained_3,RQKMeans,4
+recall100,adjusted_semantic_variance_explained_3,RQVAE (ECM),0
+recall100,adjusted_semantic_variance_explained_3,RQVAE,5
+recall100,adjusted_semantic_variance_explained_3,RQVAE (RRS),0
+recall100,adjusted_semantic_variance_explained_3,RQVAE-token,1
+recall100,adjusted_semantic_variance_explained_3,PLUM,3
+recall100,adjusted_semantic_variance_explained_3,BalanceRQKMeans,3
+recall100,adjusted_semantic_variance_explained_3,RQVAE + item LogQ,5
+recall100,adjusted_semantic_variance_explained_3,RQVAE + pure SID LogQ,1
+recall100,normalized_conditional_entropy_3,R3VAE (rqkmeans),4
+recall100,normalized_conditional_entropy_3,R3VAE (spherical),5
+recall100,normalized_conditional_entropy_3,RQKMeans,4
+recall100,normalized_conditional_entropy_3,RQVAE (ECM),3
+recall100,normalized_conditional_entropy_3,RQVAE,5
+recall100,normalized_conditional_entropy_3,RQVAE (RRS),3
+recall100,normalized_conditional_entropy_3,RQVAE-token,2
+recall100,normalized_conditional_entropy_3,PLUM,3
+recall100,normalized_conditional_entropy_3,BalanceRQKMeans,3
+recall100,normalized_conditional_entropy_3,RQVAE + item LogQ,5
+recall100,normalized_conditional_entropy_3,RQVAE + pure SID LogQ,1
+recall100,pair_refinement_rate_3,R3VAE (rqkmeans),4
+recall100,pair_refinement_rate_3,R3VAE (spherical),5
+recall100,pair_refinement_rate_3,RQKMeans,4
+recall100,pair_refinement_rate_3,RQVAE (ECM),3
+recall100,pair_refinement_rate_3,RQVAE,5
+recall100,pair_refinement_rate_3,RQVAE (RRS),3
+recall100,pair_refinement_rate_3,RQVAE-token,2
+recall100,pair_refinement_rate_3,PLUM,3
+recall100,pair_refinement_rate_3,BalanceRQKMeans,3
+recall100,pair_refinement_rate_3,RQVAE + item LogQ,5
+recall100,pair_refinement_rate_3,RQVAE + pure SID LogQ,1
+recall100,mean_active_branch_fraction_3,R3VAE (rqkmeans),4
+recall100,mean_active_branch_fraction_3,R3VAE (spherical),5
+recall100,mean_active_branch_fraction_3,RQKMeans,4
+recall100,mean_active_branch_fraction_3,RQVAE (ECM),3
+recall100,mean_active_branch_fraction_3,RQVAE,5
+recall100,mean_active_branch_fraction_3,RQVAE (RRS),3
+recall100,mean_active_branch_fraction_3,RQVAE-token,2
+recall100,mean_active_branch_fraction_3,PLUM,3
+recall100,mean_active_branch_fraction_3,BalanceRQKMeans,3
+recall100,mean_active_branch_fraction_3,RQVAE + item LogQ,5
+recall100,mean_active_branch_fraction_3,RQVAE + pure SID LogQ,1
+recall100,load_balance_p25_3,R3VAE (rqkmeans),4
+recall100,load_balance_p25_3,R3VAE (spherical),5
+recall100,load_balance_p25_3,RQKMeans,4
+recall100,load_balance_p25_3,RQVAE (ECM),3
+recall100,load_balance_p25_3,RQVAE,5
+recall100,load_balance_p25_3,RQVAE (RRS),3
+recall100,load_balance_p25_3,RQVAE-token,2
+recall100,load_balance_p25_3,PLUM,3
+recall100,load_balance_p25_3,BalanceRQKMeans,3
+recall100,load_balance_p25_3,RQVAE + item LogQ,5
+recall100,load_balance_p25_3,RQVAE + pure SID LogQ,1
+recall100,load_balance_p75_3,R3VAE (rqkmeans),4
+recall100,load_balance_p75_3,R3VAE (spherical),5
+recall100,load_balance_p75_3,RQKMeans,4
+recall100,load_balance_p75_3,RQVAE (ECM),3
+recall100,load_balance_p75_3,RQVAE,5
+recall100,load_balance_p75_3,RQVAE (RRS),3
+recall100,load_balance_p75_3,RQVAE-token,2
+recall100,load_balance_p75_3,PLUM,3
+recall100,load_balance_p75_3,BalanceRQKMeans,3
+recall100,load_balance_p75_3,RQVAE + item LogQ,5
+recall100,load_balance_p75_3,RQVAE + pure SID LogQ,1
+recall100,load_balance_p90_3,R3VAE (rqkmeans),4
+recall100,load_balance_p90_3,R3VAE (spherical),5
+recall100,load_balance_p90_3,RQKMeans,4
+recall100,load_balance_p90_3,RQVAE (ECM),3
+recall100,load_balance_p90_3,RQVAE,5
+recall100,load_balance_p90_3,RQVAE (RRS),3
+recall100,load_balance_p90_3,RQVAE-token,2
+recall100,load_balance_p90_3,PLUM,3
+recall100,load_balance_p90_3,BalanceRQKMeans,3
+recall100,load_balance_p90_3,RQVAE + item LogQ,5
+recall100,load_balance_p90_3,RQVAE + pure SID LogQ,1
+recall100,codebook_coverage_3,R3VAE (rqkmeans),4
+recall100,codebook_coverage_3,R3VAE (spherical),5
+recall100,codebook_coverage_3,RQKMeans,4
+recall100,codebook_coverage_3,RQVAE (ECM),3
+recall100,codebook_coverage_3,RQVAE,5
+recall100,codebook_coverage_3,RQVAE (RRS),3
+recall100,codebook_coverage_3,RQVAE-token,2
+recall100,codebook_coverage_3,PLUM,3
+recall100,codebook_coverage_3,BalanceRQKMeans,3
+recall100,codebook_coverage_3,RQVAE + item LogQ,5
+recall100,codebook_coverage_3,RQVAE + pure SID LogQ,1
+recall100,codebook_utilization_rate_3,R3VAE (rqkmeans),4
+recall100,codebook_utilization_rate_3,R3VAE (spherical),5
+recall100,codebook_utilization_rate_3,RQKMeans,4
+recall100,codebook_utilization_rate_3,RQVAE (ECM),3
+recall100,codebook_utilization_rate_3,RQVAE,5
+recall100,codebook_utilization_rate_3,RQVAE (RRS),3
+recall100,codebook_utilization_rate_3,RQVAE-token,2
+recall100,codebook_utilization_rate_3,PLUM,3
+recall100,codebook_utilization_rate_3,BalanceRQKMeans,3
+recall100,codebook_utilization_rate_3,RQVAE + item LogQ,5
+recall100,codebook_utilization_rate_3,RQVAE + pure SID LogQ,1
+recall100,adjusted_semantic_variance_explained_4,R3VAE (rqkmeans),1
+recall100,adjusted_semantic_variance_explained_4,R3VAE (spherical),1
+recall100,adjusted_semantic_variance_explained_4,RQKMeans,1
+recall100,adjusted_semantic_variance_explained_4,RQVAE (ECM),0
+recall100,adjusted_semantic_variance_explained_4,RQVAE,1
+recall100,adjusted_semantic_variance_explained_4,RQVAE (RRS),0
+recall100,adjusted_semantic_variance_explained_4,RQVAE-token,0
+recall100,adjusted_semantic_variance_explained_4,PLUM,0
+recall100,adjusted_semantic_variance_explained_4,BalanceRQKMeans,0
+recall100,adjusted_semantic_variance_explained_4,RQVAE + item LogQ,1
+recall100,adjusted_semantic_variance_explained_4,RQVAE + pure SID LogQ,0
+recall100,normalized_conditional_entropy_4,R3VAE (rqkmeans),1
+recall100,normalized_conditional_entropy_4,R3VAE (spherical),1
+recall100,normalized_conditional_entropy_4,RQKMeans,1
+recall100,normalized_conditional_entropy_4,RQVAE (ECM),0
+recall100,normalized_conditional_entropy_4,RQVAE,1
+recall100,normalized_conditional_entropy_4,RQVAE (RRS),0
+recall100,normalized_conditional_entropy_4,RQVAE-token,1
+recall100,normalized_conditional_entropy_4,PLUM,0
+recall100,normalized_conditional_entropy_4,BalanceRQKMeans,0
+recall100,normalized_conditional_entropy_4,RQVAE + item LogQ,1
+recall100,normalized_conditional_entropy_4,RQVAE + pure SID LogQ,0
+recall100,pair_refinement_rate_4,R3VAE (rqkmeans),1
+recall100,pair_refinement_rate_4,R3VAE (spherical),1
+recall100,pair_refinement_rate_4,RQKMeans,1
+recall100,pair_refinement_rate_4,RQVAE (ECM),0
+recall100,pair_refinement_rate_4,RQVAE,1
+recall100,pair_refinement_rate_4,RQVAE (RRS),0
+recall100,pair_refinement_rate_4,RQVAE-token,1
+recall100,pair_refinement_rate_4,PLUM,0
+recall100,pair_refinement_rate_4,BalanceRQKMeans,0
+recall100,pair_refinement_rate_4,RQVAE + item LogQ,1
+recall100,pair_refinement_rate_4,RQVAE + pure SID LogQ,0
+recall100,mean_active_branch_fraction_4,R3VAE (rqkmeans),1
+recall100,mean_active_branch_fraction_4,R3VAE (spherical),1
+recall100,mean_active_branch_fraction_4,RQKMeans,1
+recall100,mean_active_branch_fraction_4,RQVAE (ECM),0
+recall100,mean_active_branch_fraction_4,RQVAE,1
+recall100,mean_active_branch_fraction_4,RQVAE (RRS),0
+recall100,mean_active_branch_fraction_4,RQVAE-token,1
+recall100,mean_active_branch_fraction_4,PLUM,0
+recall100,mean_active_branch_fraction_4,BalanceRQKMeans,0
+recall100,mean_active_branch_fraction_4,RQVAE + item LogQ,1
+recall100,mean_active_branch_fraction_4,RQVAE + pure SID LogQ,0
+recall100,load_balance_p25_4,R3VAE (rqkmeans),1
+recall100,load_balance_p25_4,R3VAE (spherical),1
+recall100,load_balance_p25_4,RQKMeans,1
+recall100,load_balance_p25_4,RQVAE (ECM),0
+recall100,load_balance_p25_4,RQVAE,1
+recall100,load_balance_p25_4,RQVAE (RRS),0
+recall100,load_balance_p25_4,RQVAE-token,1
+recall100,load_balance_p25_4,PLUM,0
+recall100,load_balance_p25_4,BalanceRQKMeans,0
+recall100,load_balance_p25_4,RQVAE + item LogQ,1
+recall100,load_balance_p25_4,RQVAE + pure SID LogQ,0
+recall100,load_balance_p75_4,R3VAE (rqkmeans),1
+recall100,load_balance_p75_4,R3VAE (spherical),1
+recall100,load_balance_p75_4,RQKMeans,1
+recall100,load_balance_p75_4,RQVAE (ECM),0
+recall100,load_balance_p75_4,RQVAE,1
+recall100,load_balance_p75_4,RQVAE (RRS),0
+recall100,load_balance_p75_4,RQVAE-token,1
+recall100,load_balance_p75_4,PLUM,0
+recall100,load_balance_p75_4,BalanceRQKMeans,0
+recall100,load_balance_p75_4,RQVAE + item LogQ,1
+recall100,load_balance_p75_4,RQVAE + pure SID LogQ,0
+recall100,load_balance_p90_4,R3VAE (rqkmeans),1
+recall100,load_balance_p90_4,R3VAE (spherical),1
+recall100,load_balance_p90_4,RQKMeans,1
+recall100,load_balance_p90_4,RQVAE (ECM),0
+recall100,load_balance_p90_4,RQVAE,1
+recall100,load_balance_p90_4,RQVAE (RRS),0
+recall100,load_balance_p90_4,RQVAE-token,1
+recall100,load_balance_p90_4,PLUM,0
+recall100,load_balance_p90_4,BalanceRQKMeans,0
+recall100,load_balance_p90_4,RQVAE + item LogQ,1
+recall100,load_balance_p90_4,RQVAE + pure SID LogQ,0
+recall100,codebook_coverage_4,R3VAE (rqkmeans),1
+recall100,codebook_coverage_4,R3VAE (spherical),1
+recall100,codebook_coverage_4,RQKMeans,1
+recall100,codebook_coverage_4,RQVAE (ECM),0
+recall100,codebook_coverage_4,RQVAE,1
+recall100,codebook_coverage_4,RQVAE (RRS),0
+recall100,codebook_coverage_4,RQVAE-token,1
+recall100,codebook_coverage_4,PLUM,0
+recall100,codebook_coverage_4,BalanceRQKMeans,0
+recall100,codebook_coverage_4,RQVAE + item LogQ,1
+recall100,codebook_coverage_4,RQVAE + pure SID LogQ,0
+recall100,codebook_utilization_rate_4,R3VAE (rqkmeans),1
+recall100,codebook_utilization_rate_4,R3VAE (spherical),1
+recall100,codebook_utilization_rate_4,RQKMeans,1
+recall100,codebook_utilization_rate_4,RQVAE (ECM),0
+recall100,codebook_utilization_rate_4,RQVAE,1
+recall100,codebook_utilization_rate_4,RQVAE (RRS),0
+recall100,codebook_utilization_rate_4,RQVAE-token,1
+recall100,codebook_utilization_rate_4,PLUM,0
+recall100,codebook_utilization_rate_4,BalanceRQKMeans,0
+recall100,codebook_utilization_rate_4,RQVAE + item LogQ,1
+recall100,codebook_utilization_rate_4,RQVAE + pure SID LogQ,0
+recall100,load_balance_p25_mean,R3VAE (rqkmeans),5
+recall100,load_balance_p25_mean,R3VAE (spherical),6
+recall100,load_balance_p25_mean,RQKMeans,5
+recall100,load_balance_p25_mean,RQVAE (ECM),3
+recall100,load_balance_p25_mean,RQVAE,6
+recall100,load_balance_p25_mean,RQVAE (RRS),3
+recall100,load_balance_p25_mean,RQVAE-token,2
+recall100,load_balance_p25_mean,PLUM,3
+recall100,load_balance_p25_mean,BalanceRQKMeans,3
+recall100,load_balance_p25_mean,RQVAE + item LogQ,6
+recall100,load_balance_p25_mean,RQVAE + pure SID LogQ,2
+recall100,load_balance_p75_mean,R3VAE (rqkmeans),5
+recall100,load_balance_p75_mean,R3VAE (spherical),6
+recall100,load_balance_p75_mean,RQKMeans,5
+recall100,load_balance_p75_mean,RQVAE (ECM),3
+recall100,load_balance_p75_mean,RQVAE,6
+recall100,load_balance_p75_mean,RQVAE (RRS),3
+recall100,load_balance_p75_mean,RQVAE-token,2
+recall100,load_balance_p75_mean,PLUM,3
+recall100,load_balance_p75_mean,BalanceRQKMeans,3
+recall100,load_balance_p75_mean,RQVAE + item LogQ,6
+recall100,load_balance_p75_mean,RQVAE + pure SID LogQ,2
+recall100,load_balance_p90_mean,R3VAE (rqkmeans),5
+recall100,load_balance_p90_mean,R3VAE (spherical),6
+recall100,load_balance_p90_mean,RQKMeans,5
+recall100,load_balance_p90_mean,RQVAE (ECM),3
+recall100,load_balance_p90_mean,RQVAE,6
+recall100,load_balance_p90_mean,RQVAE (RRS),3
+recall100,load_balance_p90_mean,RQVAE-token,2
+recall100,load_balance_p90_mean,PLUM,3
+recall100,load_balance_p90_mean,BalanceRQKMeans,3
+recall100,load_balance_p90_mean,RQVAE + item LogQ,6
+recall100,load_balance_p90_mean,RQVAE + pure SID LogQ,2
+dcnv2,singleton_rate,R3VAE (rqkmeans),5
+dcnv2,singleton_rate,R3VAE (spherical),6
+dcnv2,singleton_rate,RQKMeans,5
+dcnv2,singleton_rate,RQVAE (ECM),3
+dcnv2,singleton_rate,RQVAE,6
+dcnv2,singleton_rate,RQVAE (RRS),3
+dcnv2,singleton_rate,RQVAE-token,0
+dcnv2,singleton_rate,PLUM,0
+dcnv2,singleton_rate,BalanceRQKMeans,0
+dcnv2,singleton_rate,RQVAE + item LogQ,0
+dcnv2,singleton_rate,RQVAE + pure SID LogQ,0
+dcnv2,collision_item_rate,R3VAE (rqkmeans),5
+dcnv2,collision_item_rate,R3VAE (spherical),6
+dcnv2,collision_item_rate,RQKMeans,5
+dcnv2,collision_item_rate,RQVAE (ECM),3
+dcnv2,collision_item_rate,RQVAE,6
+dcnv2,collision_item_rate,RQVAE (RRS),3
+dcnv2,collision_item_rate,RQVAE-token,0
+dcnv2,collision_item_rate,PLUM,0
+dcnv2,collision_item_rate,BalanceRQKMeans,0
+dcnv2,collision_item_rate,RQVAE + item LogQ,0
+dcnv2,collision_item_rate,RQVAE + pure SID LogQ,0
+dcnv2,pair_collision_probability,R3VAE (rqkmeans),5
+dcnv2,pair_collision_probability,R3VAE (spherical),6
+dcnv2,pair_collision_probability,RQKMeans,5
+dcnv2,pair_collision_probability,RQVAE (ECM),3
+dcnv2,pair_collision_probability,RQVAE,6
+dcnv2,pair_collision_probability,RQVAE (RRS),3
+dcnv2,pair_collision_probability,RQVAE-token,0
+dcnv2,pair_collision_probability,PLUM,0
+dcnv2,pair_collision_probability,BalanceRQKMeans,0
+dcnv2,pair_collision_probability,RQVAE + item LogQ,0
+dcnv2,pair_collision_probability,RQVAE + pure SID LogQ,0
+dcnv2,intra_code_similarity_v2,R3VAE (rqkmeans),5
+dcnv2,intra_code_similarity_v2,R3VAE (spherical),6
+dcnv2,intra_code_similarity_v2,RQKMeans,5
+dcnv2,intra_code_similarity_v2,RQVAE (ECM),3
+dcnv2,intra_code_similarity_v2,RQVAE,6
+dcnv2,intra_code_similarity_v2,RQVAE (RRS),3
+dcnv2,intra_code_similarity_v2,RQVAE-token,0
+dcnv2,intra_code_similarity_v2,PLUM,0
+dcnv2,intra_code_similarity_v2,BalanceRQKMeans,0
+dcnv2,intra_code_similarity_v2,RQVAE + item LogQ,0
+dcnv2,intra_code_similarity_v2,RQVAE + pure SID LogQ,0
+dcnv2,prefix_coherence_4,R3VAE (rqkmeans),1
+dcnv2,prefix_coherence_4,R3VAE (spherical),1
+dcnv2,prefix_coherence_4,RQKMeans,1
+dcnv2,prefix_coherence_4,RQVAE (ECM),0
+dcnv2,prefix_coherence_4,RQVAE,1
+dcnv2,prefix_coherence_4,RQVAE (RRS),0
+dcnv2,prefix_coherence_4,RQVAE-token,0
+dcnv2,prefix_coherence_4,PLUM,0
+dcnv2,prefix_coherence_4,BalanceRQKMeans,0
+dcnv2,prefix_coherence_4,RQVAE + item LogQ,0
+dcnv2,prefix_coherence_4,RQVAE + pure SID LogQ,0
+dcnv2,adjusted_semantic_variance_explained_1,R3VAE (rqkmeans),5
+dcnv2,adjusted_semantic_variance_explained_1,R3VAE (spherical),6
+dcnv2,adjusted_semantic_variance_explained_1,RQKMeans,5
+dcnv2,adjusted_semantic_variance_explained_1,RQVAE (ECM),3
+dcnv2,adjusted_semantic_variance_explained_1,RQVAE,6
+dcnv2,adjusted_semantic_variance_explained_1,RQVAE (RRS),3
+dcnv2,adjusted_semantic_variance_explained_1,RQVAE-token,0
+dcnv2,adjusted_semantic_variance_explained_1,PLUM,0
+dcnv2,adjusted_semantic_variance_explained_1,BalanceRQKMeans,0
+dcnv2,adjusted_semantic_variance_explained_1,RQVAE + item LogQ,0
+dcnv2,adjusted_semantic_variance_explained_1,RQVAE + pure SID LogQ,0
+dcnv2,normalized_conditional_entropy_1,R3VAE (rqkmeans),5
+dcnv2,normalized_conditional_entropy_1,R3VAE (spherical),6
+dcnv2,normalized_conditional_entropy_1,RQKMeans,5
+dcnv2,normalized_conditional_entropy_1,RQVAE (ECM),3
+dcnv2,normalized_conditional_entropy_1,RQVAE,6
+dcnv2,normalized_conditional_entropy_1,RQVAE (RRS),3
+dcnv2,normalized_conditional_entropy_1,RQVAE-token,0
+dcnv2,normalized_conditional_entropy_1,PLUM,0
+dcnv2,normalized_conditional_entropy_1,BalanceRQKMeans,0
+dcnv2,normalized_conditional_entropy_1,RQVAE + item LogQ,0
+dcnv2,normalized_conditional_entropy_1,RQVAE + pure SID LogQ,0
+dcnv2,pair_refinement_rate_1,R3VAE (rqkmeans),5
+dcnv2,pair_refinement_rate_1,R3VAE (spherical),6
+dcnv2,pair_refinement_rate_1,RQKMeans,5
+dcnv2,pair_refinement_rate_1,RQVAE (ECM),3
+dcnv2,pair_refinement_rate_1,RQVAE,6
+dcnv2,pair_refinement_rate_1,RQVAE (RRS),3
+dcnv2,pair_refinement_rate_1,RQVAE-token,0
+dcnv2,pair_refinement_rate_1,PLUM,0
+dcnv2,pair_refinement_rate_1,BalanceRQKMeans,0
+dcnv2,pair_refinement_rate_1,RQVAE + item LogQ,0
+dcnv2,pair_refinement_rate_1,RQVAE + pure SID LogQ,0
+dcnv2,mean_active_branch_fraction_1,R3VAE (rqkmeans),5
+dcnv2,mean_active_branch_fraction_1,R3VAE (spherical),6
+dcnv2,mean_active_branch_fraction_1,RQKMeans,5
+dcnv2,mean_active_branch_fraction_1,RQVAE (ECM),3
+dcnv2,mean_active_branch_fraction_1,RQVAE,6
+dcnv2,mean_active_branch_fraction_1,RQVAE (RRS),3
+dcnv2,mean_active_branch_fraction_1,RQVAE-token,0
+dcnv2,mean_active_branch_fraction_1,PLUM,0
+dcnv2,mean_active_branch_fraction_1,BalanceRQKMeans,0
+dcnv2,mean_active_branch_fraction_1,RQVAE + item LogQ,0
+dcnv2,mean_active_branch_fraction_1,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p25_1,R3VAE (rqkmeans),5
+dcnv2,load_balance_p25_1,R3VAE (spherical),6
+dcnv2,load_balance_p25_1,RQKMeans,5
+dcnv2,load_balance_p25_1,RQVAE (ECM),3
+dcnv2,load_balance_p25_1,RQVAE,6
+dcnv2,load_balance_p25_1,RQVAE (RRS),3
+dcnv2,load_balance_p25_1,RQVAE-token,0
+dcnv2,load_balance_p25_1,PLUM,0
+dcnv2,load_balance_p25_1,BalanceRQKMeans,0
+dcnv2,load_balance_p25_1,RQVAE + item LogQ,0
+dcnv2,load_balance_p25_1,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p75_1,R3VAE (rqkmeans),5
+dcnv2,load_balance_p75_1,R3VAE (spherical),6
+dcnv2,load_balance_p75_1,RQKMeans,5
+dcnv2,load_balance_p75_1,RQVAE (ECM),3
+dcnv2,load_balance_p75_1,RQVAE,6
+dcnv2,load_balance_p75_1,RQVAE (RRS),3
+dcnv2,load_balance_p75_1,RQVAE-token,0
+dcnv2,load_balance_p75_1,PLUM,0
+dcnv2,load_balance_p75_1,BalanceRQKMeans,0
+dcnv2,load_balance_p75_1,RQVAE + item LogQ,0
+dcnv2,load_balance_p75_1,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p90_1,R3VAE (rqkmeans),5
+dcnv2,load_balance_p90_1,R3VAE (spherical),6
+dcnv2,load_balance_p90_1,RQKMeans,5
+dcnv2,load_balance_p90_1,RQVAE (ECM),3
+dcnv2,load_balance_p90_1,RQVAE,6
+dcnv2,load_balance_p90_1,RQVAE (RRS),3
+dcnv2,load_balance_p90_1,RQVAE-token,0
+dcnv2,load_balance_p90_1,PLUM,0
+dcnv2,load_balance_p90_1,BalanceRQKMeans,0
+dcnv2,load_balance_p90_1,RQVAE + item LogQ,0
+dcnv2,load_balance_p90_1,RQVAE + pure SID LogQ,0
+dcnv2,codebook_coverage_1,R3VAE (rqkmeans),5
+dcnv2,codebook_coverage_1,R3VAE (spherical),6
+dcnv2,codebook_coverage_1,RQKMeans,5
+dcnv2,codebook_coverage_1,RQVAE (ECM),3
+dcnv2,codebook_coverage_1,RQVAE,6
+dcnv2,codebook_coverage_1,RQVAE (RRS),3
+dcnv2,codebook_coverage_1,RQVAE-token,0
+dcnv2,codebook_coverage_1,PLUM,0
+dcnv2,codebook_coverage_1,BalanceRQKMeans,0
+dcnv2,codebook_coverage_1,RQVAE + item LogQ,0
+dcnv2,codebook_coverage_1,RQVAE + pure SID LogQ,0
+dcnv2,codebook_utilization_rate_1,R3VAE (rqkmeans),5
+dcnv2,codebook_utilization_rate_1,R3VAE (spherical),6
+dcnv2,codebook_utilization_rate_1,RQKMeans,5
+dcnv2,codebook_utilization_rate_1,RQVAE (ECM),3
+dcnv2,codebook_utilization_rate_1,RQVAE,6
+dcnv2,codebook_utilization_rate_1,RQVAE (RRS),3
+dcnv2,codebook_utilization_rate_1,RQVAE-token,0
+dcnv2,codebook_utilization_rate_1,PLUM,0
+dcnv2,codebook_utilization_rate_1,BalanceRQKMeans,0
+dcnv2,codebook_utilization_rate_1,RQVAE + item LogQ,0
+dcnv2,codebook_utilization_rate_1,RQVAE + pure SID LogQ,0
+dcnv2,adjusted_semantic_variance_explained_2,R3VAE (rqkmeans),5
+dcnv2,adjusted_semantic_variance_explained_2,R3VAE (spherical),6
+dcnv2,adjusted_semantic_variance_explained_2,RQKMeans,5
+dcnv2,adjusted_semantic_variance_explained_2,RQVAE (ECM),3
+dcnv2,adjusted_semantic_variance_explained_2,RQVAE,6
+dcnv2,adjusted_semantic_variance_explained_2,RQVAE (RRS),3
+dcnv2,adjusted_semantic_variance_explained_2,RQVAE-token,0
+dcnv2,adjusted_semantic_variance_explained_2,PLUM,0
+dcnv2,adjusted_semantic_variance_explained_2,BalanceRQKMeans,0
+dcnv2,adjusted_semantic_variance_explained_2,RQVAE + item LogQ,0
+dcnv2,adjusted_semantic_variance_explained_2,RQVAE + pure SID LogQ,0
+dcnv2,normalized_conditional_entropy_2,R3VAE (rqkmeans),5
+dcnv2,normalized_conditional_entropy_2,R3VAE (spherical),6
+dcnv2,normalized_conditional_entropy_2,RQKMeans,5
+dcnv2,normalized_conditional_entropy_2,RQVAE (ECM),3
+dcnv2,normalized_conditional_entropy_2,RQVAE,6
+dcnv2,normalized_conditional_entropy_2,RQVAE (RRS),3
+dcnv2,normalized_conditional_entropy_2,RQVAE-token,0
+dcnv2,normalized_conditional_entropy_2,PLUM,0
+dcnv2,normalized_conditional_entropy_2,BalanceRQKMeans,0
+dcnv2,normalized_conditional_entropy_2,RQVAE + item LogQ,0
+dcnv2,normalized_conditional_entropy_2,RQVAE + pure SID LogQ,0
+dcnv2,pair_refinement_rate_2,R3VAE (rqkmeans),5
+dcnv2,pair_refinement_rate_2,R3VAE (spherical),6
+dcnv2,pair_refinement_rate_2,RQKMeans,5
+dcnv2,pair_refinement_rate_2,RQVAE (ECM),3
+dcnv2,pair_refinement_rate_2,RQVAE,6
+dcnv2,pair_refinement_rate_2,RQVAE (RRS),3
+dcnv2,pair_refinement_rate_2,RQVAE-token,0
+dcnv2,pair_refinement_rate_2,PLUM,0
+dcnv2,pair_refinement_rate_2,BalanceRQKMeans,0
+dcnv2,pair_refinement_rate_2,RQVAE + item LogQ,0
+dcnv2,pair_refinement_rate_2,RQVAE + pure SID LogQ,0
+dcnv2,mean_active_branch_fraction_2,R3VAE (rqkmeans),5
+dcnv2,mean_active_branch_fraction_2,R3VAE (spherical),6
+dcnv2,mean_active_branch_fraction_2,RQKMeans,5
+dcnv2,mean_active_branch_fraction_2,RQVAE (ECM),3
+dcnv2,mean_active_branch_fraction_2,RQVAE,6
+dcnv2,mean_active_branch_fraction_2,RQVAE (RRS),3
+dcnv2,mean_active_branch_fraction_2,RQVAE-token,0
+dcnv2,mean_active_branch_fraction_2,PLUM,0
+dcnv2,mean_active_branch_fraction_2,BalanceRQKMeans,0
+dcnv2,mean_active_branch_fraction_2,RQVAE + item LogQ,0
+dcnv2,mean_active_branch_fraction_2,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p25_2,R3VAE (rqkmeans),5
+dcnv2,load_balance_p25_2,R3VAE (spherical),6
+dcnv2,load_balance_p25_2,RQKMeans,5
+dcnv2,load_balance_p25_2,RQVAE (ECM),3
+dcnv2,load_balance_p25_2,RQVAE,6
+dcnv2,load_balance_p25_2,RQVAE (RRS),3
+dcnv2,load_balance_p25_2,RQVAE-token,0
+dcnv2,load_balance_p25_2,PLUM,0
+dcnv2,load_balance_p25_2,BalanceRQKMeans,0
+dcnv2,load_balance_p25_2,RQVAE + item LogQ,0
+dcnv2,load_balance_p25_2,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p75_2,R3VAE (rqkmeans),5
+dcnv2,load_balance_p75_2,R3VAE (spherical),6
+dcnv2,load_balance_p75_2,RQKMeans,5
+dcnv2,load_balance_p75_2,RQVAE (ECM),3
+dcnv2,load_balance_p75_2,RQVAE,6
+dcnv2,load_balance_p75_2,RQVAE (RRS),3
+dcnv2,load_balance_p75_2,RQVAE-token,0
+dcnv2,load_balance_p75_2,PLUM,0
+dcnv2,load_balance_p75_2,BalanceRQKMeans,0
+dcnv2,load_balance_p75_2,RQVAE + item LogQ,0
+dcnv2,load_balance_p75_2,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p90_2,R3VAE (rqkmeans),5
+dcnv2,load_balance_p90_2,R3VAE (spherical),6
+dcnv2,load_balance_p90_2,RQKMeans,5
+dcnv2,load_balance_p90_2,RQVAE (ECM),3
+dcnv2,load_balance_p90_2,RQVAE,6
+dcnv2,load_balance_p90_2,RQVAE (RRS),3
+dcnv2,load_balance_p90_2,RQVAE-token,0
+dcnv2,load_balance_p90_2,PLUM,0
+dcnv2,load_balance_p90_2,BalanceRQKMeans,0
+dcnv2,load_balance_p90_2,RQVAE + item LogQ,0
+dcnv2,load_balance_p90_2,RQVAE + pure SID LogQ,0
+dcnv2,codebook_coverage_2,R3VAE (rqkmeans),5
+dcnv2,codebook_coverage_2,R3VAE (spherical),6
+dcnv2,codebook_coverage_2,RQKMeans,5
+dcnv2,codebook_coverage_2,RQVAE (ECM),3
+dcnv2,codebook_coverage_2,RQVAE,6
+dcnv2,codebook_coverage_2,RQVAE (RRS),3
+dcnv2,codebook_coverage_2,RQVAE-token,0
+dcnv2,codebook_coverage_2,PLUM,0
+dcnv2,codebook_coverage_2,BalanceRQKMeans,0
+dcnv2,codebook_coverage_2,RQVAE + item LogQ,0
+dcnv2,codebook_coverage_2,RQVAE + pure SID LogQ,0
+dcnv2,codebook_utilization_rate_2,R3VAE (rqkmeans),5
+dcnv2,codebook_utilization_rate_2,R3VAE (spherical),6
+dcnv2,codebook_utilization_rate_2,RQKMeans,5
+dcnv2,codebook_utilization_rate_2,RQVAE (ECM),3
+dcnv2,codebook_utilization_rate_2,RQVAE,6
+dcnv2,codebook_utilization_rate_2,RQVAE (RRS),3
+dcnv2,codebook_utilization_rate_2,RQVAE-token,0
+dcnv2,codebook_utilization_rate_2,PLUM,0
+dcnv2,codebook_utilization_rate_2,BalanceRQKMeans,0
+dcnv2,codebook_utilization_rate_2,RQVAE + item LogQ,0
+dcnv2,codebook_utilization_rate_2,RQVAE + pure SID LogQ,0
+dcnv2,adjusted_semantic_variance_explained_3,R3VAE (rqkmeans),4
+dcnv2,adjusted_semantic_variance_explained_3,R3VAE (spherical),5
+dcnv2,adjusted_semantic_variance_explained_3,RQKMeans,4
+dcnv2,adjusted_semantic_variance_explained_3,RQVAE (ECM),0
+dcnv2,adjusted_semantic_variance_explained_3,RQVAE,5
+dcnv2,adjusted_semantic_variance_explained_3,RQVAE (RRS),0
+dcnv2,adjusted_semantic_variance_explained_3,RQVAE-token,0
+dcnv2,adjusted_semantic_variance_explained_3,PLUM,0
+dcnv2,adjusted_semantic_variance_explained_3,BalanceRQKMeans,0
+dcnv2,adjusted_semantic_variance_explained_3,RQVAE + item LogQ,0
+dcnv2,adjusted_semantic_variance_explained_3,RQVAE + pure SID LogQ,0
+dcnv2,normalized_conditional_entropy_3,R3VAE (rqkmeans),4
+dcnv2,normalized_conditional_entropy_3,R3VAE (spherical),5
+dcnv2,normalized_conditional_entropy_3,RQKMeans,4
+dcnv2,normalized_conditional_entropy_3,RQVAE (ECM),3
+dcnv2,normalized_conditional_entropy_3,RQVAE,5
+dcnv2,normalized_conditional_entropy_3,RQVAE (RRS),3
+dcnv2,normalized_conditional_entropy_3,RQVAE-token,0
+dcnv2,normalized_conditional_entropy_3,PLUM,0
+dcnv2,normalized_conditional_entropy_3,BalanceRQKMeans,0
+dcnv2,normalized_conditional_entropy_3,RQVAE + item LogQ,0
+dcnv2,normalized_conditional_entropy_3,RQVAE + pure SID LogQ,0
+dcnv2,pair_refinement_rate_3,R3VAE (rqkmeans),4
+dcnv2,pair_refinement_rate_3,R3VAE (spherical),5
+dcnv2,pair_refinement_rate_3,RQKMeans,4
+dcnv2,pair_refinement_rate_3,RQVAE (ECM),3
+dcnv2,pair_refinement_rate_3,RQVAE,5
+dcnv2,pair_refinement_rate_3,RQVAE (RRS),3
+dcnv2,pair_refinement_rate_3,RQVAE-token,0
+dcnv2,pair_refinement_rate_3,PLUM,0
+dcnv2,pair_refinement_rate_3,BalanceRQKMeans,0
+dcnv2,pair_refinement_rate_3,RQVAE + item LogQ,0
+dcnv2,pair_refinement_rate_3,RQVAE + pure SID LogQ,0
+dcnv2,mean_active_branch_fraction_3,R3VAE (rqkmeans),4
+dcnv2,mean_active_branch_fraction_3,R3VAE (spherical),5
+dcnv2,mean_active_branch_fraction_3,RQKMeans,4
+dcnv2,mean_active_branch_fraction_3,RQVAE (ECM),3
+dcnv2,mean_active_branch_fraction_3,RQVAE,5
+dcnv2,mean_active_branch_fraction_3,RQVAE (RRS),3
+dcnv2,mean_active_branch_fraction_3,RQVAE-token,0
+dcnv2,mean_active_branch_fraction_3,PLUM,0
+dcnv2,mean_active_branch_fraction_3,BalanceRQKMeans,0
+dcnv2,mean_active_branch_fraction_3,RQVAE + item LogQ,0
+dcnv2,mean_active_branch_fraction_3,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p25_3,R3VAE (rqkmeans),4
+dcnv2,load_balance_p25_3,R3VAE (spherical),5
+dcnv2,load_balance_p25_3,RQKMeans,4
+dcnv2,load_balance_p25_3,RQVAE (ECM),3
+dcnv2,load_balance_p25_3,RQVAE,5
+dcnv2,load_balance_p25_3,RQVAE (RRS),3
+dcnv2,load_balance_p25_3,RQVAE-token,0
+dcnv2,load_balance_p25_3,PLUM,0
+dcnv2,load_balance_p25_3,BalanceRQKMeans,0
+dcnv2,load_balance_p25_3,RQVAE + item LogQ,0
+dcnv2,load_balance_p25_3,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p75_3,R3VAE (rqkmeans),4
+dcnv2,load_balance_p75_3,R3VAE (spherical),5
+dcnv2,load_balance_p75_3,RQKMeans,4
+dcnv2,load_balance_p75_3,RQVAE (ECM),3
+dcnv2,load_balance_p75_3,RQVAE,5
+dcnv2,load_balance_p75_3,RQVAE (RRS),3
+dcnv2,load_balance_p75_3,RQVAE-token,0
+dcnv2,load_balance_p75_3,PLUM,0
+dcnv2,load_balance_p75_3,BalanceRQKMeans,0
+dcnv2,load_balance_p75_3,RQVAE + item LogQ,0
+dcnv2,load_balance_p75_3,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p90_3,R3VAE (rqkmeans),4
+dcnv2,load_balance_p90_3,R3VAE (spherical),5
+dcnv2,load_balance_p90_3,RQKMeans,4
+dcnv2,load_balance_p90_3,RQVAE (ECM),3
+dcnv2,load_balance_p90_3,RQVAE,5
+dcnv2,load_balance_p90_3,RQVAE (RRS),3
+dcnv2,load_balance_p90_3,RQVAE-token,0
+dcnv2,load_balance_p90_3,PLUM,0
+dcnv2,load_balance_p90_3,BalanceRQKMeans,0
+dcnv2,load_balance_p90_3,RQVAE + item LogQ,0
+dcnv2,load_balance_p90_3,RQVAE + pure SID LogQ,0
+dcnv2,codebook_coverage_3,R3VAE (rqkmeans),4
+dcnv2,codebook_coverage_3,R3VAE (spherical),5
+dcnv2,codebook_coverage_3,RQKMeans,4
+dcnv2,codebook_coverage_3,RQVAE (ECM),3
+dcnv2,codebook_coverage_3,RQVAE,5
+dcnv2,codebook_coverage_3,RQVAE (RRS),3
+dcnv2,codebook_coverage_3,RQVAE-token,0
+dcnv2,codebook_coverage_3,PLUM,0
+dcnv2,codebook_coverage_3,BalanceRQKMeans,0
+dcnv2,codebook_coverage_3,RQVAE + item LogQ,0
+dcnv2,codebook_coverage_3,RQVAE + pure SID LogQ,0
+dcnv2,codebook_utilization_rate_3,R3VAE (rqkmeans),4
+dcnv2,codebook_utilization_rate_3,R3VAE (spherical),5
+dcnv2,codebook_utilization_rate_3,RQKMeans,4
+dcnv2,codebook_utilization_rate_3,RQVAE (ECM),3
+dcnv2,codebook_utilization_rate_3,RQVAE,5
+dcnv2,codebook_utilization_rate_3,RQVAE (RRS),3
+dcnv2,codebook_utilization_rate_3,RQVAE-token,0
+dcnv2,codebook_utilization_rate_3,PLUM,0
+dcnv2,codebook_utilization_rate_3,BalanceRQKMeans,0
+dcnv2,codebook_utilization_rate_3,RQVAE + item LogQ,0
+dcnv2,codebook_utilization_rate_3,RQVAE + pure SID LogQ,0
+dcnv2,adjusted_semantic_variance_explained_4,R3VAE (rqkmeans),1
+dcnv2,adjusted_semantic_variance_explained_4,R3VAE (spherical),1
+dcnv2,adjusted_semantic_variance_explained_4,RQKMeans,1
+dcnv2,adjusted_semantic_variance_explained_4,RQVAE (ECM),0
+dcnv2,adjusted_semantic_variance_explained_4,RQVAE,1
+dcnv2,adjusted_semantic_variance_explained_4,RQVAE (RRS),0
+dcnv2,adjusted_semantic_variance_explained_4,RQVAE-token,0
+dcnv2,adjusted_semantic_variance_explained_4,PLUM,0
+dcnv2,adjusted_semantic_variance_explained_4,BalanceRQKMeans,0
+dcnv2,adjusted_semantic_variance_explained_4,RQVAE + item LogQ,0
+dcnv2,adjusted_semantic_variance_explained_4,RQVAE + pure SID LogQ,0
+dcnv2,normalized_conditional_entropy_4,R3VAE (rqkmeans),1
+dcnv2,normalized_conditional_entropy_4,R3VAE (spherical),1
+dcnv2,normalized_conditional_entropy_4,RQKMeans,1
+dcnv2,normalized_conditional_entropy_4,RQVAE (ECM),0
+dcnv2,normalized_conditional_entropy_4,RQVAE,1
+dcnv2,normalized_conditional_entropy_4,RQVAE (RRS),0
+dcnv2,normalized_conditional_entropy_4,RQVAE-token,0
+dcnv2,normalized_conditional_entropy_4,PLUM,0
+dcnv2,normalized_conditional_entropy_4,BalanceRQKMeans,0
+dcnv2,normalized_conditional_entropy_4,RQVAE + item LogQ,0
+dcnv2,normalized_conditional_entropy_4,RQVAE + pure SID LogQ,0
+dcnv2,pair_refinement_rate_4,R3VAE (rqkmeans),1
+dcnv2,pair_refinement_rate_4,R3VAE (spherical),1
+dcnv2,pair_refinement_rate_4,RQKMeans,1
+dcnv2,pair_refinement_rate_4,RQVAE (ECM),0
+dcnv2,pair_refinement_rate_4,RQVAE,1
+dcnv2,pair_refinement_rate_4,RQVAE (RRS),0
+dcnv2,pair_refinement_rate_4,RQVAE-token,0
+dcnv2,pair_refinement_rate_4,PLUM,0
+dcnv2,pair_refinement_rate_4,BalanceRQKMeans,0
+dcnv2,pair_refinement_rate_4,RQVAE + item LogQ,0
+dcnv2,pair_refinement_rate_4,RQVAE + pure SID LogQ,0
+dcnv2,mean_active_branch_fraction_4,R3VAE (rqkmeans),1
+dcnv2,mean_active_branch_fraction_4,R3VAE (spherical),1
+dcnv2,mean_active_branch_fraction_4,RQKMeans,1
+dcnv2,mean_active_branch_fraction_4,RQVAE (ECM),0
+dcnv2,mean_active_branch_fraction_4,RQVAE,1
+dcnv2,mean_active_branch_fraction_4,RQVAE (RRS),0
+dcnv2,mean_active_branch_fraction_4,RQVAE-token,0
+dcnv2,mean_active_branch_fraction_4,PLUM,0
+dcnv2,mean_active_branch_fraction_4,BalanceRQKMeans,0
+dcnv2,mean_active_branch_fraction_4,RQVAE + item LogQ,0
+dcnv2,mean_active_branch_fraction_4,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p25_4,R3VAE (rqkmeans),1
+dcnv2,load_balance_p25_4,R3VAE (spherical),1
+dcnv2,load_balance_p25_4,RQKMeans,1
+dcnv2,load_balance_p25_4,RQVAE (ECM),0
+dcnv2,load_balance_p25_4,RQVAE,1
+dcnv2,load_balance_p25_4,RQVAE (RRS),0
+dcnv2,load_balance_p25_4,RQVAE-token,0
+dcnv2,load_balance_p25_4,PLUM,0
+dcnv2,load_balance_p25_4,BalanceRQKMeans,0
+dcnv2,load_balance_p25_4,RQVAE + item LogQ,0
+dcnv2,load_balance_p25_4,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p75_4,R3VAE (rqkmeans),1
+dcnv2,load_balance_p75_4,R3VAE (spherical),1
+dcnv2,load_balance_p75_4,RQKMeans,1
+dcnv2,load_balance_p75_4,RQVAE (ECM),0
+dcnv2,load_balance_p75_4,RQVAE,1
+dcnv2,load_balance_p75_4,RQVAE (RRS),0
+dcnv2,load_balance_p75_4,RQVAE-token,0
+dcnv2,load_balance_p75_4,PLUM,0
+dcnv2,load_balance_p75_4,BalanceRQKMeans,0
+dcnv2,load_balance_p75_4,RQVAE + item LogQ,0
+dcnv2,load_balance_p75_4,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p90_4,R3VAE (rqkmeans),1
+dcnv2,load_balance_p90_4,R3VAE (spherical),1
+dcnv2,load_balance_p90_4,RQKMeans,1
+dcnv2,load_balance_p90_4,RQVAE (ECM),0
+dcnv2,load_balance_p90_4,RQVAE,1
+dcnv2,load_balance_p90_4,RQVAE (RRS),0
+dcnv2,load_balance_p90_4,RQVAE-token,0
+dcnv2,load_balance_p90_4,PLUM,0
+dcnv2,load_balance_p90_4,BalanceRQKMeans,0
+dcnv2,load_balance_p90_4,RQVAE + item LogQ,0
+dcnv2,load_balance_p90_4,RQVAE + pure SID LogQ,0
+dcnv2,codebook_coverage_4,R3VAE (rqkmeans),1
+dcnv2,codebook_coverage_4,R3VAE (spherical),1
+dcnv2,codebook_coverage_4,RQKMeans,1
+dcnv2,codebook_coverage_4,RQVAE (ECM),0
+dcnv2,codebook_coverage_4,RQVAE,1
+dcnv2,codebook_coverage_4,RQVAE (RRS),0
+dcnv2,codebook_coverage_4,RQVAE-token,0
+dcnv2,codebook_coverage_4,PLUM,0
+dcnv2,codebook_coverage_4,BalanceRQKMeans,0
+dcnv2,codebook_coverage_4,RQVAE + item LogQ,0
+dcnv2,codebook_coverage_4,RQVAE + pure SID LogQ,0
+dcnv2,codebook_utilization_rate_4,R3VAE (rqkmeans),1
+dcnv2,codebook_utilization_rate_4,R3VAE (spherical),1
+dcnv2,codebook_utilization_rate_4,RQKMeans,1
+dcnv2,codebook_utilization_rate_4,RQVAE (ECM),0
+dcnv2,codebook_utilization_rate_4,RQVAE,1
+dcnv2,codebook_utilization_rate_4,RQVAE (RRS),0
+dcnv2,codebook_utilization_rate_4,RQVAE-token,0
+dcnv2,codebook_utilization_rate_4,PLUM,0
+dcnv2,codebook_utilization_rate_4,BalanceRQKMeans,0
+dcnv2,codebook_utilization_rate_4,RQVAE + item LogQ,0
+dcnv2,codebook_utilization_rate_4,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p25_mean,R3VAE (rqkmeans),5
+dcnv2,load_balance_p25_mean,R3VAE (spherical),6
+dcnv2,load_balance_p25_mean,RQKMeans,5
+dcnv2,load_balance_p25_mean,RQVAE (ECM),3
+dcnv2,load_balance_p25_mean,RQVAE,6
+dcnv2,load_balance_p25_mean,RQVAE (RRS),3
+dcnv2,load_balance_p25_mean,RQVAE-token,0
+dcnv2,load_balance_p25_mean,PLUM,0
+dcnv2,load_balance_p25_mean,BalanceRQKMeans,0
+dcnv2,load_balance_p25_mean,RQVAE + item LogQ,0
+dcnv2,load_balance_p25_mean,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p75_mean,R3VAE (rqkmeans),5
+dcnv2,load_balance_p75_mean,R3VAE (spherical),6
+dcnv2,load_balance_p75_mean,RQKMeans,5
+dcnv2,load_balance_p75_mean,RQVAE (ECM),3
+dcnv2,load_balance_p75_mean,RQVAE,6
+dcnv2,load_balance_p75_mean,RQVAE (RRS),3
+dcnv2,load_balance_p75_mean,RQVAE-token,0
+dcnv2,load_balance_p75_mean,PLUM,0
+dcnv2,load_balance_p75_mean,BalanceRQKMeans,0
+dcnv2,load_balance_p75_mean,RQVAE + item LogQ,0
+dcnv2,load_balance_p75_mean,RQVAE + pure SID LogQ,0
+dcnv2,load_balance_p90_mean,R3VAE (rqkmeans),5
+dcnv2,load_balance_p90_mean,R3VAE (spherical),6
+dcnv2,load_balance_p90_mean,RQKMeans,5
+dcnv2,load_balance_p90_mean,RQVAE (ECM),3
+dcnv2,load_balance_p90_mean,RQVAE,6
+dcnv2,load_balance_p90_mean,RQVAE (RRS),3
+dcnv2,load_balance_p90_mean,RQVAE-token,0
+dcnv2,load_balance_p90_mean,PLUM,0
+dcnv2,load_balance_p90_mean,BalanceRQKMeans,0
+dcnv2,load_balance_p90_mean,RQVAE + item LogQ,0
+dcnv2,load_balance_p90_mean,RQVAE + pure SID LogQ,0
+transact,singleton_rate,R3VAE (rqkmeans),5
+transact,singleton_rate,R3VAE (spherical),6
+transact,singleton_rate,RQKMeans,5
+transact,singleton_rate,RQVAE (ECM),3
+transact,singleton_rate,RQVAE,6
+transact,singleton_rate,RQVAE (RRS),3
+transact,singleton_rate,RQVAE-token,2
+transact,singleton_rate,PLUM,3
+transact,singleton_rate,BalanceRQKMeans,3
+transact,singleton_rate,RQVAE + item LogQ,6
+transact,singleton_rate,RQVAE + pure SID LogQ,2
+transact,collision_item_rate,R3VAE (rqkmeans),5
+transact,collision_item_rate,R3VAE (spherical),6
+transact,collision_item_rate,RQKMeans,5
+transact,collision_item_rate,RQVAE (ECM),3
+transact,collision_item_rate,RQVAE,6
+transact,collision_item_rate,RQVAE (RRS),3
+transact,collision_item_rate,RQVAE-token,2
+transact,collision_item_rate,PLUM,3
+transact,collision_item_rate,BalanceRQKMeans,3
+transact,collision_item_rate,RQVAE + item LogQ,6
+transact,collision_item_rate,RQVAE + pure SID LogQ,2
+transact,pair_collision_probability,R3VAE (rqkmeans),5
+transact,pair_collision_probability,R3VAE (spherical),6
+transact,pair_collision_probability,RQKMeans,5
+transact,pair_collision_probability,RQVAE (ECM),3
+transact,pair_collision_probability,RQVAE,6
+transact,pair_collision_probability,RQVAE (RRS),3
+transact,pair_collision_probability,RQVAE-token,2
+transact,pair_collision_probability,PLUM,3
+transact,pair_collision_probability,BalanceRQKMeans,3
+transact,pair_collision_probability,RQVAE + item LogQ,6
+transact,pair_collision_probability,RQVAE + pure SID LogQ,2
+transact,intra_code_similarity_v2,R3VAE (rqkmeans),5
+transact,intra_code_similarity_v2,R3VAE (spherical),6
+transact,intra_code_similarity_v2,RQKMeans,5
+transact,intra_code_similarity_v2,RQVAE (ECM),3
+transact,intra_code_similarity_v2,RQVAE,6
+transact,intra_code_similarity_v2,RQVAE (RRS),3
+transact,intra_code_similarity_v2,RQVAE-token,2
+transact,intra_code_similarity_v2,PLUM,3
+transact,intra_code_similarity_v2,BalanceRQKMeans,3
+transact,intra_code_similarity_v2,RQVAE + item LogQ,6
+transact,intra_code_similarity_v2,RQVAE + pure SID LogQ,2
+transact,prefix_coherence_4,R3VAE (rqkmeans),1
+transact,prefix_coherence_4,R3VAE (spherical),1
+transact,prefix_coherence_4,RQKMeans,1
+transact,prefix_coherence_4,RQVAE (ECM),0
+transact,prefix_coherence_4,RQVAE,1
+transact,prefix_coherence_4,RQVAE (RRS),0
+transact,prefix_coherence_4,RQVAE-token,0
+transact,prefix_coherence_4,PLUM,0
+transact,prefix_coherence_4,BalanceRQKMeans,0
+transact,prefix_coherence_4,RQVAE + item LogQ,1
+transact,prefix_coherence_4,RQVAE + pure SID LogQ,0
+transact,adjusted_semantic_variance_explained_1,R3VAE (rqkmeans),5
+transact,adjusted_semantic_variance_explained_1,R3VAE (spherical),6
+transact,adjusted_semantic_variance_explained_1,RQKMeans,5
+transact,adjusted_semantic_variance_explained_1,RQVAE (ECM),3
+transact,adjusted_semantic_variance_explained_1,RQVAE,6
+transact,adjusted_semantic_variance_explained_1,RQVAE (RRS),3
+transact,adjusted_semantic_variance_explained_1,RQVAE-token,2
+transact,adjusted_semantic_variance_explained_1,PLUM,3
+transact,adjusted_semantic_variance_explained_1,BalanceRQKMeans,3
+transact,adjusted_semantic_variance_explained_1,RQVAE + item LogQ,6
+transact,adjusted_semantic_variance_explained_1,RQVAE + pure SID LogQ,2
+transact,normalized_conditional_entropy_1,R3VAE (rqkmeans),5
+transact,normalized_conditional_entropy_1,R3VAE (spherical),6
+transact,normalized_conditional_entropy_1,RQKMeans,5
+transact,normalized_conditional_entropy_1,RQVAE (ECM),3
+transact,normalized_conditional_entropy_1,RQVAE,6
+transact,normalized_conditional_entropy_1,RQVAE (RRS),3
+transact,normalized_conditional_entropy_1,RQVAE-token,2
+transact,normalized_conditional_entropy_1,PLUM,3
+transact,normalized_conditional_entropy_1,BalanceRQKMeans,3
+transact,normalized_conditional_entropy_1,RQVAE + item LogQ,6
+transact,normalized_conditional_entropy_1,RQVAE + pure SID LogQ,2
+transact,pair_refinement_rate_1,R3VAE (rqkmeans),5
+transact,pair_refinement_rate_1,R3VAE (spherical),6
+transact,pair_refinement_rate_1,RQKMeans,5
+transact,pair_refinement_rate_1,RQVAE (ECM),3
+transact,pair_refinement_rate_1,RQVAE,6
+transact,pair_refinement_rate_1,RQVAE (RRS),3
+transact,pair_refinement_rate_1,RQVAE-token,2
+transact,pair_refinement_rate_1,PLUM,3
+transact,pair_refinement_rate_1,BalanceRQKMeans,3
+transact,pair_refinement_rate_1,RQVAE + item LogQ,6
+transact,pair_refinement_rate_1,RQVAE + pure SID LogQ,2
+transact,mean_active_branch_fraction_1,R3VAE (rqkmeans),5
+transact,mean_active_branch_fraction_1,R3VAE (spherical),6
+transact,mean_active_branch_fraction_1,RQKMeans,5
+transact,mean_active_branch_fraction_1,RQVAE (ECM),3
+transact,mean_active_branch_fraction_1,RQVAE,6
+transact,mean_active_branch_fraction_1,RQVAE (RRS),3
+transact,mean_active_branch_fraction_1,RQVAE-token,2
+transact,mean_active_branch_fraction_1,PLUM,3
+transact,mean_active_branch_fraction_1,BalanceRQKMeans,3
+transact,mean_active_branch_fraction_1,RQVAE + item LogQ,6
+transact,mean_active_branch_fraction_1,RQVAE + pure SID LogQ,2
+transact,load_balance_p25_1,R3VAE (rqkmeans),5
+transact,load_balance_p25_1,R3VAE (spherical),6
+transact,load_balance_p25_1,RQKMeans,5
+transact,load_balance_p25_1,RQVAE (ECM),3
+transact,load_balance_p25_1,RQVAE,6
+transact,load_balance_p25_1,RQVAE (RRS),3
+transact,load_balance_p25_1,RQVAE-token,2
+transact,load_balance_p25_1,PLUM,3
+transact,load_balance_p25_1,BalanceRQKMeans,3
+transact,load_balance_p25_1,RQVAE + item LogQ,6
+transact,load_balance_p25_1,RQVAE + pure SID LogQ,2
+transact,load_balance_p75_1,R3VAE (rqkmeans),5
+transact,load_balance_p75_1,R3VAE (spherical),6
+transact,load_balance_p75_1,RQKMeans,5
+transact,load_balance_p75_1,RQVAE (ECM),3
+transact,load_balance_p75_1,RQVAE,6
+transact,load_balance_p75_1,RQVAE (RRS),3
+transact,load_balance_p75_1,RQVAE-token,2
+transact,load_balance_p75_1,PLUM,3
+transact,load_balance_p75_1,BalanceRQKMeans,3
+transact,load_balance_p75_1,RQVAE + item LogQ,6
+transact,load_balance_p75_1,RQVAE + pure SID LogQ,2
+transact,load_balance_p90_1,R3VAE (rqkmeans),5
+transact,load_balance_p90_1,R3VAE (spherical),6
+transact,load_balance_p90_1,RQKMeans,5
+transact,load_balance_p90_1,RQVAE (ECM),3
+transact,load_balance_p90_1,RQVAE,6
+transact,load_balance_p90_1,RQVAE (RRS),3
+transact,load_balance_p90_1,RQVAE-token,2
+transact,load_balance_p90_1,PLUM,3
+transact,load_balance_p90_1,BalanceRQKMeans,3
+transact,load_balance_p90_1,RQVAE + item LogQ,6
+transact,load_balance_p90_1,RQVAE + pure SID LogQ,2
+transact,codebook_coverage_1,R3VAE (rqkmeans),5
+transact,codebook_coverage_1,R3VAE (spherical),6
+transact,codebook_coverage_1,RQKMeans,5
+transact,codebook_coverage_1,RQVAE (ECM),3
+transact,codebook_coverage_1,RQVAE,6
+transact,codebook_coverage_1,RQVAE (RRS),3
+transact,codebook_coverage_1,RQVAE-token,2
+transact,codebook_coverage_1,PLUM,3
+transact,codebook_coverage_1,BalanceRQKMeans,3
+transact,codebook_coverage_1,RQVAE + item LogQ,6
+transact,codebook_coverage_1,RQVAE + pure SID LogQ,2
+transact,codebook_utilization_rate_1,R3VAE (rqkmeans),5
+transact,codebook_utilization_rate_1,R3VAE (spherical),6
+transact,codebook_utilization_rate_1,RQKMeans,5
+transact,codebook_utilization_rate_1,RQVAE (ECM),3
+transact,codebook_utilization_rate_1,RQVAE,6
+transact,codebook_utilization_rate_1,RQVAE (RRS),3
+transact,codebook_utilization_rate_1,RQVAE-token,2
+transact,codebook_utilization_rate_1,PLUM,3
+transact,codebook_utilization_rate_1,BalanceRQKMeans,3
+transact,codebook_utilization_rate_1,RQVAE + item LogQ,6
+transact,codebook_utilization_rate_1,RQVAE + pure SID LogQ,2
+transact,adjusted_semantic_variance_explained_2,R3VAE (rqkmeans),5
+transact,adjusted_semantic_variance_explained_2,R3VAE (spherical),6
+transact,adjusted_semantic_variance_explained_2,RQKMeans,5
+transact,adjusted_semantic_variance_explained_2,RQVAE (ECM),3
+transact,adjusted_semantic_variance_explained_2,RQVAE,6
+transact,adjusted_semantic_variance_explained_2,RQVAE (RRS),3
+transact,adjusted_semantic_variance_explained_2,RQVAE-token,2
+transact,adjusted_semantic_variance_explained_2,PLUM,3
+transact,adjusted_semantic_variance_explained_2,BalanceRQKMeans,3
+transact,adjusted_semantic_variance_explained_2,RQVAE + item LogQ,6
+transact,adjusted_semantic_variance_explained_2,RQVAE + pure SID LogQ,2
+transact,normalized_conditional_entropy_2,R3VAE (rqkmeans),5
+transact,normalized_conditional_entropy_2,R3VAE (spherical),6
+transact,normalized_conditional_entropy_2,RQKMeans,5
+transact,normalized_conditional_entropy_2,RQVAE (ECM),3
+transact,normalized_conditional_entropy_2,RQVAE,6
+transact,normalized_conditional_entropy_2,RQVAE (RRS),3
+transact,normalized_conditional_entropy_2,RQVAE-token,2
+transact,normalized_conditional_entropy_2,PLUM,3
+transact,normalized_conditional_entropy_2,BalanceRQKMeans,3
+transact,normalized_conditional_entropy_2,RQVAE + item LogQ,6
+transact,normalized_conditional_entropy_2,RQVAE + pure SID LogQ,2
+transact,pair_refinement_rate_2,R3VAE (rqkmeans),5
+transact,pair_refinement_rate_2,R3VAE (spherical),6
+transact,pair_refinement_rate_2,RQKMeans,5
+transact,pair_refinement_rate_2,RQVAE (ECM),3
+transact,pair_refinement_rate_2,RQVAE,6
+transact,pair_refinement_rate_2,RQVAE (RRS),3
+transact,pair_refinement_rate_2,RQVAE-token,2
+transact,pair_refinement_rate_2,PLUM,3
+transact,pair_refinement_rate_2,BalanceRQKMeans,3
+transact,pair_refinement_rate_2,RQVAE + item LogQ,6
+transact,pair_refinement_rate_2,RQVAE + pure SID LogQ,2
+transact,mean_active_branch_fraction_2,R3VAE (rqkmeans),5
+transact,mean_active_branch_fraction_2,R3VAE (spherical),6
+transact,mean_active_branch_fraction_2,RQKMeans,5
+transact,mean_active_branch_fraction_2,RQVAE (ECM),3
+transact,mean_active_branch_fraction_2,RQVAE,6
+transact,mean_active_branch_fraction_2,RQVAE (RRS),3
+transact,mean_active_branch_fraction_2,RQVAE-token,2
+transact,mean_active_branch_fraction_2,PLUM,3
+transact,mean_active_branch_fraction_2,BalanceRQKMeans,3
+transact,mean_active_branch_fraction_2,RQVAE + item LogQ,6
+transact,mean_active_branch_fraction_2,RQVAE + pure SID LogQ,2
+transact,load_balance_p25_2,R3VAE (rqkmeans),5
+transact,load_balance_p25_2,R3VAE (spherical),6
+transact,load_balance_p25_2,RQKMeans,5
+transact,load_balance_p25_2,RQVAE (ECM),3
+transact,load_balance_p25_2,RQVAE,6
+transact,load_balance_p25_2,RQVAE (RRS),3
+transact,load_balance_p25_2,RQVAE-token,2
+transact,load_balance_p25_2,PLUM,3
+transact,load_balance_p25_2,BalanceRQKMeans,3
+transact,load_balance_p25_2,RQVAE + item LogQ,6
+transact,load_balance_p25_2,RQVAE + pure SID LogQ,2
+transact,load_balance_p75_2,R3VAE (rqkmeans),5
+transact,load_balance_p75_2,R3VAE (spherical),6
+transact,load_balance_p75_2,RQKMeans,5
+transact,load_balance_p75_2,RQVAE (ECM),3
+transact,load_balance_p75_2,RQVAE,6
+transact,load_balance_p75_2,RQVAE (RRS),3
+transact,load_balance_p75_2,RQVAE-token,2
+transact,load_balance_p75_2,PLUM,3
+transact,load_balance_p75_2,BalanceRQKMeans,3
+transact,load_balance_p75_2,RQVAE + item LogQ,6
+transact,load_balance_p75_2,RQVAE + pure SID LogQ,2
+transact,load_balance_p90_2,R3VAE (rqkmeans),5
+transact,load_balance_p90_2,R3VAE (spherical),6
+transact,load_balance_p90_2,RQKMeans,5
+transact,load_balance_p90_2,RQVAE (ECM),3
+transact,load_balance_p90_2,RQVAE,6
+transact,load_balance_p90_2,RQVAE (RRS),3
+transact,load_balance_p90_2,RQVAE-token,2
+transact,load_balance_p90_2,PLUM,3
+transact,load_balance_p90_2,BalanceRQKMeans,3
+transact,load_balance_p90_2,RQVAE + item LogQ,6
+transact,load_balance_p90_2,RQVAE + pure SID LogQ,2
+transact,codebook_coverage_2,R3VAE (rqkmeans),5
+transact,codebook_coverage_2,R3VAE (spherical),6
+transact,codebook_coverage_2,RQKMeans,5
+transact,codebook_coverage_2,RQVAE (ECM),3
+transact,codebook_coverage_2,RQVAE,6
+transact,codebook_coverage_2,RQVAE (RRS),3
+transact,codebook_coverage_2,RQVAE-token,2
+transact,codebook_coverage_2,PLUM,3
+transact,codebook_coverage_2,BalanceRQKMeans,3
+transact,codebook_coverage_2,RQVAE + item LogQ,6
+transact,codebook_coverage_2,RQVAE + pure SID LogQ,2
+transact,codebook_utilization_rate_2,R3VAE (rqkmeans),5
+transact,codebook_utilization_rate_2,R3VAE (spherical),6
+transact,codebook_utilization_rate_2,RQKMeans,5
+transact,codebook_utilization_rate_2,RQVAE (ECM),3
+transact,codebook_utilization_rate_2,RQVAE,6
+transact,codebook_utilization_rate_2,RQVAE (RRS),3
+transact,codebook_utilization_rate_2,RQVAE-token,2
+transact,codebook_utilization_rate_2,PLUM,3
+transact,codebook_utilization_rate_2,BalanceRQKMeans,3
+transact,codebook_utilization_rate_2,RQVAE + item LogQ,6
+transact,codebook_utilization_rate_2,RQVAE + pure SID LogQ,2
+transact,adjusted_semantic_variance_explained_3,R3VAE (rqkmeans),4
+transact,adjusted_semantic_variance_explained_3,R3VAE (spherical),5
+transact,adjusted_semantic_variance_explained_3,RQKMeans,4
+transact,adjusted_semantic_variance_explained_3,RQVAE (ECM),0
+transact,adjusted_semantic_variance_explained_3,RQVAE,5
+transact,adjusted_semantic_variance_explained_3,RQVAE (RRS),0
+transact,adjusted_semantic_variance_explained_3,RQVAE-token,1
+transact,adjusted_semantic_variance_explained_3,PLUM,3
+transact,adjusted_semantic_variance_explained_3,BalanceRQKMeans,3
+transact,adjusted_semantic_variance_explained_3,RQVAE + item LogQ,5
+transact,adjusted_semantic_variance_explained_3,RQVAE + pure SID LogQ,1
+transact,normalized_conditional_entropy_3,R3VAE (rqkmeans),4
+transact,normalized_conditional_entropy_3,R3VAE (spherical),5
+transact,normalized_conditional_entropy_3,RQKMeans,4
+transact,normalized_conditional_entropy_3,RQVAE (ECM),3
+transact,normalized_conditional_entropy_3,RQVAE,5
+transact,normalized_conditional_entropy_3,RQVAE (RRS),3
+transact,normalized_conditional_entropy_3,RQVAE-token,2
+transact,normalized_conditional_entropy_3,PLUM,3
+transact,normalized_conditional_entropy_3,BalanceRQKMeans,3
+transact,normalized_conditional_entropy_3,RQVAE + item LogQ,5
+transact,normalized_conditional_entropy_3,RQVAE + pure SID LogQ,1
+transact,pair_refinement_rate_3,R3VAE (rqkmeans),4
+transact,pair_refinement_rate_3,R3VAE (spherical),5
+transact,pair_refinement_rate_3,RQKMeans,4
+transact,pair_refinement_rate_3,RQVAE (ECM),3
+transact,pair_refinement_rate_3,RQVAE,5
+transact,pair_refinement_rate_3,RQVAE (RRS),3
+transact,pair_refinement_rate_3,RQVAE-token,2
+transact,pair_refinement_rate_3,PLUM,3
+transact,pair_refinement_rate_3,BalanceRQKMeans,3
+transact,pair_refinement_rate_3,RQVAE + item LogQ,5
+transact,pair_refinement_rate_3,RQVAE + pure SID LogQ,1
+transact,mean_active_branch_fraction_3,R3VAE (rqkmeans),4
+transact,mean_active_branch_fraction_3,R3VAE (spherical),5
+transact,mean_active_branch_fraction_3,RQKMeans,4
+transact,mean_active_branch_fraction_3,RQVAE (ECM),3
+transact,mean_active_branch_fraction_3,RQVAE,5
+transact,mean_active_branch_fraction_3,RQVAE (RRS),3
+transact,mean_active_branch_fraction_3,RQVAE-token,2
+transact,mean_active_branch_fraction_3,PLUM,3
+transact,mean_active_branch_fraction_3,BalanceRQKMeans,3
+transact,mean_active_branch_fraction_3,RQVAE + item LogQ,5
+transact,mean_active_branch_fraction_3,RQVAE + pure SID LogQ,1
+transact,load_balance_p25_3,R3VAE (rqkmeans),4
+transact,load_balance_p25_3,R3VAE (spherical),5
+transact,load_balance_p25_3,RQKMeans,4
+transact,load_balance_p25_3,RQVAE (ECM),3
+transact,load_balance_p25_3,RQVAE,5
+transact,load_balance_p25_3,RQVAE (RRS),3
+transact,load_balance_p25_3,RQVAE-token,2
+transact,load_balance_p25_3,PLUM,3
+transact,load_balance_p25_3,BalanceRQKMeans,3
+transact,load_balance_p25_3,RQVAE + item LogQ,5
+transact,load_balance_p25_3,RQVAE + pure SID LogQ,1
+transact,load_balance_p75_3,R3VAE (rqkmeans),4
+transact,load_balance_p75_3,R3VAE (spherical),5
+transact,load_balance_p75_3,RQKMeans,4
+transact,load_balance_p75_3,RQVAE (ECM),3
+transact,load_balance_p75_3,RQVAE,5
+transact,load_balance_p75_3,RQVAE (RRS),3
+transact,load_balance_p75_3,RQVAE-token,2
+transact,load_balance_p75_3,PLUM,3
+transact,load_balance_p75_3,BalanceRQKMeans,3
+transact,load_balance_p75_3,RQVAE + item LogQ,5
+transact,load_balance_p75_3,RQVAE + pure SID LogQ,1
+transact,load_balance_p90_3,R3VAE (rqkmeans),4
+transact,load_balance_p90_3,R3VAE (spherical),5
+transact,load_balance_p90_3,RQKMeans,4
+transact,load_balance_p90_3,RQVAE (ECM),3
+transact,load_balance_p90_3,RQVAE,5
+transact,load_balance_p90_3,RQVAE (RRS),3
+transact,load_balance_p90_3,RQVAE-token,2
+transact,load_balance_p90_3,PLUM,3
+transact,load_balance_p90_3,BalanceRQKMeans,3
+transact,load_balance_p90_3,RQVAE + item LogQ,5
+transact,load_balance_p90_3,RQVAE + pure SID LogQ,1
+transact,codebook_coverage_3,R3VAE (rqkmeans),4
+transact,codebook_coverage_3,R3VAE (spherical),5
+transact,codebook_coverage_3,RQKMeans,4
+transact,codebook_coverage_3,RQVAE (ECM),3
+transact,codebook_coverage_3,RQVAE,5
+transact,codebook_coverage_3,RQVAE (RRS),3
+transact,codebook_coverage_3,RQVAE-token,2
+transact,codebook_coverage_3,PLUM,3
+transact,codebook_coverage_3,BalanceRQKMeans,3
+transact,codebook_coverage_3,RQVAE + item LogQ,5
+transact,codebook_coverage_3,RQVAE + pure SID LogQ,1
+transact,codebook_utilization_rate_3,R3VAE (rqkmeans),4
+transact,codebook_utilization_rate_3,R3VAE (spherical),5
+transact,codebook_utilization_rate_3,RQKMeans,4
+transact,codebook_utilization_rate_3,RQVAE (ECM),3
+transact,codebook_utilization_rate_3,RQVAE,5
+transact,codebook_utilization_rate_3,RQVAE (RRS),3
+transact,codebook_utilization_rate_3,RQVAE-token,2
+transact,codebook_utilization_rate_3,PLUM,3
+transact,codebook_utilization_rate_3,BalanceRQKMeans,3
+transact,codebook_utilization_rate_3,RQVAE + item LogQ,5
+transact,codebook_utilization_rate_3,RQVAE + pure SID LogQ,1
+transact,adjusted_semantic_variance_explained_4,R3VAE (rqkmeans),1
+transact,adjusted_semantic_variance_explained_4,R3VAE (spherical),1
+transact,adjusted_semantic_variance_explained_4,RQKMeans,1
+transact,adjusted_semantic_variance_explained_4,RQVAE (ECM),0
+transact,adjusted_semantic_variance_explained_4,RQVAE,1
+transact,adjusted_semantic_variance_explained_4,RQVAE (RRS),0
+transact,adjusted_semantic_variance_explained_4,RQVAE-token,0
+transact,adjusted_semantic_variance_explained_4,PLUM,0
+transact,adjusted_semantic_variance_explained_4,BalanceRQKMeans,0
+transact,adjusted_semantic_variance_explained_4,RQVAE + item LogQ,1
+transact,adjusted_semantic_variance_explained_4,RQVAE + pure SID LogQ,0
+transact,normalized_conditional_entropy_4,R3VAE (rqkmeans),1
+transact,normalized_conditional_entropy_4,R3VAE (spherical),1
+transact,normalized_conditional_entropy_4,RQKMeans,1
+transact,normalized_conditional_entropy_4,RQVAE (ECM),0
+transact,normalized_conditional_entropy_4,RQVAE,1
+transact,normalized_conditional_entropy_4,RQVAE (RRS),0
+transact,normalized_conditional_entropy_4,RQVAE-token,1
+transact,normalized_conditional_entropy_4,PLUM,0
+transact,normalized_conditional_entropy_4,BalanceRQKMeans,0
+transact,normalized_conditional_entropy_4,RQVAE + item LogQ,1
+transact,normalized_conditional_entropy_4,RQVAE + pure SID LogQ,0
+transact,pair_refinement_rate_4,R3VAE (rqkmeans),1
+transact,pair_refinement_rate_4,R3VAE (spherical),1
+transact,pair_refinement_rate_4,RQKMeans,1
+transact,pair_refinement_rate_4,RQVAE (ECM),0
+transact,pair_refinement_rate_4,RQVAE,1
+transact,pair_refinement_rate_4,RQVAE (RRS),0
+transact,pair_refinement_rate_4,RQVAE-token,1
+transact,pair_refinement_rate_4,PLUM,0
+transact,pair_refinement_rate_4,BalanceRQKMeans,0
+transact,pair_refinement_rate_4,RQVAE + item LogQ,1
+transact,pair_refinement_rate_4,RQVAE + pure SID LogQ,0
+transact,mean_active_branch_fraction_4,R3VAE (rqkmeans),1
+transact,mean_active_branch_fraction_4,R3VAE (spherical),1
+transact,mean_active_branch_fraction_4,RQKMeans,1
+transact,mean_active_branch_fraction_4,RQVAE (ECM),0
+transact,mean_active_branch_fraction_4,RQVAE,1
+transact,mean_active_branch_fraction_4,RQVAE (RRS),0
+transact,mean_active_branch_fraction_4,RQVAE-token,1
+transact,mean_active_branch_fraction_4,PLUM,0
+transact,mean_active_branch_fraction_4,BalanceRQKMeans,0
+transact,mean_active_branch_fraction_4,RQVAE + item LogQ,1
+transact,mean_active_branch_fraction_4,RQVAE + pure SID LogQ,0
+transact,load_balance_p25_4,R3VAE (rqkmeans),1
+transact,load_balance_p25_4,R3VAE (spherical),1
+transact,load_balance_p25_4,RQKMeans,1
+transact,load_balance_p25_4,RQVAE (ECM),0
+transact,load_balance_p25_4,RQVAE,1
+transact,load_balance_p25_4,RQVAE (RRS),0
+transact,load_balance_p25_4,RQVAE-token,1
+transact,load_balance_p25_4,PLUM,0
+transact,load_balance_p25_4,BalanceRQKMeans,0
+transact,load_balance_p25_4,RQVAE + item LogQ,1
+transact,load_balance_p25_4,RQVAE + pure SID LogQ,0
+transact,load_balance_p75_4,R3VAE (rqkmeans),1
+transact,load_balance_p75_4,R3VAE (spherical),1
+transact,load_balance_p75_4,RQKMeans,1
+transact,load_balance_p75_4,RQVAE (ECM),0
+transact,load_balance_p75_4,RQVAE,1
+transact,load_balance_p75_4,RQVAE (RRS),0
+transact,load_balance_p75_4,RQVAE-token,1
+transact,load_balance_p75_4,PLUM,0
+transact,load_balance_p75_4,BalanceRQKMeans,0
+transact,load_balance_p75_4,RQVAE + item LogQ,1
+transact,load_balance_p75_4,RQVAE + pure SID LogQ,0
+transact,load_balance_p90_4,R3VAE (rqkmeans),1
+transact,load_balance_p90_4,R3VAE (spherical),1
+transact,load_balance_p90_4,RQKMeans,1
+transact,load_balance_p90_4,RQVAE (ECM),0
+transact,load_balance_p90_4,RQVAE,1
+transact,load_balance_p90_4,RQVAE (RRS),0
+transact,load_balance_p90_4,RQVAE-token,1
+transact,load_balance_p90_4,PLUM,0
+transact,load_balance_p90_4,BalanceRQKMeans,0
+transact,load_balance_p90_4,RQVAE + item LogQ,1
+transact,load_balance_p90_4,RQVAE + pure SID LogQ,0
+transact,codebook_coverage_4,R3VAE (rqkmeans),1
+transact,codebook_coverage_4,R3VAE (spherical),1
+transact,codebook_coverage_4,RQKMeans,1
+transact,codebook_coverage_4,RQVAE (ECM),0
+transact,codebook_coverage_4,RQVAE,1
+transact,codebook_coverage_4,RQVAE (RRS),0
+transact,codebook_coverage_4,RQVAE-token,1
+transact,codebook_coverage_4,PLUM,0
+transact,codebook_coverage_4,BalanceRQKMeans,0
+transact,codebook_coverage_4,RQVAE + item LogQ,1
+transact,codebook_coverage_4,RQVAE + pure SID LogQ,0
+transact,codebook_utilization_rate_4,R3VAE (rqkmeans),1
+transact,codebook_utilization_rate_4,R3VAE (spherical),1
+transact,codebook_utilization_rate_4,RQKMeans,1
+transact,codebook_utilization_rate_4,RQVAE (ECM),0
+transact,codebook_utilization_rate_4,RQVAE,1
+transact,codebook_utilization_rate_4,RQVAE (RRS),0
+transact,codebook_utilization_rate_4,RQVAE-token,1
+transact,codebook_utilization_rate_4,PLUM,0
+transact,codebook_utilization_rate_4,BalanceRQKMeans,0
+transact,codebook_utilization_rate_4,RQVAE + item LogQ,1
+transact,codebook_utilization_rate_4,RQVAE + pure SID LogQ,0
+transact,load_balance_p25_mean,R3VAE (rqkmeans),5
+transact,load_balance_p25_mean,R3VAE (spherical),6
+transact,load_balance_p25_mean,RQKMeans,5
+transact,load_balance_p25_mean,RQVAE (ECM),3
+transact,load_balance_p25_mean,RQVAE,6
+transact,load_balance_p25_mean,RQVAE (RRS),3
+transact,load_balance_p25_mean,RQVAE-token,2
+transact,load_balance_p25_mean,PLUM,3
+transact,load_balance_p25_mean,BalanceRQKMeans,3
+transact,load_balance_p25_mean,RQVAE + item LogQ,6
+transact,load_balance_p25_mean,RQVAE + pure SID LogQ,2
+transact,load_balance_p75_mean,R3VAE (rqkmeans),5
+transact,load_balance_p75_mean,R3VAE (spherical),6
+transact,load_balance_p75_mean,RQKMeans,5
+transact,load_balance_p75_mean,RQVAE (ECM),3
+transact,load_balance_p75_mean,RQVAE,6
+transact,load_balance_p75_mean,RQVAE (RRS),3
+transact,load_balance_p75_mean,RQVAE-token,2
+transact,load_balance_p75_mean,PLUM,3
+transact,load_balance_p75_mean,BalanceRQKMeans,3
+transact,load_balance_p75_mean,RQVAE + item LogQ,6
+transact,load_balance_p75_mean,RQVAE + pure SID LogQ,2
+transact,load_balance_p90_mean,R3VAE (rqkmeans),5
+transact,load_balance_p90_mean,R3VAE (spherical),6
+transact,load_balance_p90_mean,RQKMeans,5
+transact,load_balance_p90_mean,RQVAE (ECM),3
+transact,load_balance_p90_mean,RQVAE,6
+transact,load_balance_p90_mean,RQVAE (RRS),3
+transact,load_balance_p90_mean,RQVAE-token,2
+transact,load_balance_p90_mean,PLUM,3
+transact,load_balance_p90_mean,BalanceRQKMeans,3
+transact,load_balance_p90_mean,RQVAE + item LogQ,6
+transact,load_balance_p90_mean,RQVAE + pure SID LogQ,2
