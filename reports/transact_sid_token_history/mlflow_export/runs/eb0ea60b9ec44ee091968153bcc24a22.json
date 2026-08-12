@@ -1,0 +1,75 @@
+{
+  "local_run_directory": null,
+  "metric_histories": {
+    "fit.kmeans_iterations": [
+      {
+        "step": 1,
+        "timestamp": 1786562394787,
+        "value": 50.0
+      },
+      {
+        "step": 2,
+        "timestamp": 1786562406046,
+        "value": 50.0
+      },
+      {
+        "step": 3,
+        "timestamp": 1786562417164,
+        "value": 50.0
+      }
+    ],
+    "fit.residual_mse": [
+      {
+        "step": 1,
+        "timestamp": 1786562394787,
+        "value": 0.0029411830473691225
+      },
+      {
+        "step": 2,
+        "timestamp": 1786562406046,
+        "value": 0.002462279051542282
+      },
+      {
+        "step": 3,
+        "timestamp": 1786562417164,
+        "value": 0.0022094387095421553
+      }
+    ]
+  },
+  "mlflow_artifacts": [],
+  "params": {
+    "catalog_items": "33148",
+    "config.codebook_sizes": "[128, 128, 128]",
+    "config.device": "cuda",
+    "config.kmeans_batch_size": "65536",
+    "config.max_iter": "50",
+    "config.predict_batch_size": "16384",
+    "config.seed": "42",
+    "pipeline": "sids_experiment_3827775380435139534:CachedSidPipeline"
+  },
+  "run": {
+    "end_time": 1786562421095,
+    "lifecycle_stage": "active",
+    "name": "sid",
+    "parent_source_run_id": "78e92c9ff66f40829e8b39deaffdd827",
+    "start_time": 1786562382712,
+    "status": "FINISHED"
+  },
+  "schema_version": 1,
+  "source": {
+    "experiment_id": "1",
+    "experiment_name": "transact-sid-token-history-20260812",
+    "run_id": "eb0ea60b9ec44ee091968153bcc24a22",
+    "tracking_uri": "http://127.0.0.1:5000"
+  },
+  "tags": {
+    "mlflow.parentRunId": "78e92c9ff66f40829e8b39deaffdd827",
+    "mlflow.runName": "sid",
+    "mlflow.source.git.commit": "a806b4c08918e1f7501d9b71791b0328cf596843",
+    "mlflow.source.name": "run.py",
+    "mlflow.source.type": "LOCAL",
+    "mlflow.user": "sashanovak",
+    "pipeline": "CachedSidPipeline",
+    "stage": "sid"
+  }
+}

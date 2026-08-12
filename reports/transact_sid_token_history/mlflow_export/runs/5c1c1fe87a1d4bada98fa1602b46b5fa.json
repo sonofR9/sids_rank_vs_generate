@@ -1,0 +1,51 @@
+{
+  "local_run_directory": null,
+  "metric_histories": {},
+  "mlflow_artifacts": [],
+  "params": {
+    "catalog_items": "33148",
+    "config.assignment_method": "nearest",
+    "config.batch_size": "1024",
+    "config.beta": "0.25",
+    "config.codebook_size": "256",
+    "config.device": "cuda",
+    "config.hidden_dim": "256",
+    "config.latent_dim": "128",
+    "config.lr": "0.0005",
+    "config.max_epochs": "20",
+    "config.min_delta": "1e-05",
+    "config.num_levels": "3",
+    "config.num_workers": "4",
+    "config.patience": "5",
+    "config.pretrain_epochs": "3",
+    "config.pretrain_lr": "0.005",
+    "config.psi_top_k": "4",
+    "config.val_part": "0.05",
+    "pipeline": "sids_experiment_5691161013198557675:CachedSidPipeline"
+  },
+  "run": {
+    "end_time": 1786563484918,
+    "lifecycle_stage": "active",
+    "name": "sid",
+    "parent_source_run_id": "3f5de335eec54b8aa91c76fb17493639",
+    "start_time": 1786563484850,
+    "status": "FINISHED"
+  },
+  "schema_version": 1,
+  "source": {
+    "experiment_id": "1",
+    "experiment_name": "transact-sid-token-history-20260812",
+    "run_id": "5c1c1fe87a1d4bada98fa1602b46b5fa",
+    "tracking_uri": "http://127.0.0.1:5000"
+  },
+  "tags": {
+    "mlflow.parentRunId": "3f5de335eec54b8aa91c76fb17493639",
+    "mlflow.runName": "sid",
+    "mlflow.source.git.commit": "74e7759bc3074f7c105433d95e263a81291f1527",
+    "mlflow.source.name": "run.py",
+    "mlflow.source.type": "LOCAL",
+    "mlflow.user": "sashanovak",
+    "pipeline": "CachedSidPipeline",
+    "stage": "sid"
+  }
+}

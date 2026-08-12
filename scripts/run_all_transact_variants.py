@@ -92,6 +92,8 @@ def launch(
             "CODEBOOK_SIZE": str(size),
             "TRANSACT_SID_CACHE": str(args.sid_cache),
             "PYTHONUNBUFFERED": "1",
+            "OPENBLAS_NUM_THREADS": "64",
+            "OMP_NUM_THREADS": "16",
         }
     )
     command = [
