@@ -25,5 +25,5 @@ python scripts/analyze_logq_rqvae_sid_quality_recall.py \
   --logq-experiments sid-comparison \
   --quality-experiments sid-quality-only-full-v2 \
   --pure-sid-logq-only \
-  --output-dir reports/figures/generation/pure_sid_logq_recall
+  --output-dir reports/figures/generation/rqvae_pure_sid_logq_recall
 ```
