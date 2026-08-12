@@ -7,6 +7,7 @@ Expected contents are the PNG/PDF/SVG `recall100_vs_*` figures together with
 `matched_generation_runs.csv`, `correlations.csv`, `analysis_metadata.json`,
 and `local_sid_metric_backfill.csv`.
 
-The report is intentionally separate from the 2026-08-10 snapshots because it
+The report is intentionally separate from the raw-SID poster report because it
 contains 36 generation runs and derives missing PLUM/Balance SID metrics from
-the saved semantic IDs and cached catalog embeddings.
+the saved semantic IDs and cached catalog embeddings. Its PLUM/Balance runs
+use a different catalog size, so the two reports must not be combined.
