@@ -91,6 +91,59 @@ python run.py experiments/rqkmeans_full.py --skip-generation
 python run.py experiments/rqkmeans_full.py --skip-ranking
 ```
 
+### Metrics for precomputed SIDs
+
+To measure SID assignments that have already been generated, place their
+Parquet files in one directory. Each file must contain one unique `item_id` row
+and integer `sid_0`, `sid_1`, ... columns. Run the metrics-only mode with the
+catalog embedding Parquet used to create those IDs:
+
+```bash
+python run.py \
+  --sids-metrics-dir path/to/precomputed_sids \
+  --embeddings-path path/to/embeddings.parquet
+```
+
+This skips SID training and downstream evaluation. It calculates all common
+collision, uniqueness, codebook-quality, path-similarity, and
+`intra_code_similarity_v2` metrics for every Parquet and writes the combined
+report to `path/to/precomputed_sids/sid_metrics.json`.
+
+The output includes the existing report metrics (`ICR`, collision rate and
+sizes, CUR, path Gini/entropy, prefix coherence, and validity) plus these new
+diagnostics:
+
+- `collision_item_rate`: fraction of catalog items that belong to a collided
+  complete SID path; lower is better.
+- `pair_collision_probability`: probability that two distinct random items
+  receive the same complete path; lower is better and heavily penalizes large
+  collision groups.
+- `pair_refinement_rate_at_<level>_layer`: fraction of item pairs sharing the
+  preceding prefix that the current level separates; higher is better.
+- `mean_active_branch_fraction_at_<level>_layer`: mean fraction of available
+  child codes used under each occupied parent prefix; higher indicates broader
+  local branching.
+- `normalized_conditional_entropy_at_<level>_layer`: item-weighted balance of
+  the new branches after the preceding prefix is known; higher indicates less
+  branch collapse.
+- `adjusted_semantic_variance_explained_at_<level>`: degrees-of-freedom-adjusted
+  clustering R-squared of content embeddings under prefixes of that depth. It
+  rewards compact, separated semantic groups without treating all-singleton
+  prefixes as perfect; higher is better and singleton-only depths are `null`.
+
+Use `--recursive-sids` for nested folders, `--metrics-output` to choose another
+JSON path, or explicit codebook sizes when observed ranges do not describe the
+full codebooks:
+
+```bash
+python run.py \
+  --sids-metrics-dir path/to/precomputed_sids \
+  --embeddings-path path/to/embeddings.parquet \
+  --recursive-sids \
+  --codebook-sizes 256,256,256 \
+  --metrics-output reports/precomputed_sid_metrics.json
+```
+
 ### RQ-VAE purely semantic indexing
 
 RQ-VAE supports three final assignment policies over the same trained encoder
@@ -179,6 +232,8 @@ Ranking uses the existing listen labels and all prepared DCNv2 lag features.
 Both models consume the same dense counters, user and candidate SID features,
 and multivalent artist/album IDs. The TransAct variant adds the latest like
 history strictly preceding each ranking timestamp to that same DCNv2 input.
+Every historical item is expanded into one transformer token per SID level;
+each level has its own learned embedding table.
 Ranking defaults are tuned for a 48 GiB V100: DCNv2 uses batch size 32,768 and
 TransAct uses batch size 8,192. Both train in FP32 with PyTorch float32 matmul
 precision set to `high`.

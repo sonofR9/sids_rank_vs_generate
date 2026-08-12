@@ -19,7 +19,7 @@
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
 
-% ---------- colors ----------
+% Colors
 \definecolor{ink}{HTML}{182840}
 \definecolor{headerred}{HTML}{D72645}
 \definecolor{blue}{HTML}{1E6D93}
@@ -70,7 +70,7 @@
   rectangle
   ([xshift=-0.6cm,yshift=0.6cm]current page.south east);
 
-% ---------- HEADER ----------
+% Header
 \posterbox{2.0}{1.6}{115.0}{7.6}{headerred}{fillpink}{}
 \fill[headerred] ([xshift=2.0cm,yshift=-1.6cm]current page.north west) rectangle ++(0.8cm,-7.6cm);
 
@@ -91,18 +91,10 @@
   {Константин Рядинский \enspace\textbullet\enspace
    Лев Клюев \enspace\textbullet\enspace
    Ростислав Головков \enspace\textbullet\enspace
-   Глеб Шевченко};
+   Глеб Шевченко \enspace\textbullet\enspace
+   \textcolor{gray}{Ментор: Александр Новак}};
 
-\node[
-    anchor=north west,
-    text=gray,
-    inner sep=0pt,
-    font=\fontsize{22}{27}\selectfont
-] at ([xshift=4.0cm,yshift=-7.3cm]current page.north west)
-  {Ментор: Александр Новак};
-
-% ---------- LEFT COLUMN ----------
-% ---------- LEFT COLUMN ----------
+% Left column
 
 \posterbox
   {2.0}{10.4}
@@ -118,25 +110,18 @@
 {
     {\fontsize{30}{37}\selectfont
 
-    Semantic IDs (SIDs) используются для дискретного представления
-    объектов в генеративных рекомендательных системах.
+Semantic IDs (SIDs) используются для дискретного представления объектов в генеративных рекомендательных системах. 
+При этом качество SID часто оценивается через свойства самого представления, которые не обязательно коррелируют с 
+качеством итоговых рекомендаций.
 
-    \vspace{0.5cm}
+    \vspace{1cm}
 
-    При этом качество SID часто оценивается через
-    \textbf{\textcolor{blue}{свойства самого представления}},
-    которые не обязательно коррелируют с качеством итоговых рекомендаций.
-
-    \vspace{0.5cm}
-
-    \textbf{Цель нашей работы} --- исследовать эту связь:
-    сравнить различные методы построения Semantic IDs и определить,
-    какие свойства SID действительно отражаются на финальных метриках
-    рекомендательной системы.
+    \textbf{Цель нашей работы} - исследовать эту связь: сравнить различные методы построения Semantic IDs и определить, 
+    какие свойства SID действительно отражаются на финальных метриках рекомендательной системы.
     }
 };
 % Вместо \posterbox используем Ti*k*Z-узел с рамкой и заливкой
-\posterbox{2.0}{28.8}{37.3}{35.7}{gray}{fillgray}{Бэйзлайны}
+\posterbox{2.0}{28.8}{37.3}{35.7}{gray}{fillgray}{Постановка эксперимента}
 
 \node[
     anchor=north west,
@@ -146,66 +131,62 @@
     align=left
 ] at ([xshift=2.8cm,yshift=-31.0cm]current page.north west)
 {
-{\fontsize{24}{30}\selectfont
+    {\fontsize{26}{33}\selectfont
 
-\textbf{\textcolor{red}{Генерация без Semantic IDs}}
+\textbf{\textcolor{purple}{Что хотим выяснить}}
 
-\vspace{0.25cm}
+Связаны ли метрики качества Semantic ID с качеством рекомендаций?
+И сохраняется ли эта связь при переходе от одной задачи и модели к другой?
 
-\textbf{SASRec} --- одна из первых моделей трансформеров, использующая историю
-взаимодействий пользователя с айтемами.
+\vspace{0.65cm}
 
-\vspace{0.5cm}
+\begin{center}
+\textbf{\textcolor{purple}{метрики SID}}
+$\longrightarrow$
+\textbf{\textcolor{orange}{downstream-метрики}}
+\end{center}
 
-\textbf{\textcolor{orange}{Генерация с Semantic IDs}}
+\vspace{0.45cm}
 
-\vspace{0.25cm}
+\textbf{\textcolor{blue}{Единый протокол сравнения}}
 
-\textbf{TIGER-like} --- генеративная рекомендательная модель,
-которая авторегрессионно предсказывает последовательность токенов
-Semantic ID целевого объекта.
-
-\vspace{0.7cm}
-
-\textbf{\textcolor{blue}{Ранжирование без Semantic IDs}}
-
-\vspace{0.25cm}
-
-В качестве базовых моделей используем стандартные ранжирующие
-модели, работающие с обычными \textbf{item ID}:
-
-\vspace{0.35cm}
-
-\textbf{DCNv2} --- надо написать, в чём прикол именно этой модели.
-
-\vspace{0.35cm}
-
-\textbf{TransAct-like} --- надо написать, в чём прикол именно этой модели.
+Все варианты SID проверяем на датасете \textbf{Yambda-50M} и с единым временным
+разбиением. Для downstream-моделей используем одинаковые настройки обучения.
 
 \vspace{0.7cm}
 
-\textbf{\textcolor{teal}{Ранжирование с Semantic IDs}}
+\textbf{\textcolor{orange}{Генерация}}
 
-\vspace{0.25cm}
+\textbf{TIGER-like} авторегрессионно предсказывает SID следующего объекта.
+Качество измеряем по \textbf{Recall@100}.
 
-Для тех же ранжирующих моделей мы добавляем к обычному индексу объекта
-его \textbf{Semantic ID}. Это позволяет напрямую оценить,
-как способ построения SID влияет на качество ранжирования.
+В качестве ориентира используем \textbf{SASRec}, который предсказывает
+следующий объект напрямую по item ID.
 
 \vspace{0.7cm}
 
-Таким образом, влияние SID оцениваются как в
-\textbf{ранжировании}, так и в \textbf{генерации}.
+\textbf{\textcolor{teal}{Ранжирование}}
+
+Проверяем два сценария: \textbf{DCNv2} без истории и \textbf{TransAct-like}
+с последовательностью взаимодействий пользователя.
+
+SID целевого объекта используется в обеих моделях, а в TransAct-like
+дополнительно кодирует объекты из истории.
+
+Качество измеряем по \textbf{ROC-AUC} и \textbf{pairwise accuracy}.
+
+\vspace{0.7cm}
+
+Для каждого варианта SID получаем результаты во всех трёх моделях и сравниваем,
+какие метрики SID действительно согласуются с ростом итогового качества.
 
 }
 };
-\posterbox{2.0}{65.5}{37.3}{16.4}{teal}{fillteal}{Гибкая зона: 1--2 метода после примерки текста (объясните, что это))}
-
-% ---------- RIGHT: methods grid ----------
-\posterbox{79.1}{10.4}{37.8}{20.2}{blue}{fillblue}{Balanced RQ-KMeans / RQ-VAE}
+% Middle column: methods grid
+\posterbox{40.3}{10.4}{37.8}{20.2}{blue}{fillblue}{Balanced RQ-KMeans / RQ-VAE}
 
 \node[anchor=north, inner sep=0pt]
-  at ([xshift=98.0cm,yshift=-13.0cm]current page.north west)
+  at ([xshift=59.2cm,yshift=-13.0cm]current page.north west)
   {\includegraphics[width=33.5cm]{rq-rqvae.png}};
 
 \node[
@@ -213,10 +194,10 @@ Semantic ID целевого объекта.
     text=gray,
     inner sep=0pt,
     font=\fontsize{11}{13}\selectfont
-] at ([xshift=116.1cm,yshift=-30.0cm]current page.north west)
+] at ([xshift=77.3cm,yshift=-30.0cm]current page.north west)
   {Источник: Mike X Cohen (2026), схема Sumit};
 
-\posterbox{79.1}{31.6}{18.4}{16.0}{teal}{fillteal}{PLUM-like}
+\posterbox{40.3}{31.6}{18.4}{16.0}{teal}{fillteal}{PLUM-like}
 
 \node[
     anchor=north west,
@@ -224,34 +205,34 @@ Semantic ID целевого объекта.
     inner sep=0pt,
     text width=16.8cm,
     align=left
-] at ([xshift=79.9cm,yshift=-33.7cm]current page.north west)
+] at ([xshift=41.1cm,yshift=-33.7cm]current page.north west)
 {
     {\fontsize{21}{26}\selectfont
 
-    Размер кодбука уменьшается вдвое с каждым уровнем:
+    Число кодов уменьшается вдвое с каждым уровнем:
 
     \[
         C_i = \frac{C_0}{2^i}.
     \]
 
-    Случайная \textbf{prefix-маска} выбирает глубину SID:
-    обновляются только уровни активного префикса.
+    При обучении случайно выбирается длина \textbf{активного
+    префикса}: обновляются только первые уровни SID.
 
     \vspace{0.25cm}
 
-    Последний кодбук используется с вероятностью \textbf{0.25};
-    остальные глубины делят оставшуюся вероятность.
+    Полная глубина выбирается с вероятностью \textbf{0.25};
+    остальные длины делят оставшуюся вероятность.
 
     \vspace{0.25cm}
 
-    Ранние уровни обучаются чаще и формируют информативные
-    короткие префиксы SID.
+    Поэтому ранние токены обучаются чаще, а каждый короткий
+    префикс остаётся информативным.
 
     }
 
 };
 
-\posterbox{98.5}{31.6}{18.4}{16.0}{teal}{fillteal}{R3-VAE}
+\posterbox{59.7}{31.6}{18.4}{16.0}{teal}{fillteal}{R3-VAE}
 
 \node[
     anchor=north west,
@@ -259,19 +240,23 @@ Semantic ID целевого объекта.
     inner sep=0pt,
     text width=16.8cm,
     align=left
-] at ([xshift=99.3cm,yshift=-34.0cm]current page.north west)
+] at ([xshift=60.5cm,yshift=-34.0cm]current page.north west)
 {
 {\fontsize{22}{28}\selectfont
-Обучаемый \textbf{reference-вектор} задаёт семантический якорь для начального residual.\\[0.35cm]
-\textbf{Dot-product rating} сохраняет поток градиента и предотвращает collapse кодбука.\\[0.35cm]
-Регуляризация \textbf{SC/PD} усиливает сходство внутри SID и различия между кластерами.
+Обучаемый \textbf{опорный вектор} задаёт семантический якорь для начального остатка.\\[0.35cm]
+\textbf{Оценка скалярным произведением} сохраняет градиент и снижает риск вырождения кодбука.\\[0.35cm]
+Регуляризация \textbf{SC/PD} сближает объекты внутри кластера и разделяет разные паттерны предпочтений.
 }
 };
 
-\posterbox{79.1}{48.6}{18.4}{15.6}{purple}{fillpurple}{User-aware}
-\posterbox{98.5}{48.6}{18.4}{15.6}{orange}{fillteal}{BPE}
+\posterbox{40.3}{48.6}{37.8}{15.6}{purple}{fillpurple}{User-aware}
 
-\posterbox{79.1}{65.2}{18.4}{16.7}{red}{fillpurple}{PSI}
+\node[anchor=north, inner sep=0pt]
+  at ([xshift=59.2cm,yshift=-51.2cm]current page.north west)
+  {\includegraphics[width=35.5cm,trim=35bp 120bp 35bp 120bp,clip]
+    {user-aware-semantic-ids-v5.png}};
+
+\posterbox{40.3}{65.2}{18.4}{7.8}{red}{fillpurple}{PSI}
 
 \node[
     anchor=north west,
@@ -279,19 +264,22 @@ Semantic ID целевого объекта.
     inner sep=0pt,
     text width=16.8cm,
     align=left
-] at ([xshift=79.9cm,yshift=-67.6cm]current page.north west)
+] at ([xshift=41.1cm,yshift=-67.6cm]current page.north west)
 {
 {\fontsize{22}{28}\selectfont
-\textbf{Multi-resolution кодбуки} уменьшаются на глубоких уровнях и компактно кодируют residual.\\[0.35cm]
-\textbf{Progressive masking} обучает случайные SID-префиксы, усиливая семантическую иерархию.
+Первые токены передают \textbf{основную информацию},
+а последующие добавляют детали. Случайное маскирование
+хвоста делает полезным каждый \textbf{префикс SID}.
 }
 };
 
-\posterbox{98.5}{65.2}{18.4}{16.7}{purple}{fillteal}{Spectral embeddings}
+\posterbox{59.7}{65.2}{18.4}{7.8}{purple}{fillteal}{Spectral embeddings}
 
-% ---------- MIDDLE: RESULTS ----------
-\posterbox{40.3}{10.4}{37.8}{50.2}{orange}{fillorange}{Эксперименты и графики}
-\posterbox{40.3}{61.6}{37.8}{20.3}{headerred}{fillpink}{Главный результат}
+% Right column: results
+\posterbox{79.1}{10.4}{37.8}{62.6}{orange}{fillorange}{Эксперименты и графики}
+
+% Bottom: main result
+\posterbox{2.0}{74.0}{115.0}{7.9}{headerred}{fillpink}{Главный результат}
 
 
 \end{tikzpicture}

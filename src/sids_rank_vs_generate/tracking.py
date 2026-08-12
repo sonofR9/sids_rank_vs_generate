@@ -114,7 +114,7 @@ class ExperimentTracker:
 
     def log_artifact(
         self,
-        local_path: Path,
+        local_path: str | Path,
         *,
         artifact_path: str | None = None,
     ) -> None:
@@ -187,19 +187,21 @@ class MlflowTracker(ExperimentTracker):
 
     def log_artifact(
         self,
-        local_path: Path,
+        local_path: str | Path,
         *,
         artifact_path: str | None = None,
     ) -> None:
-        if not local_path.is_file():
-            raise FileNotFoundError(f"artifact file not found: {local_path}")
-        self._mlflow.log_artifact(str(local_path), artifact_path=artifact_path)
+        self._mlflow.log_artifact(
+            str(Path(local_path)),
+            artifact_path=artifact_path,
+        )
 
     def info(self) -> dict[str, Any]:
         active_run = self._mlflow.active_run()
         return {
             "enabled": True,
             "experiment_name": self._config.experiment_name,
+            "run_name": self._config.run_name,
             "run_id": active_run.info.run_id if active_run is not None else None,
         }
 

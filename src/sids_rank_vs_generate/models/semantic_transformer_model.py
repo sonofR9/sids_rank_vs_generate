@@ -34,6 +34,25 @@ class SemanticTransformerModel(nn.Module):
         self.codebook_size = self.codebook_sizes[0]
         self.bos_id = sum(self.codebook_sizes)
         self.encoder = HistoryTransformerEncoder(num_items, self.cfg)
+        self.use_user_profile = bool(
+            getattr(self.cfg, "use_user_profile", False)
+        )
+        self.user_profile_dim = int(
+            getattr(self.cfg, "user_profile_dim", 0)
+        )
+        if self.use_user_profile:
+            if self.user_profile_dim <= 0:
+                raise ValueError(
+                    "user_profile_dim must be positive when user profiles are enabled"
+                )
+            self.user_profile_projection = nn.Linear(
+                self.user_profile_dim,
+                self.cfg.d_model,
+            )
+            self.user_profile_norm = nn.LayerNorm(self.cfg.d_model)
+        else:
+            self.user_profile_projection = None
+            self.user_profile_norm = None
 
         if initial_item_embeddings is not None:
             expected_shape = tuple(self.encoder.item_emb.weight.shape)
@@ -133,19 +152,56 @@ class SemanticTransformerModel(nn.Module):
         embeddings = embeddings.sum(dim=2) / valid.sum(dim=2, keepdim=True).clamp_min(1)
         return embeddings * self.semantic_history_weight
 
-    def encode_history(self, history, positions, mask):
-        return self.encoder(
+    def _user_profile_context(self, history, user_features):
+        if not self.use_user_profile:
+            if user_features is not None:
+                raise ValueError("user features were provided to a disabled model")
+            return None
+        if user_features is None:
+            raise ValueError("user features are required by this model")
+        expected_shape = (history.size(0), self.user_profile_dim)
+        if tuple(user_features.shape) != expected_shape:
+            raise ValueError(
+                f"user features have shape {tuple(user_features.shape)}, "
+                f"expected {expected_shape}"
+            )
+        if not user_features.is_cuda and not torch.isfinite(user_features).all():
+            raise ValueError("user features must contain only finite values")
+        context = self.user_profile_projection(user_features)
+        return self.user_profile_norm(context)
+
+    def encode_history(self, history, positions, mask, user_features=None):
+        memory, pooled_history = self.encoder(
             history,
             positions,
             mask,
             additional_item_embeddings=self._semantic_history_embeddings(history),
         )
+        user_context = self._user_profile_context(history, user_features)
+        if user_context is not None:
+            memory = memory + user_context.unsqueeze(1)
+            pooled_history = pooled_history + user_context
+        return memory, pooled_history
 
     def _ranking_loss(self, pooled_history, target, log_q=None):
         if target.ndim != 1 or target.size(0) != pooled_history.size(0):
             raise ValueError("target must contain one item ID per history")
         target_embeddings = self.encoder.item_emb(target)
-        return self.retrieval_loss(pooled_history, target_embeddings, log_q)
+        output = self.retrieval_loss(pooled_history, target_embeddings, log_q)
+        if (
+            self.retrieval_loss.logq_mode == "none"
+            and output.raw_logits.size(1) == target.size(0)
+        ):
+            positive_mask = target.unsqueeze(1) == target.unsqueeze(0)
+            positive_logits = output.raw_logits.masked_fill(
+                ~positive_mask,
+                float("-inf"),
+            )
+            output.loss = (
+                torch.logsumexp(output.raw_logits, dim=1)
+                - torch.logsumexp(positive_logits, dim=1)
+            ).mean()
+        return output
 
     def forward(
         self,
@@ -156,11 +212,17 @@ class SemanticTransformerModel(nn.Module):
         target=None,
         log_q=None,
         sid_log_q=None,
+        user_features=None,
     ):
         # history: [B, L]
         # sid: [B, M]
         # TODO: encode history
-        memory, pooled_history = self.encode_history(history, positions, mask)
+        memory, pooled_history = self.encode_history(
+            history,
+            positions,
+            mask,
+            user_features=user_features,
+        )
 
         # TODO: build decoder input tokens
         sid_with_offset = self.add_sid_offset(sid)

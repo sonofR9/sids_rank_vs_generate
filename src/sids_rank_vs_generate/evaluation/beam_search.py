@@ -75,10 +75,19 @@ def _model_codebook_offsets(model, device: torch.device) -> torch.Tensor:
     return torch.tensor([0, *sizes[:-1]], device=device).cumsum(dim=0)
 
 
-def _encode_history(model, history, positions, mask):
+def _encode_history(model, history, positions, mask, user_features=None):
     encode_history = getattr(model, "encode_history", None)
     if callable(encode_history):
+        if user_features is not None:
+            return encode_history(
+                history,
+                positions,
+                mask,
+                user_features=user_features,
+            )
         return encode_history(history, positions, mask)
+    if user_features is not None:
+        raise ValueError("model does not support user profile conditioning")
     return model.encoder(history, positions, mask)
 
 
@@ -92,6 +101,7 @@ def semantic_beam_search(
     use_bf16: bool = False,
     sid_catalog: SemanticIDCatalog | None = None,
     sid_logq_table=None,
+    user_features: torch.Tensor | None = None,
 ):
     if beam_size <= 0:
         raise ValueError("beam_size must be positive")
@@ -105,6 +115,7 @@ def semantic_beam_search(
             beam_size,
             sid_catalog,
             sid_logq_table,
+            user_features,
         )
 
 
@@ -116,6 +127,7 @@ def _semantic_beam_search(
     beam_size,
     sid_catalog,
     sid_logq_table,
+    user_features,
 ):
     codebook_sizes = _model_codebook_sizes(model)
     if sid_catalog is not None and sid_catalog.codebook_sizes != codebook_sizes:
@@ -131,6 +143,7 @@ def _semantic_beam_search(
         history,
         positions,
         mask,
+        user_features,
     )
 
     batch_size = history.size(0)

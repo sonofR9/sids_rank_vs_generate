@@ -1,0 +1,794 @@
+{
+  "local_run_directory": "reports/transact_sid_token_history/runs/50m/CachedSidPipeline/20260812T193522928254Z",
+  "metric_histories": {
+    "data.catalog_size": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 33148.0
+      }
+    ],
+    "data.fit_interactions": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 568448.0
+      }
+    ],
+    "data.interactions": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 634642.0
+      }
+    ],
+    "data.test_interactions": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 4535.0
+      }
+    ],
+    "data.train_interactions": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 630107.0
+      }
+    ],
+    "data.users": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 8032.0
+      }
+    ],
+    "data.validation_interactions": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 61659.0
+      }
+    ],
+    "evaluations.ranking.transact.test.logloss": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.06767089664936066
+      }
+    ],
+    "evaluations.ranking.transact.test.pairwise_accuracy": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.623251736164093
+      }
+    ],
+    "evaluations.ranking.transact.test.pairwise_accuracy_ci95_high": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.6513564586639404
+      }
+    ],
+    "evaluations.ranking.transact.test.pairwise_accuracy_ci95_low": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.5951470136642456
+      }
+    ],
+    "evaluations.ranking.transact.test.pairwise_accuracy_std_error": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.01433915738016367
+      }
+    ],
+    "evaluations.ranking.transact.test.pairwise_comparisons": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1716.0
+      }
+    ],
+    "evaluations.ranking.transact.test.pairwise_users": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 523.0
+      }
+    ],
+    "evaluations.ranking.transact.test.pr_auc": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.43120768666267395
+      }
+    ],
+    "evaluations.ranking.transact.test.roc_auc": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.928223192691803
+      }
+    ],
+    "evaluations.ranking.transact.trained_epochs": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.0
+      }
+    ],
+    "sid.adjusted_semantic_variance_explained_at_1": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.6647659241823973
+      }
+    ],
+    "sid.adjusted_semantic_variance_explained_at_2": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.8488724906186689
+      }
+    ],
+    "sid.adjusted_semantic_variance_explained_at_3": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.9415028680620927
+      }
+    ],
+    "sid.code_entropy": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 10.224240455566866
+      }
+    ],
+    "sid.code_gini": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.102570548294034
+      }
+    ],
+    "sid.codebook_quality.codebook_coverage_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.0
+      }
+    ],
+    "sid.codebook_quality.codebook_coverage_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.218597412109375
+      }
+    ],
+    "sid.codebook_quality.codebook_coverage_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.0017598867416381836
+      }
+    ],
+    "sid.codebook_quality.codebook_utilization_rate_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.0
+      }
+    ],
+    "sid.codebook_quality.codebook_utilization_rate_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.0
+      }
+    ],
+    "sid.codebook_quality.codebook_utilization_rate_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.0
+      }
+    ],
+    "sid.codebook_quality.codebook_utilization_rate_total": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.0
+      }
+    ],
+    "sid.codebook_quality.load_balance_p25_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.7414021962109328
+      }
+    ],
+    "sid.codebook_quality.load_balance_p25_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.8109086521057077
+      }
+    ],
+    "sid.codebook_quality.load_balance_p25_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.8418004102811633
+      }
+    ],
+    "sid.codebook_quality.load_balance_p25_mean": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.7980370861992679
+      }
+    ],
+    "sid.codebook_quality.load_balance_p75_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.1816097502111742
+      }
+    ],
+    "sid.codebook_quality.load_balance_p75_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.1429950524918546
+      }
+    ],
+    "sid.codebook_quality.load_balance_p75_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.1661638711234463
+      }
+    ],
+    "sid.codebook_quality.load_balance_p75_mean": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.1635895579421585
+      }
+    ],
+    "sid.codebook_quality.load_balance_p90_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.521419090141185
+      }
+    ],
+    "sid.codebook_quality.load_balance_p90_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.3592373597200433
+      }
+    ],
+    "sid.codebook_quality.load_balance_p90_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.382406178351635
+      }
+    ],
+    "sid.codebook_quality.load_balance_p90_mean": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.4210208760709546
+      }
+    ],
+    "sid.collision_item_rate": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.184355013877157
+      }
+    ],
+    "sid.collision_percentiles.p90": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 3.0
+      }
+    ],
+    "sid.collision_percentiles.p99": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 8.0
+      }
+    ],
+    "sid.collision_percentiles.p999": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 27.0
+      }
+    ],
+    "sid.collision_rate": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.10926752745263668
+      }
+    ],
+    "sid.cur_total": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.0
+      }
+    ],
+    "sid.independent_code_rate": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.8907324725473633
+      }
+    ],
+    "sid.intra_code_similarity": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.9496079568947133
+      }
+    ],
+    "sid.intra_code_similarity_v2": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.4605705128403054
+      }
+    ],
+    "sid.item_count": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 33148.0
+      }
+    ],
+    "sid.levels.sid_0.max_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 255.0
+      }
+    ],
+    "sid.levels.sid_0.max_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 312.0
+      }
+    ],
+    "sid.levels.sid_0.mean_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 129.484375
+      }
+    ],
+    "sid.levels.sid_0.min_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.0
+      }
+    ],
+    "sid.levels.sid_0.min_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 28.0
+      }
+    ],
+    "sid.levels.sid_0.used_codes": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 256.0
+      }
+    ],
+    "sid.levels.sid_1.max_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 255.0
+      }
+    ],
+    "sid.levels.sid_1.max_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 276.0
+      }
+    ],
+    "sid.levels.sid_1.mean_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 129.484375
+      }
+    ],
+    "sid.levels.sid_1.min_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.0
+      }
+    ],
+    "sid.levels.sid_1.min_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 27.0
+      }
+    ],
+    "sid.levels.sid_1.used_codes": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 256.0
+      }
+    ],
+    "sid.levels.sid_2.max_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 255.0
+      }
+    ],
+    "sid.levels.sid_2.max_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 235.0
+      }
+    ],
+    "sid.levels.sid_2.mean_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 129.484375
+      }
+    ],
+    "sid.levels.sid_2.min_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.0
+      }
+    ],
+    "sid.levels.sid_2.min_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 41.0
+      }
+    ],
+    "sid.levels.sid_2.used_codes": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 256.0
+      }
+    ],
+    "sid.max_collision": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 28.0
+      }
+    ],
+    "sid.mean_active_branch_fraction_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.0
+      }
+    ],
+    "sid.mean_active_branch_fraction_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.218597412109375
+      }
+    ],
+    "sid.mean_active_branch_fraction_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.008050812334217507
+      }
+    ],
+    "sid.normalized_conditional_entropy_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.9892389122631253
+      }
+    ],
+    "sid.normalized_conditional_entropy_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.6708532702062928
+      }
+    ],
+    "sid.normalized_conditional_entropy_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.18371544279341115
+      }
+    ],
+    "sid.p95_collision_group_size": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 4.0
+      }
+    ],
+    "sid.pair_collision_probability": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.35225562153449e-05
+      }
+    ],
+    "sid.pair_refinement_rate_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.9956363317232699
+      }
+    ],
+    "sid.pair_refinement_rate_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.9710053581000332
+      }
+    ],
+    "sid.pair_refinement_rate_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.8931217540174654
+      }
+    ],
+    "sid.path_average_similarity": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.9496079568947133
+      }
+    ],
+    "sid.prefix_coherence_at_1": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.7064926421584281
+      }
+    ],
+    "sid.prefix_coherence_at_2": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.8601045806266879
+      }
+    ],
+    "sid.prefix_coherence_at_3": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.9496079568947133
+      }
+    ],
+    "sid.singleton_count": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 27037.0
+      }
+    ],
+    "sid.singleton_rate": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 0.815644986122843
+      }
+    ],
+    "sid.unique_paths": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 29526.0
+      }
+    ],
+    "sid.valid_sid_rate": [
+      {
+        "step": 0,
+        "timestamp": 1786563429759,
+        "value": 1.0
+      }
+    ]
+  },
+  "mlflow_artifacts": [
+    "mlflow_artifacts/5413eb4b1b8c443bae33c388ed2db520/metrics.json"
+  ],
+  "params": {
+    "data_contract.expected_catalog_size": "null",
+    "data_contract.protocol_id": "three-way",
+    "dataset.album_mapping_path": "null",
+    "dataset.artist_mapping_path": "null",
+    "dataset.core_min_interactions_per_item": "5",
+    "dataset.embeddings_path": "null",
+    "dataset.history_days": "null",
+    "dataset.interactions_path": "null",
+    "dataset.protocol_id": "three-way",
+    "dataset.ranking_interactions_path": "null",
+    "dataset.size": "50m",
+    "dataset.source_embeddings_path": "null",
+    "dataset.test_days": "7.0",
+    "dataset.timestamp_unit_seconds": "5.0",
+    "dataset.validation_fraction": "0.1",
+    "enabled_stages": "[\"ranking\"]",
+    "max_rows": "null",
+    "training.generation.auxiliary_item_loss_weight": "0.0",
+    "training.generation.batch_size": "1024",
+    "training.generation.batch_size_val": "64",
+    "training.generation.checkpoint_path": "best_model.pt",
+    "training.generation.codebook_size": "0",
+    "training.generation.codebook_sizes": "null",
+    "training.generation.constrain_to_catalog": "True",
+    "training.generation.content_embedding_column": "normalized_embed",
+    "training.generation.content_embedding_scale": "1.0",
+    "training.generation.d_ff": "512",
+    "training.generation.d_model": "128",
+    "training.generation.device": "auto",
+    "training.generation.dropout": "0.1",
+    "training.generation.early_stopping_min_delta": "0.0001",
+    "training.generation.early_stopping_patience": "3",
+    "training.generation.gather_distributed_negatives": "False",
+    "training.generation.grad_clip": "1.0",
+    "training.generation.initialize_item_embeddings_from_content": "False",
+    "training.generation.load_checkpoint_path": "null",
+    "training.generation.logq_debug": "False",
+    "training.generation.logq_eps": "1e-12",
+    "training.generation.logq_mode": "none",
+    "training.generation.lr": "0.001",
+    "training.generation.mapper.batch_size": "512",
+    "training.generation.mapper.catalog_masked_teacher_forced_loss": "False",
+    "training.generation.mapper.collision_level_loss_weight": "null",
+    "training.generation.mapper.d_ff": "256",
+    "training.generation.mapper.d_model": "128",
+    "training.generation.mapper.decode_beam_size": "null",
+    "training.generation.mapper.dropout": "0.1",
+    "training.generation.mapper.early_stopping_min_delta": "0.0001",
+    "training.generation.mapper.early_stopping_patience": "3",
+    "training.generation.mapper.grad_clip": "1.0",
+    "training.generation.mapper.inference_batch_size": "1024",
+    "training.generation.mapper.kind": "frequency",
+    "training.generation.mapper.level_loss_weights": "null",
+    "training.generation.mapper.load_checkpoint_path": "null",
+    "training.generation.mapper.lr": "0.001",
+    "training.generation.mapper.max_epochs": "20",
+    "training.generation.mapper.num_decoder_layers": "2",
+    "training.generation.mapper.num_encoder_layers": "2",
+    "training.generation.mapper.num_heads": "4",
+    "training.generation.mapper.validation_selection_metric": "teacher_forced_loss",
+    "training.generation.mapper.validation_selection_top_k": "3",
+    "training.generation.mapper.weight_decay": "0.01",
+    "training.generation.mapper_beam_chunk_size": "16",
+    "training.generation.mapper_top_k": "3",
+    "training.generation.max_epochs": "30",
+    "training.generation.max_history_len": "16",
+    "training.generation.max_test_examples": "50000",
+    "training.generation.max_train_examples": "null",
+    "training.generation.max_validation_examples": "50000",
+    "training.generation.min_history_len": "5",
+    "training.generation.num_beams": "150",
+    "training.generation.num_heads": "4",
+    "training.generation.num_layers": "4",
+    "training.generation.num_levels": "0",
+    "training.generation.num_workers": "2",
+    "training.generation.ranking_temperature": "0.07",
+    "training.generation.recall_k": "100",
+    "training.generation.reference_artifact_dir": "null",
+    "training.generation.resolve_collisions": "True",
+    "training.generation.rq_num_levels": "0",
+    "training.generation.run_diagnostics": "False",
+    "training.generation.run_mapper_inference_diagnostic": "False",
+    "training.generation.semantic_history_weight": "0.0",
+    "training.generation.sid_logq_beta": "1.0",
+    "training.generation.sid_logq_mode": "none",
+    "training.generation.sid_only_validation_during_training": "False",
+    "training.generation.use_bf16": "True",
+    "training.generation.use_user_profile": "False",
+    "training.generation.user_profile_dim": "0",
+    "training.generation.validation_metric": "null",
+    "training.generation.weight_decay": "0.01",
+    "training.ranking.dcn_cross_layers": "3",
+    "training.ranking.dcn_deep_units": "[256, 128, 64]",
+    "training.ranking.dcn_low_rank": "32",
+    "training.ranking.dcn_num_experts": "4",
+    "training.ranking.dcnv2_training.batch_size": "32768",
+    "training.ranking.dcnv2_training.epochs": "2",
+    "training.ranking.dcnv2_training.learning_rate": "0.002",
+    "training.ranking.dense_bins": "32",
+    "training.ranking.dense_train_rows": "1000000",
+    "training.ranking.device": "auto",
+    "training.ranking.dropout": "0.2",
+    "training.ranking.embedding_dim": "32",
+    "training.ranking.enabled_models": "[\"transact\"]",
+    "training.ranking.grad_clip": "1.0",
+    "training.ranking.hidden_dim": "128",
+    "training.ranking.hyperparameter_tuning": "False",
+    "training.ranking.max_history_len": "50",
+    "training.ranking.min_history_len": "2",
+    "training.ranking.num_workers": "0",
+    "training.ranking.show_progress": "True",
+    "training.ranking.train_days": "270.0",
+    "training.ranking.transact_d_model": "64",
+    "training.ranking.transact_ff_dim": "256",
+    "training.ranking.transact_heads": "4",
+    "training.ranking.transact_layers": "1",
+    "training.ranking.transact_training.batch_size": "8192",
+    "training.ranking.transact_training.epochs": "1",
+    "training.ranking.transact_training.learning_rate": "0.0005",
+    "training.ranking.validation_days": "7.0",
+    "training.ranking.weight_decay": "0.0001",
+    "user_catalog_quality.enabled": "False",
+    "user_catalog_quality.max_users": "256",
+    "user_catalog_quality.seed": "42",
+    "user_catalog_quality.selection": "stable_hash",
+    "user_sid_pipeline": "null"
+  },
+  "run": {
+    "end_time": 1786563429868,
+    "lifecycle_stage": "active",
+    "name": "transact-sid-tokens-rqvae-l3-c256-full-seed42",
+    "parent_source_run_id": null,
+    "start_time": 1786563273450,
+    "status": "FINISHED"
+  },
+  "schema_version": 1,
+  "source": {
+    "experiment_id": "1",
+    "experiment_name": "transact-sid-token-history-20260812",
+    "run_id": "5413eb4b1b8c443bae33c388ed2db520",
+    "tracking_uri": "http://127.0.0.1:5000"
+  },
+  "tags": {
+    "codebook_size": "256",
+    "data_scope": "full",
+    "dataset": "50m",
+    "evaluation": "transact_sid_level_tokens",
+    "method": "RQVAE",
+    "method_key": "rqvae",
+    "mlflow.runName": "transact-sid-tokens-rqvae-l3-c256-full-seed42",
+    "mlflow.source.git.commit": "74e7759bc3074f7c105433d95e263a81291f1527",
+    "mlflow.source.name": "run.py",
+    "mlflow.source.type": "LOCAL",
+    "mlflow.user": "sashanovak",
+    "num_levels": "3",
+    "pipeline": "CachedSidPipeline",
+    "protocol_id": "three-way",
+    "quality_metric_schema": "sid-quality-v1",
+    "seed": "42",
+    "user_catalog_quality": "disabled",
+    "user_pipeline": "content-only"
+  }
+}

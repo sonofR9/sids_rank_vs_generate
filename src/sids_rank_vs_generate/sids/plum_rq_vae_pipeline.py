@@ -13,7 +13,11 @@ from .rq_kmeans import RQKMeans
 
 def _model_parameters(config: PlumRQVAEConfig) -> dict:
     parameters = asdict(config)
-    parameters["codebooks_sizes"] = parameters.pop("codebook_sizes")
+    parameters.pop("seed", None)
+    codebook_sizes = parameters.pop("codebook_sizes", None)
+    if codebook_sizes is not None:
+        parameters["codebooks_sizes"] = codebook_sizes
+        parameters["num_levels"] = len(codebook_sizes)
     if parameters.get("device") == "auto":
         parameters["device"] = None
     return parameters
@@ -24,7 +28,7 @@ class PlumRQVAEPipeline(ISidPipeline):
         self.model = None
 
     def train(self, df: pl.DataFrame) -> None:
-        seed_everything(SID_EXPERIMENT_SEED)
+        seed_everything(getattr(self.config, "seed", SID_EXPERIMENT_SEED))
         dim = len(df["normalized_embed"][0])
         self.model = RQVAE(dim=dim, **_model_parameters(self.config))
 
