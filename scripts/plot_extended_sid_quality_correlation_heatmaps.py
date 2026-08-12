@@ -11,7 +11,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.colors import LinearSegmentedColormap, Normalize, TwoSlopeNorm
 
 
 REPOSITORY = Path(__file__).resolve().parents[1]
@@ -180,6 +180,61 @@ def correlation_cmap() -> LinearSegmentedColormap:
     )
 
 
+def observed_norm(values: pd.DataFrame) -> Normalize:
+    finite = values.to_numpy(dtype=float)
+    finite = finite[np.isfinite(finite)]
+    if finite.size == 0:
+        raise ValueError("heatmap contains no finite correlations")
+    minimum = float(finite.min())
+    maximum = float(finite.max())
+    if minimum == maximum:
+        padding = max(abs(minimum) * 0.05, 0.01)
+        return Normalize(vmin=minimum - padding, vmax=maximum + padding)
+    if minimum < 0.0 < maximum:
+        return TwoSlopeNorm(vmin=minimum, vcenter=0.0, vmax=maximum)
+    return Normalize(vmin=minimum, vmax=maximum)
+
+
+def colorbar_ticks(norm: Normalize) -> list[float]:
+    ticks = [float(norm.vmin)]
+    if float(norm.vmin) < 0.0 < float(norm.vmax):
+        ticks.append(0.0)
+    ticks.append(float(norm.vmax))
+    return ticks
+
+
+def retained_metrics(
+    correlations: pd.DataFrame,
+    metrics: list[str],
+    *,
+    minimum_pairs: int,
+) -> tuple[list[str], list[dict[str, object]]]:
+    kept: list[str] = []
+    removed: list[dict[str, object]] = []
+    for metric in metrics:
+        rows = correlations[correlations["sid_metric"].eq(metric)]
+        minimum = int(rows["num_points"].min())
+        has_undefined = bool(
+            rows[["pearson_r", "spearman_rho"]].isna().any().any()
+        )
+        if minimum >= minimum_pairs and not has_undefined:
+            kept.append(metric)
+        else:
+            reasons = []
+            if minimum < minimum_pairs:
+                reasons.append(f"minimum complete-pair count {minimum} < {minimum_pairs}")
+            if has_undefined:
+                reasons.append("undefined Pearson or Spearman correlation")
+            removed.append(
+                {
+                    "sid_metric": metric,
+                    "minimum_complete_pairs": minimum,
+                    "reason": "; ".join(reasons),
+                }
+            )
+    return kept, removed
+
+
 def plot_heatmap(
     correlations: pd.DataFrame,
     metrics: list[str],
@@ -193,11 +248,11 @@ def plot_heatmap(
     figure, axis = plt.subplots(figsize=(figure_width, 8.0), facecolor="white")
     cmap = correlation_cmap()
     cmap.set_bad("#E5E7EB")
+    norm = observed_norm(values)
     image = axis.imshow(
         np.ma.masked_invalid(values.to_numpy(dtype=float)),
         cmap=cmap,
-        vmin=-1.0,
-        vmax=1.0,
+        norm=norm,
         aspect="auto",
     )
     axis.set_xticks(
@@ -226,7 +281,12 @@ def plot_heatmap(
             value = values.iat[row, column]
             count = int(counts.iat[row, column])
             label = f"{value:+.2f}\nn={count}" if pd.notna(value) else f"NA\nn={count}"
-            text_color = "white" if pd.notna(value) and abs(value) >= 0.68 else "#17202A"
+            normalized = norm(value) if pd.notna(value) else 0.5
+            text_color = (
+                "white"
+                if pd.notna(value) and (normalized <= 0.16 or normalized >= 0.84)
+                else "#17202A"
+            )
             if pd.isna(value):
                 text_color = "#5F6B76"
             axis.text(
@@ -242,11 +302,11 @@ def plot_heatmap(
 
     colorbar = figure.colorbar(image, ax=axis, fraction=0.012, pad=0.012)
     colorbar.set_label("Correlation coefficient", rotation=270, labelpad=17)
-    colorbar.set_ticks([-1.0, -0.5, 0.0, 0.5, 1.0])
+    colorbar.set_ticks(colorbar_ticks(norm))
     figure.text(
         0.5,
         0.01,
-        "Cells show coefficient and complete-pair count; gray cells are undefined.",
+        "Cells show coefficient and complete-pair count; colors span the observed min-max.",
         ha="center",
         va="bottom",
         fontsize=9,
@@ -261,6 +321,11 @@ def plot_heatmap(
             facecolor="white",
         )
     plt.close(figure)
+    svg_path = output_stem.with_suffix(".svg")
+    svg_path.write_text(
+        "\n".join(line.rstrip() for line in svg_path.read_text().splitlines()) + "\n",
+        encoding="utf-8",
+    )
 
 
 def main() -> int:
@@ -268,25 +333,35 @@ def main() -> int:
     parser.add_argument("--report-dir", type=Path, default=DEFAULT_REPORT)
     parser.add_argument("--dcnv2-source", type=Path, default=DEFAULT_DCNV2_SOURCE)
     parser.add_argument("--output-dir", type=Path)
+    parser.add_argument("--minimum-pairs", type=int, default=20)
+    parser.add_argument("--recall-baseline", type=float, default=0.113)
     args = parser.parse_args()
 
     report = resolve(args.report_dir)
     dcnv2_source = resolve(args.dcnv2_source)
     output = resolve(args.output_dir) if args.output_dir else report / "correlation_heatmaps"
-    metrics = load_metric_columns(report)
+    all_metrics = load_metric_columns(report)
     generation = pd.read_csv(report / "generation_points.csv")
     ranking = add_dcnv2_roc_auc(
         pd.read_csv(report / "ranking_points.csv"), dcnv2_source
     )
     missing = [
         column
-        for column in metrics
+        for column in all_metrics
         if column not in generation or column not in ranking
     ]
     if missing:
         raise ValueError(f"SID metric columns missing from report: {missing}")
 
-    correlations = calculate_correlations(generation, ranking, metrics)
+    all_correlations = calculate_correlations(generation, ranking, all_metrics)
+    metrics, removed_metrics = retained_metrics(
+        all_correlations,
+        all_metrics,
+        minimum_pairs=args.minimum_pairs,
+    )
+    correlations = all_correlations[
+        all_correlations["sid_metric"].isin(metrics)
+    ].copy()
     output.mkdir(parents=True, exist_ok=True)
     correlations.to_csv(output / "correlations.csv", index=False)
     for value_column, stem, title in (
@@ -301,12 +376,68 @@ def main() -> int:
         output / "num_points_matrix.csv"
     )
 
+    generation_below = generation[
+        pd.to_numeric(generation["recall_at_100"], errors="coerce").le(
+            args.recall_baseline
+        )
+    ].copy()
+    below_keys = generation_below[KEY_COLUMNS].drop_duplicates()
+    ranking_below = ranking.merge(
+        below_keys,
+        on=KEY_COLUMNS,
+        how="inner",
+        validate="one_to_one",
+    )
+    all_correlations_below = calculate_correlations(
+        generation_below,
+        ranking_below,
+        all_metrics,
+    )
+    metrics_below, removed_metrics_below = retained_metrics(
+        all_correlations_below,
+        all_metrics,
+        minimum_pairs=args.minimum_pairs,
+    )
+    correlations_below = all_correlations_below[
+        all_correlations_below["sid_metric"].isin(metrics_below)
+    ].copy()
+    suffix = "_below_recall_baseline"
+    correlations_below.to_csv(output / f"correlations{suffix}.csv", index=False)
+    for value_column, stem, title in (
+        (
+            "pearson_r",
+            "pearson_heatmap",
+            "Pearson correlation below Recall@100 baseline vs SID metrics",
+        ),
+        (
+            "spearman_rho",
+            "spearman_heatmap",
+            "Spearman correlation below Recall@100 baseline vs SID metrics",
+        ),
+    ):
+        correlation_matrix(correlations_below, metrics_below, value_column).to_csv(
+            output / f"{stem.replace('_heatmap', '')}_matrix{suffix}.csv"
+        )
+        plot_heatmap(
+            correlations_below,
+            metrics_below,
+            value_column,
+            title,
+            output / f"{stem}{suffix}",
+        )
+    correlation_matrix(correlations_below, metrics_below, "num_points").to_csv(
+        output / f"num_points_matrix{suffix}.csv"
+    )
+
     metadata = {
         "report": str(report.relative_to(REPOSITORY)),
         "dcnv2_roc_auc_source": str(dcnv2_source.relative_to(REPOSITORY)),
         "targets": [target.key for target in TARGETS],
         "sid_metrics": metrics,
         "sid_metric_count": len(metrics),
+        "candidate_sid_metric_count": len(all_metrics),
+        "minimum_complete_pairs": args.minimum_pairs,
+        "removed_sid_metrics": removed_metrics,
         "cells": len(correlations),
         "generation_rows": len(generation),
         "ranking_rows": len(ranking),
@@ -320,6 +451,43 @@ def main() -> int:
         },
         "undefined_pearson": int(correlations["pearson_r"].isna().sum()),
         "undefined_spearman": int(correlations["spearman_rho"].isna().sum()),
+        "color_limits": {
+            value_column: {
+                "minimum": float(correlations[value_column].min()),
+                "maximum": float(correlations[value_column].max()),
+            }
+            for value_column in ("pearson_r", "spearman_rho")
+        },
+        "below_recall_baseline": {
+            "recall_at_100_maximum": args.recall_baseline,
+            "generation_rows": len(generation_below),
+            "ranking_rows": len(ranking_below),
+            "target_complete_rows": {
+                target.key: int(
+                    (
+                        generation_below
+                        if target.source == "generation"
+                        else ranking_below
+                    )[target.column].notna().sum()
+                )
+                for target in TARGETS
+            },
+            "sid_metrics": metrics_below,
+            "sid_metric_count": len(metrics_below),
+            "removed_sid_metrics": removed_metrics_below,
+            "cells": len(correlations_below),
+            "undefined_pearson": int(correlations_below["pearson_r"].isna().sum()),
+            "undefined_spearman": int(
+                correlations_below["spearman_rho"].isna().sum()
+            ),
+            "color_limits": {
+                value_column: {
+                    "minimum": float(correlations_below[value_column].min()),
+                    "maximum": float(correlations_below[value_column].max()),
+                }
+                for value_column in ("pearson_r", "spearman_rho")
+            },
+        },
     }
     (output / "analysis_metadata.json").write_text(
         json.dumps(metadata, indent=2) + "\n", encoding="utf-8"
@@ -328,19 +496,27 @@ def main() -> int:
         "# Extended SID correlation heatmaps\n\n"
         "Pearson and Spearman correlations are pooled across all available SID "
         "methods and configurations. The five rows are generation Recall@100, "
-        "then pairwise accuracy and ROC-AUC for DCNv2 and TransAct. The 56 "
+        "then pairwise accuracy and ROC-AUC for DCNv2 and TransAct. Candidate "
         "columns contain all 12 original and 44 newly calculated SID metrics.\n\n"
         "Each cell reports the correlation coefficient and complete-pair count. "
-        "DCNv2 uses the 28 configurations available in the combined report; "
-        "generation and TransAct use all 44. Gray cells are undefined because "
-        "the SID metric is constant or has fewer than two complete pairs.\n\n"
+        f"Metrics are removed if any target correlation is undefined or uses "
+        f"fewer than {args.minimum_pairs} complete pairs; {len(metrics)} of "
+        f"{len(all_metrics)} metrics remain. Colors span the observed minimum "
+        "and maximum independently for each correlation type, with zero at the "
+        "neutral midpoint when the range crosses zero.\n\n"
+        f"Additional files ending in `_below_recall_baseline` use only method, "
+        f"level, and codebook configurations whose generation Recall@100 is "
+        f"less than or equal to {args.recall_baseline:g}. The same keys filter "
+        f"the ranking rows, and {len(metrics_below)} metrics pass the independent "
+        f"coverage filter for this subset.\n\n"
         "Outputs are written as PNG, PDF, and SVG, with long-form correlations "
         "and matrix CSV files alongside them.\n",
         encoding="utf-8",
     )
     print(
-        f"COMPLETE metrics={len(metrics)} targets={len(TARGETS)} "
-        f"cells={len(correlations)} output={output}"
+        f"COMPLETE metrics={len(metrics)}/{len(all_metrics)} targets={len(TARGETS)} "
+        f"cells={len(correlations)} below_metrics={len(metrics_below)}/{len(all_metrics)} "
+        f"below_cells={len(correlations_below)} output={output}"
     )
     return 0
 
