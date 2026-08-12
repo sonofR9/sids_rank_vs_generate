@@ -43,7 +43,7 @@ class SidExperimentConfig:
     enabled_stages: tuple[str, ...] = ()
     reports_dir: Path = Path("reports/experiments")
     core_min_interactions_per_item: int = 5
-    history_days: float | None = 365.0
+    history_days: float | None = None
     test_days: float = 7.0
     timestamp_unit_seconds: float = 1.0
     latest_interactions: int | None = None

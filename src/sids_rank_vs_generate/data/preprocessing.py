@@ -19,7 +19,7 @@ class PreprocessingConfig:
     core_min_interactions_per_item: int = 5
     test_days: float = 7.0
     timestamp_unit_seconds: float = 1.0
-    history_days: float | None = 365.0
+    history_days: float | None = None
 
     def __post_init__(self) -> None:
         if self.core_min_interactions_per_item <= 0:
