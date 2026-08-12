@@ -17,6 +17,10 @@ from .data.protocols import (
     validate_protocol_id,
 )
 from .evaluation.generation_stage import GenerationConfig, GenerationStage
+from .evaluation.precomputed_sid_metrics import (
+    PrecomputedSidMetricsConfig,
+    run_precomputed_sid_metrics,
+)
 from .evaluation.ranking_stage import RankingConfig, RankingStage
 from .evaluation.sid_quality import (
     SID_QUALITY_SCHEMA_VERSION,
@@ -274,7 +278,41 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "config",
+        nargs="?",
         help="Python config path, optionally followed by :attribute.",
+    )
+    parser.add_argument(
+        "--sids-metrics-dir",
+        type=Path,
+        help=(
+            "Metrics-only mode: scan this directory for precomputed SID "
+            "parquets instead of running an experiment config."
+        ),
+    )
+    parser.add_argument(
+        "--embeddings-path",
+        type=Path,
+        help="Embedding parquet used by --sids-metrics-dir.",
+    )
+    parser.add_argument(
+        "--metrics-output",
+        type=Path,
+        help=(
+            "Output JSON for metrics-only mode; defaults to "
+            "<sids-metrics-dir>/sid_metrics.json."
+        ),
+    )
+    parser.add_argument(
+        "--recursive-sids",
+        action="store_true",
+        help="Recursively scan --sids-metrics-dir for parquet files.",
+    )
+    parser.add_argument(
+        "--codebook-sizes",
+        help=(
+            "Comma-separated codebook sizes for metrics-only mode, such as "
+            "256,256,256; defaults to the observed ranges in each SID parquet."
+        ),
     )
     parser.add_argument(
         "--skip-ranking",
@@ -312,7 +350,70 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if args.sids_metrics_dir is not None:
+        if args.config is not None:
+            parser.error("config cannot be combined with --sids-metrics-dir")
+        if args.embeddings_path is None:
+            parser.error("--embeddings-path is required with --sids-metrics-dir")
+        incompatible = {
+            "--skip-ranking": args.skip_ranking,
+            "--skip-generation": args.skip_generation,
+            "--max-rows": args.max_rows is not None,
+            "--mlflow": args.mlflow,
+            "--mlflow-tracking-uri": args.mlflow_tracking_uri is not None,
+            "--mlflow-experiment-name": args.mlflow_experiment_name is not None,
+            "--mlflow-run-name": args.mlflow_run_name is not None,
+        }
+        used_incompatible = [
+            option for option, enabled in incompatible.items() if enabled
+        ]
+        if used_incompatible:
+            parser.error(
+                "experiment options cannot be used in metrics-only mode: "
+                + ", ".join(used_incompatible)
+            )
+        codebook_sizes = None
+        if args.codebook_sizes is not None:
+            try:
+                codebook_sizes = tuple(
+                    int(value.strip())
+                    for value in args.codebook_sizes.split(",")
+                    if value.strip()
+                )
+            except ValueError:
+                parser.error("--codebook-sizes must be comma-separated integers")
+            if not codebook_sizes or any(size <= 0 for size in codebook_sizes):
+                parser.error("--codebook-sizes must contain positive integers")
+        result = run_precomputed_sid_metrics(
+            PrecomputedSidMetricsConfig(
+                sids_dir=args.sids_metrics_dir,
+                embeddings_path=args.embeddings_path,
+                output_path=args.metrics_output,
+                recursive=args.recursive_sids,
+                codebook_sizes=codebook_sizes,
+            )
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+
+    if args.config is None:
+        parser.error("config is required unless --sids-metrics-dir is used")
+    metrics_only_options = {
+        "--embeddings-path": args.embeddings_path is not None,
+        "--metrics-output": args.metrics_output is not None,
+        "--recursive-sids": args.recursive_sids,
+        "--codebook-sizes": args.codebook_sizes is not None,
+    }
+    used_metrics_only = [
+        option for option, enabled in metrics_only_options.items() if enabled
+    ]
+    if used_metrics_only:
+        parser.error(
+            "metrics-only options require --sids-metrics-dir: "
+            + ", ".join(used_metrics_only)
+        )
     config = load_experiment_config(args.config)
     mlflow_requested = any(
         (

@@ -19,7 +19,7 @@
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
 
-% ---------- colors ----------
+% Colors
 \definecolor{ink}{HTML}{182840}
 \definecolor{headerred}{HTML}{D72645}
 \definecolor{blue}{HTML}{1E6D93}
@@ -70,7 +70,7 @@
   rectangle
   ([xshift=-0.6cm,yshift=0.6cm]current page.south east);
 
-% ---------- HEADER ----------
+% Header
 \posterbox{2.0}{1.6}{115.0}{7.6}{headerred}{fillpink}{}
 \fill[headerred] ([xshift=2.0cm,yshift=-1.6cm]current page.north west) rectangle ++(0.8cm,-7.6cm);
 
@@ -91,18 +91,10 @@
   {Константин Рядинский \enspace\textbullet\enspace
    Лев Клюев \enspace\textbullet\enspace
    Ростислав Головков \enspace\textbullet\enspace
-   Глеб Шевченко};
+   Глеб Шевченко \enspace\textbullet\enspace
+   \textcolor{gray}{Ментор: Александр Новак}};
 
-\node[
-    anchor=north west,
-    text=gray,
-    inner sep=0pt,
-    font=\fontsize{22}{27}\selectfont
-] at ([xshift=4.0cm,yshift=-7.3cm]current page.north west)
-  {Ментор: Александр Новак};
-
-% ---------- LEFT COLUMN ----------
-% ---------- LEFT COLUMN ----------
+% Left column
 
 \posterbox
   {2.0}{10.4}
@@ -118,21 +110,20 @@
 {
     {\fontsize{30}{37}\selectfont
 
-    Semantic ID (SID) кодирует объект короткой последовательностью
-    дискретных токенов и позволяет модели работать с семантикой
-    вместо произвольных item ID.
+    Semantic IDs (SIDs) используются для дискретного представления
+    объектов в генеративных рекомендательных системах.
+    В нашей работе SID строятся на основе \textbf{контентной информации}
+    об объектах. При этом
+    качество~SID часто оценивается через
+    \textbf{\textcolor{blue}{свойства самого представления}}, которые
+    не обязательно коррелируют с качеством итоговых рекомендаций.
 
-    \vspace{0.5cm}
+    \vspace{0.6cm}
 
-    Но хорошие \textbf{\textcolor{blue}{свойства самого представления}}
-    --- баланс кодбука, низкая доля коллизий, точная реконструкция ---
-    не гарантируют роста итоговых метрик.
-
-    \vspace{0.5cm}
-
-    \textbf{Цель работы} --- сравнить методы построения SID и выяснить,
-    какие характеристики представления действительно предсказывают
-    качество \textbf{ранжирования} и \textbf{генерации}.
+    \textbf{Цель нашей работы:} исследовать эту связь, сравнить
+    различные методы построения Semantic IDs и определить, какие
+    свойства~SID действительно отражаются на финальных метриках
+    рекомендательной системы.
     }
 };
 % Вместо \posterbox используем Ti*k*Z-узел с рамкой и заливкой
@@ -152,7 +143,7 @@
 
 \vspace{0.25cm}
 
-\textbf{SASRec} --- Transformer-бейзлайн: кодирует историю взаимодействий
+\textbf{SASRec}: Transformer-бейзлайн, который кодирует историю взаимодействий
 и предсказывает следующий объект по его item ID.
 
 \vspace{0.5cm}
@@ -199,71 +190,22 @@
 
 }
 };
-\posterbox{2.0}{65.5}{37.3}{16.4}{teal}{fillteal}{Дополнительные методы}
+% Middle column: methods grid
+\posterbox{40.3}{10.4}{37.8}{20.2}{blue}{fillblue}{Balanced RQ-KMeans / RQ-VAE}
 
-% ---------- RIGHT: methods grid ----------
-\posterbox{79.1}{10.4}{37.8}{20.2}{blue}{fillblue}{Balanced RQ-KMeans / RQ-VAE}
-
-\node[anchor=center, inner sep=0pt]
-  at ([xshift=98.0cm,yshift=-21.0cm]current page.north west)
-  {\begin{tikzpicture}[
-      line width=.45mm,
-      >=latex,
-      every node/.style={font=\fontsize{18}{22}\selectfont,align=center}
-    ]
-    \node[draw=blue,fill=fillblue,rounded corners=2mm,
-          minimum width=3.1cm,minimum height=2.8cm] (emb) at (1.6,0)
-      {Item\\embedding};
-    \node[draw=blue,fill=fillblue,rounded corners=2mm,
-          minimum width=3.6cm,minimum height=2.8cm] (enc) at (5.4,0)
-      {Encoder};
-
-    \node[draw=gray,fill=white,rounded corners=2mm,
-          minimum width=13.0cm,minimum height=9.0cm] (rq) at (14.3,0) {};
-    \node[font=\bfseries\fontsize{21}{25}\selectfont] at (14.3,3.35)
-      {Residual quantization};
-
-    \node[draw=red,fill=fillpink,rounded corners=1.5mm,
-          minimum width=3.5cm,minimum height=2.3cm] (cb1) at (10.2,.65)
-      {Codebook 1};
-    \node[draw=green,fill=fillgreen,rounded corners=1.5mm,
-          minimum width=3.5cm,minimum height=2.3cm] (cb2) at (14.3,.65)
-      {Codebook 2};
-    \node[draw=purple,fill=fillpurple,rounded corners=1.5mm,
-          minimum width=3.5cm,minimum height=2.3cm] (cb3) at (18.4,.65)
-      {Codebook 3};
-    \draw[-latex] (cb1.east) -- (cb2.west);
-    \draw[-latex] (cb2.east) -- (cb3.west);
-    \node[font=\fontsize{19}{23}\selectfont] at (14.3,-2.35)
-      {$z \;\rightarrow\; r_1 \;\rightarrow\; r_2$\\[1mm]
-       equal-size codebooks};
-
-    \node[draw=purple,fill=fillpurple,rounded corners=2mm,
-          minimum width=3.6cm,minimum height=2.8cm] (sid) at (23.1,0)
-      {SID\\\textbf{(7, 1, 4)}};
-    \node[draw=orange,fill=fillorange,rounded corners=2mm,
-          minimum width=3.6cm,minimum height=2.8cm] (dec) at (27.7,0)
-      {Decoder};
-    \node[draw=purple,fill=fillpurple,rounded corners=2mm,
-          minimum width=3.6cm,minimum height=2.8cm] (out) at (32.6,0)
-      {Reconstructed\\embedding};
-
-    \draw[-latex] (emb.east) -- (enc.west);
-    \draw[-latex] (enc.east) -- (rq.west);
-    \draw[-latex] (rq.east) -- (sid.west);
-    \draw[-latex] (sid.east) -- (dec.west);
-    \draw[-latex] (dec.east) -- (out.west);
-  \end{tikzpicture}};
+\node[anchor=north, inner sep=0pt]
+  at ([xshift=59.2cm,yshift=-13.0cm]current page.north west)
+  {\includegraphics[width=33.5cm]{rq-rqvae.png}};
 
 \node[
     anchor=south east,
     text=gray,
     inner sep=0pt,
     font=\fontsize{11}{13}\selectfont
-] at ([xshift=116.1cm,yshift=-30.0cm]current page.north west)
-  {Адаптировано по схеме residual quantization};
+] at ([xshift=77.3cm,yshift=-30.0cm]current page.north west)
+  {Источник: Mike X Cohen (2026), схема Sumit};
 
-\posterbox{79.1}{31.6}{18.4}{16.0}{teal}{fillteal}{PLUM-like}
+\posterbox{40.3}{31.6}{18.4}{16.0}{teal}{fillteal}{PLUM-like}
 
 \node[
     anchor=north west,
@@ -271,7 +213,7 @@
     inner sep=0pt,
     text width=16.8cm,
     align=left
-] at ([xshift=79.9cm,yshift=-33.7cm]current page.north west)
+] at ([xshift=41.1cm,yshift=-33.7cm]current page.north west)
 {
     {\fontsize{21}{26}\selectfont
 
@@ -298,7 +240,7 @@
 
 };
 
-\posterbox{98.5}{31.6}{18.4}{16.0}{teal}{fillteal}{R3-VAE}
+\posterbox{59.7}{31.6}{18.4}{16.0}{teal}{fillteal}{R3-VAE}
 
 \node[
     anchor=north west,
@@ -306,7 +248,7 @@
     inner sep=0pt,
     text width=16.8cm,
     align=left
-] at ([xshift=99.3cm,yshift=-34.0cm]current page.north west)
+] at ([xshift=60.5cm,yshift=-34.0cm]current page.north west)
 {
 {\fontsize{22}{28}\selectfont
 Обучаемый \textbf{опорный вектор} задаёт семантический якорь для начального остатка.\\[0.35cm]
@@ -315,14 +257,14 @@
 }
 };
 
-\posterbox{79.1}{48.6}{37.8}{15.6}{purple}{fillpurple}{User-aware}
+\posterbox{40.3}{48.6}{37.8}{15.6}{purple}{fillpurple}{User-aware}
 
 \node[anchor=north, inner sep=0pt]
-  at ([xshift=98.0cm,yshift=-51.2cm]current page.north west)
+  at ([xshift=59.2cm,yshift=-51.2cm]current page.north west)
   {\includegraphics[width=35.5cm,trim=35bp 120bp 35bp 120bp,clip]
     {user-aware-semantic-ids-v5.png}};
 
-\posterbox{79.1}{65.2}{18.4}{16.7}{red}{fillpurple}{PSI}
+\posterbox{40.3}{65.2}{18.4}{7.8}{red}{fillpurple}{PSI}
 
 \node[
     anchor=north west,
@@ -330,21 +272,22 @@
     inner sep=0pt,
     text width=16.8cm,
     align=left
-] at ([xshift=79.9cm,yshift=-67.6cm]current page.north west)
+] at ([xshift=41.1cm,yshift=-67.6cm]current page.north west)
 {
 {\fontsize{22}{28}\selectfont
-Первые токены SID содержат \textbf{основную информацию} об объекте,
-а последующие уточняют представление.\\[0.35cm]
-При обучении последние токены случайно скрываются. Поэтому модель
-учится строить полезное представление даже по \textbf{короткому префиксу} SID.
+Первые токены передают \textbf{основную информацию},
+а последующие добавляют детали. Случайное маскирование
+хвоста делает полезным каждый \textbf{префикс SID}.
 }
 };
 
-\posterbox{98.5}{65.2}{18.4}{16.7}{purple}{fillteal}{Spectral embeddings}
+\posterbox{59.7}{65.2}{18.4}{7.8}{purple}{fillteal}{Spectral embeddings}
 
-% ---------- MIDDLE: RESULTS ----------
-\posterbox{40.3}{10.4}{37.8}{50.2}{orange}{fillorange}{Эксперименты и графики}
-\posterbox{40.3}{61.6}{37.8}{20.3}{headerred}{fillpink}{Главный результат}
+% Right column: results
+\posterbox{79.1}{10.4}{37.8}{62.6}{orange}{fillorange}{Эксперименты и графики}
+
+% Bottom: main result
+\posterbox{2.0}{74.0}{115.0}{7.9}{headerred}{fillpink}{Главный результат}
 
 
 \end{tikzpicture}

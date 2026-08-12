@@ -42,6 +42,7 @@ class RankingData:
     test: pl.DataFrame
     dense_train: pl.DataFrame
     sid_columns: tuple[str, ...]
+    sid_cardinalities: tuple[int, ...]
     num_users: int
     num_history_items: int
     train_start_timestamp: Any
@@ -71,6 +72,7 @@ def _sid_columns(frame: pl.DataFrame) -> tuple[str, ...]:
 def _history_snapshots(
     prepared: PreparedInteractions,
     history_item_mapping: pl.DataFrame,
+    sid_columns: tuple[str, ...],
     max_history_len: int,
 ) -> pl.DataFrame:
     item_history = pl.concat_list(
@@ -85,6 +87,17 @@ def _history_snapshots(
             for offset in range(max_history_len - 1, -1, -1)
         ]
     ).list.drop_nulls()
+    sid_histories = [
+        pl.concat_list(
+            [
+                pl.col(column).shift(offset).over("uid")
+                for offset in range(max_history_len - 1, -1, -1)
+            ]
+        )
+        .list.drop_nulls()
+        .alias(f"history_{column}")
+        for column in sid_columns
+    ]
     return (
         prepared.data.join(history_item_mapping, on="item_id", how="inner").sort(
             ["uid", "timestamp"]
@@ -92,12 +105,14 @@ def _history_snapshots(
         .with_columns(
             item_history.alias("history_item_idxs"),
             time_history.alias("history_timestamps"),
+            *sid_histories,
         )
         .select(
             "uid",
             pl.col("timestamp").alias("history_timestamp"),
             "history_item_idxs",
             "history_timestamps",
+            *(f"history_{column}" for column in sid_columns),
         )
     )
 
@@ -227,6 +242,12 @@ def prepare_ranking_data(
     sid_frame = items_with_sids.select("item_id", *sid_columns).sort("item_id")
     if sid_frame.height != prepared.catalog_size:
         raise ValueError("ranking requires SIDs for the full prepared catalog")
+    sid_minima = tuple(int(sid_frame[column].min()) for column in sid_columns)
+    if any(value < 0 for value in sid_minima):
+        raise ValueError("ranking requires non-negative semantic-ID values")
+    sid_cardinalities = tuple(
+        int(sid_frame[column].max()) + 1 for column in sid_columns
+    )
 
     sid_paths = (
         sid_frame.select(sid_columns)
@@ -238,7 +259,7 @@ def prepare_ranking_data(
         sid_paths,
         on=sid_columns,
         how="inner",
-    ).select("item_id", "history_item_idx")
+    ).select("item_id", "history_item_idx", *sid_columns)
     train_end = (
         timestamp_days_before(
             prepared.test_start_timestamp,
@@ -279,6 +300,7 @@ def prepare_ranking_data(
     histories = _history_snapshots(
         prepared,
         history_item_mapping,
+        sid_columns,
         max_history_len,
     )
     merged = candidates.join_asof(
@@ -327,6 +349,7 @@ def prepare_ranking_data(
         test=test,
         dense_train=train.select(DENSE_COLUMNS),
         sid_columns=candidate_sid_columns,
+        sid_cardinalities=sid_cardinalities,
         num_users=user_mapping.height,
         num_history_items=sid_paths.height + 1,
         train_start_timestamp=train_start,
@@ -364,26 +387,10 @@ def _collate_multivalent(
 
 
 def collate_ranking(batch: list[dict[str, Any]]) -> dict[str, Any]:
-    history_lengths = torch.tensor(
+    history_event_lengths = torch.tensor(
         [len(row["history_item_idxs"]) for row in batch], dtype=torch.long
     )
-    history_items = torch.tensor(
-        [item for row in batch for item in row["history_item_idxs"]],
-        dtype=torch.long,
-    )
-    history_deltas = (
-        torch.tensor(
-            [
-                float(row["timestamp"] - timestamp)
-                for row in batch
-                for timestamp in row["history_timestamps"]
-            ],
-            dtype=torch.float32,
-        )
-        .clamp_min_(0.0)
-        .log1p_()
-    )
-    sid_columns = tuple(
+    candidate_sid_columns = tuple(
         sorted(
             (
                 column
@@ -397,16 +404,55 @@ def collate_ranking(batch: list[dict[str, Any]]) -> dict[str, Any]:
             key=lambda column: int(column.rsplit("_", 1)[1]),
         )
     )
+    history_sid_columns = tuple(
+        sorted(
+            (
+                column
+                for column in batch[0]
+                if column.startswith("sid_")
+                and column[4:].isdigit()
+                and f"history_{column}" in batch[0]
+            ),
+            key=lambda column: int(column[4:]),
+        )
+    )
+    num_sid_levels = len(history_sid_columns)
+    history_sid_values = torch.tensor(
+        [
+            row[f"history_{column}"][position]
+            for row in batch
+            for position in range(len(row["history_item_idxs"]))
+            for column in history_sid_columns
+        ],
+        dtype=torch.long,
+    )
+    history_sid_levels = torch.arange(num_sid_levels, dtype=torch.long).repeat(
+        int(history_event_lengths.sum())
+    )
+    history_lengths = history_event_lengths * num_sid_levels
+    history_deltas = (
+        torch.tensor(
+            [
+                float(row["timestamp"] - timestamp)
+                for row in batch
+                for timestamp in row["history_timestamps"]
+            ],
+            dtype=torch.float32,
+        )
+        .clamp_min_(0.0)
+        .log1p_()
+        .repeat_interleave(num_sid_levels)
+    )
     sparse = {
         "uid": torch.tensor([row["uid_hash"] for row in batch], dtype=torch.long)
     }
-    for column in sid_columns:
+    for column in candidate_sid_columns:
         sparse[column] = torch.tensor(
             [row[f"{column}_hash"] for row in batch],
             dtype=torch.long,
         )
 
-    zeros = torch.zeros(history_items.numel(), dtype=torch.float32)
+    zeros = torch.zeros(history_sid_values.numel(), dtype=torch.float32)
     candidate_track_length = torch.tensor(
         [row["track_length_seconds"] for row in batch], dtype=torch.float32
     )
@@ -433,8 +479,9 @@ def collate_ranking(batch: list[dict[str, Any]]) -> dict[str, Any]:
         )
         / candidate_track_length.std(unbiased=False).clamp_min(1.0),
         "candidate_has_track_length": (candidate_track_length > 0).float(),
-        "history_item_idxs_flat": history_items,
-        "history_event_type_idxs_flat": torch.full_like(history_items, 2),
+        "history_sid_values_flat": history_sid_values,
+        "history_sid_levels_flat": history_sid_levels,
+        "history_event_type_idxs_flat": torch.full_like(history_sid_values, 2),
         "history_is_organic_flat": zeros,
         "history_played_ratio_flat": zeros,
         "history_has_played_ratio_flat": zeros,
@@ -479,19 +526,18 @@ def collate_ranking_frame(
     """Build a batch column-wise, avoiding one Python dictionary per row."""
 
     frame = source[indices]
-    history_lengths = frame["history_item_idxs"].list.len().to_torch().long()
-    history_items = frame["history_item_idxs"].explode().to_torch().long()
+    history_event_lengths = frame["history_item_idxs"].list.len().to_torch().long()
     history_timestamps = frame["history_timestamps"].explode().to_torch()
     candidate_timestamps = (
         _tensor_column(frame, "timestamp", torch.float64)
         * timestamp_unit_seconds
     )
     history_deltas = (
-        candidate_timestamps.repeat_interleave(history_lengths)
+        candidate_timestamps.repeat_interleave(history_event_lengths)
         - history_timestamps.double() * timestamp_unit_seconds
     ).float().clamp_min_(0.0).log1p_()
 
-    sid_columns = tuple(
+    candidate_sid_columns = tuple(
         sorted(
             (
                 column
@@ -505,17 +551,42 @@ def collate_ranking_frame(
             key=lambda column: int(column.rsplit("_", 1)[1]),
         )
     )
+    history_sid_columns = tuple(
+        sorted(
+            (
+                column
+                for column in frame.columns
+                if column.startswith("sid_")
+                and column[4:].isdigit()
+                and f"history_{column}" in frame.columns
+            ),
+            key=lambda column: int(column[4:]),
+        )
+    )
+    num_sid_levels = len(history_sid_columns)
+    history_frame_columns = [f"history_{column}" for column in history_sid_columns]
+    history_sid_values = torch.tensor(
+        frame.select(history_frame_columns)
+        .explode(history_frame_columns)
+        .to_numpy(),
+        dtype=torch.long,
+    ).reshape(-1)
+    history_sid_levels = torch.arange(num_sid_levels, dtype=torch.long).repeat(
+        int(history_event_lengths.sum())
+    )
+    history_lengths = history_event_lengths * num_sid_levels
+    history_deltas = history_deltas.repeat_interleave(num_sid_levels)
     sparse = {
         "uid": _tensor_column(frame, "uid_hash", torch.long),
         **{
             column: _tensor_column(frame, f"{column}_hash", torch.long)
-            for column in sid_columns
+            for column in candidate_sid_columns
         },
     }
     candidate_track_length = _tensor_column(
         frame, "track_length_seconds", torch.float32
     )
-    zeros = torch.zeros(history_items.numel(), dtype=torch.float32)
+    zeros = torch.zeros(history_sid_values.numel(), dtype=torch.float32)
     return {
         "dense_features": torch.tensor(
             frame.select(DENSE_COLUMNS).to_numpy(), dtype=torch.float32
@@ -536,8 +607,9 @@ def collate_ranking_frame(
         )
         / candidate_track_length.std(unbiased=False).clamp_min(1.0),
         "candidate_has_track_length": (candidate_track_length > 0).float(),
-        "history_item_idxs_flat": history_items,
-        "history_event_type_idxs_flat": torch.full_like(history_items, 2),
+        "history_sid_values_flat": history_sid_values,
+        "history_sid_levels_flat": history_sid_levels,
+        "history_event_type_idxs_flat": torch.full_like(history_sid_values, 2),
         "history_is_organic_flat": zeros,
         "history_played_ratio_flat": zeros,
         "history_has_played_ratio_flat": zeros,

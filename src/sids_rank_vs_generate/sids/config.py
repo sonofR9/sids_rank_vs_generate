@@ -69,6 +69,7 @@ class PlumRQVAEConfig:
     device: str | None = None
     pretrain_epochs: int = 3
     pretrain_lr: float = 5e-3
+    seed: int = 42
 
 @dataclass(frozen=True)
 class BalanceRQKMeansConfig:
@@ -80,6 +81,7 @@ class BalanceRQKMeansConfig:
     predict_batch_size: int = 16_384
     max_iter: int = 50
     device: str | None = None
+    seed: int = 42
 
 
 @dataclass(frozen=True)

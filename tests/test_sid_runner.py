@@ -168,6 +168,15 @@ class SidRunnerTest(unittest.TestCase):
             self.assertEqual(result["sid"]["item_count"], 3)
             statistics = result["sid"]["statistics"]
             self.assertIsNone(statistics["path_average_similarity"])
+            self.assertAlmostEqual(statistics["intra_code_similarity_v2"], 1.0)
+            self.assertEqual(statistics["collision_item_rate"], 0.0)
+            self.assertIn("pair_refinement_rate_at_1_layer", statistics)
+            self.assertIn(
+                "adjusted_semantic_variance_explained_at_1",
+                statistics,
+            )
+            self.assertAlmostEqual(statistics["prefix_coherence_at_1"], 1.0)
+            self.assertIsNone(statistics["prefix_coherence_at_2"])
             self.assertEqual(
                 statistics["codebook_quality"][
                     "codebook_utilization_rate_at_1_layer"

@@ -19,18 +19,14 @@ from .data.protocols import (
     validate_protocol_id,
 )
 from .datasets import DatasetFiles
-from .evaluation.collision_quality import (
-    codebook_quality,
-    infer_codebook_sizes,
-)
+from .evaluation.collision_quality import infer_codebook_sizes
+from .evaluation.precomputed_sid_metrics import calculate_all_sid_metrics
 from .evaluation.sid_quality import (
     SID_QUALITY_SCHEMA_VERSION,
     UserCatalogQualityConfig,
-    calculate_sid_quality,
     calculate_user_catalog_sid_quality,
     select_stable_quality_users,
 )
-from .evaluation.sid_statistics import calculate_sid_statistics
 from .evaluation.user_sid_statistics import calculate_user_sid_statistics
 from .evaluation.stages import (
     EvaluationContext,
@@ -304,33 +300,16 @@ def run_sid_experiment(
         on="item_id",
         how="inner",
     )
-    sid_statistics = calculate_sid_statistics(
-        sid_output.select("item_id", *sid_columns)
-    )
     codebook_sizes = infer_codebook_sizes(getattr(sid, "config", None), sid_output)
-    sid_quality = calculate_sid_quality(
+    embedding_col = (
+        "normalized_embed" if "normalized_embed" in item_features.columns else "embed"
+    )
+    sid_statistics = calculate_all_sid_metrics(
         sid_output,
-        codebook_sizes,
         item_features,
-        embedding_col=(
-            "normalized_embed"
-            if "normalized_embed" in item_features.columns
-            else "embed"
-        ),
+        embedding_col=embedding_col,
+        codebook_sizes=codebook_sizes,
     )
-    legacy_codebook_quality = codebook_quality(
-        sid_output,
-        codebook_sizes,
-    )
-    legacy_codebook_quality.update(sid_quality.pop("codebook_quality"))
-    sid_statistics["collision_percentiles"].update(
-        sid_quality.pop("collision_percentiles")
-    )
-    sid_statistics.update(sid_quality)
-    sid_statistics["path_average_similarity"] = sid_statistics.get(
-        "intra_code_similarity"
-    )
-    sid_statistics["codebook_quality"] = legacy_codebook_quality
 
     user_sid = config.user_sid_pipeline
     fit_user_sids: pl.DataFrame | None = None

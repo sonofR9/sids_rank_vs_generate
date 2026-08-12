@@ -35,7 +35,15 @@ class PlumRQVAEPipeline(ISidPipeline):
     def train(self, df: pl.DataFrame) -> None:
         seed_everything(self.config.seed)
         dim = len(df["normalized_embed"][0])
-        self.model = RQVAE(dim=dim, **asdict(self.config))
+        parameters = asdict(self.config)
+        parameters.pop("seed", None)
+        codebook_sizes = parameters.pop("codebook_sizes", None)
+        if codebook_sizes is not None:
+            parameters["codebooks_sizes"] = codebook_sizes
+            parameters["num_levels"] = len(codebook_sizes)
+        if parameters.get("device") == "auto":
+            parameters["device"] = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model = RQVAE(dim=dim, **parameters)
     
         X = self.model.converter(df)
     

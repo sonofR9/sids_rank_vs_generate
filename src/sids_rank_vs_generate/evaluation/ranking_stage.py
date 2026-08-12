@@ -30,6 +30,7 @@ class RankingTrainingSchedule:
 class RankingConfig:
     """Shared architecture plus independently tuned training schedules."""
 
+    enabled_models: tuple[str, ...] = ("dcnv2", "transact")
     max_history_len: int = 50
     min_history_len: int = 2
     validation_days: float = 7.0
@@ -65,6 +66,15 @@ class RankingConfig:
     device: str = "auto"
 
     def __post_init__(self) -> None:
+        unknown_models = set(self.enabled_models) - {"dcnv2", "transact"}
+        if unknown_models:
+            raise ValueError(
+                f"unknown ranking models: {', '.join(sorted(unknown_models))}"
+            )
+        if not self.enabled_models:
+            raise ValueError("at least one ranking model must be enabled")
+        if len(set(self.enabled_models)) != len(self.enabled_models):
+            raise ValueError("ranking models must not be repeated")
         if self.validation_days <= 0:
             raise ValueError("validation_days must be positive")
         if self.train_days <= 0:
@@ -96,9 +106,12 @@ class RankingStage(IEvaluationStage):
             max_rows=context.max_rows,
             user_sid_pipeline=context.user_sid_pipeline,
         )
-        model_factories = {
+        all_model_factories = {
             "dcnv2": (DcnV2Ranker, self.config.dcnv2_training),
             "transact": (TransActDcnV2Ranker, self.config.transact_training),
+        }
+        model_factories = {
+            name: all_model_factories[name] for name in self.config.enabled_models
         }
         results = {}
         for model_name, (model_factory, schedule) in model_factories.items():

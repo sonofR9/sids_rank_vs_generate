@@ -13,6 +13,7 @@ class BalanceRQKMeansConfig:
     predict_batch_size: int = 16_384
     max_iter: int = 50
     device: str = "auto"
+    seed: int = 42
 
 class BalanceRQKMeansPipeline(ISidPipeline):
     def __init__(self, config):
@@ -22,6 +23,7 @@ class BalanceRQKMeansPipeline(ISidPipeline):
     def train(self, df: pl.DataFrame) -> None:
         seed_everything(self.config.seed)
         parameters = asdict(self.config)
+        parameters.pop("seed", None)
         if parameters.get("codebook_sizes") is not None:
             parameters.pop("num_levels", None)
             parameters.pop("codebook_size", None)
