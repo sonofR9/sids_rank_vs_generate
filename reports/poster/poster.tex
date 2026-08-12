@@ -135,25 +135,11 @@ Semantic IDs (SIDs) используются для дискретного пр�
 
 \textbf{\textcolor{purple}{Что хотим выяснить}}
 
-Связаны ли метрики качества Semantic ID с качеством рекомендаций?
-И сохраняется ли эта связь при переходе от одной задачи и модели к другой?
+Хотим изучить зависимость между \textbf{метриками Semantic ID} и
+\textbf{downstream-метриками} рекомендательных моделей.
 
-\vspace{0.65cm}
-
-\begin{center}
-\textbf{\textcolor{purple}{метрики SID}}
-$\longrightarrow$
-\textbf{\textcolor{orange}{downstream-метрики}}
-\end{center}
-
-\vspace{0.45cm}
-
-\textbf{\textcolor{blue}{Единый протокол сравнения}}
-
-Все варианты SID проверяем на датасете \textbf{Yambda-50M} и с единым временным
-разбиением. Для downstream-моделей используем одинаковые настройки обучения.
-
-\vspace{0.7cm}
+Рассматриваем два сценария: \textbf{генерацию} следующего объекта и
+\textbf{ранжирование} кандидатов.
 
 \textbf{\textcolor{orange}{Генерация}}
 
@@ -167,18 +153,21 @@ $\longrightarrow$
 
 \textbf{\textcolor{teal}{Ранжирование}}
 
-Проверяем два сценария: \textbf{DCNv2} без истории и \textbf{TransAct-like}
-с последовательностью взаимодействий пользователя.
+\textbf{DCNv2} ранжирует объект по счётчикам и категориальным признакам.
+SID целевого объекта подаётся в модель как дополнительный категориальный признак.
 
-SID целевого объекта используется в обеих моделях, а в TransAct-like
-дополнительно кодирует объекты из истории.
+\textbf{TransAct-like} расширяет DCNv2 пользовательской историей: помимо тех же
+признаков модель получает последовательность взаимодействий, в которой item ID
+заменены на SID соответствующих объектов.
 
 Качество измеряем по \textbf{ROC-AUC} и \textbf{pairwise accuracy}.
 
 \vspace{0.7cm}
 
-Для каждого варианта SID получаем результаты во всех трёх моделях и сравниваем,
-какие метрики SID действительно согласуются с ростом итогового качества.
+\textbf{\textcolor{blue}{Датасет и разбиение}}
+
+Все варианты SID и downstream-модели сравниваем на датасете
+\textbf{Yambda-50M} с \textbf{time split}.
 
 }
 };
@@ -267,13 +256,27 @@ SID целевого объекта используется в обеих мо�
 ] at ([xshift=41.1cm,yshift=-67.6cm]current page.north west)
 {
 {\fontsize{22}{28}\selectfont
-Первые токены передают \textbf{основную информацию},
-а последующие добавляют детали. Случайное маскирование
-хвоста делает полезным каждый \textbf{префикс SID}.
+PSI устраняет \textbf{коллизии без дополнительного токена}:
+если ближайший SID уже занят, объект получает следующую
+близкую свободную комбинацию кодов.
 }
 };
 
-\posterbox{59.7}{65.2}{18.4}{7.8}{purple}{fillteal}{Spectral embeddings}
+\posterbox{59.7}{65.2}{18.4}{7.8}{purple}{fillteal}{LogQ}
+
+\node[
+    anchor=north west,
+    text=ink,
+    inner sep=0pt,
+    text width=16.8cm,
+    align=left
+] at ([xshift=60.5cm,yshift=-67.6cm]current page.north west)
+{
+{\fontsize{20}{24}\selectfont
+\textbf{SID LogQ}: корректируем логиты токенов по частоте SID-префиксов.\\[0.25cm]
+\textbf{Item ID + SID}: добавляем item-level loss с LogQ по частоте объектов.
+}
+};
 
 % Right column: results
 \posterbox{79.1}{10.4}{37.8}{62.6}{orange}{fillorange}{Эксперименты и графики}
