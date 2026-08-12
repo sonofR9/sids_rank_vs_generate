@@ -44,7 +44,7 @@
     ([xshift=#1cm,yshift=-#2cm]current page.north west)
     rectangle ++(#3cm,-#4cm);
   \node[anchor=north west, text=ink, inner sep=0pt,
-        font=\bfseries\fontsize{18}{21}\selectfont,
+        font=\bfseries\fontsize{34}{40}\selectfont,
         text width=\dimexpr#3cm-1.6cm\relax]
     at ([xshift=#1cm+0.8cm,yshift=-#2cm-0.8cm]current page.north west) {#7};
 }
@@ -71,15 +71,42 @@
   ([xshift=-0.6cm,yshift=0.6cm]current page.south east);
 
 % ---------- HEADER ----------
-\posterbox{2.0}{1.6}{115.0}{9.8}{headerred}{fillpink}{НАЗВАНИЕ | АВТОРЫ | ЛОГОТИПЫ | QR}
-\fill[headerred] ([xshift=2.0cm,yshift=-1.6cm]current page.north west) rectangle ++(0.8cm,-9.8cm);
+\posterbox{2.0}{1.6}{115.0}{7.6}{headerred}{fillpink}{}
+\fill[headerred] ([xshift=2.0cm,yshift=-1.6cm]current page.north west) rectangle ++(0.8cm,-7.6cm);
+
+\node[
+    anchor=north west,
+    text=ink,
+    inner sep=0pt,
+    font=\bfseries\fontsize{52}{60}\selectfont
+] at ([xshift=4.0cm,yshift=-2.1cm]current page.north west)
+  {Влияние качества Semantic ID на финальные метрики};
+
+\node[
+    anchor=north west,
+    text=ink,
+    inner sep=0pt,
+    font=\fontsize{26}{32}\selectfont
+] at ([xshift=4.0cm,yshift=-5.3cm]current page.north west)
+  {Константин Рядинский \enspace\textbullet\enspace
+   Лев Клюев \enspace\textbullet\enspace
+   Ростислав Головков \enspace\textbullet\enspace
+   Глеб Шевченко};
+
+\node[
+    anchor=north west,
+    text=gray,
+    inner sep=0pt,
+    font=\fontsize{22}{27}\selectfont
+] at ([xshift=4.0cm,yshift=-7.3cm]current page.north west)
+  {Ментор: Александр Новак};
 
 % ---------- LEFT COLUMN ----------
 % ---------- LEFT COLUMN ----------
 
 \posterbox
-  {2.0}{12.6}
-  {37.3}{15.2}
+  {2.0}{10.4}
+  {37.3}{17.4}
   {blue}{fillblue}
   {Введение}
 
@@ -87,9 +114,9 @@
     anchor=north west,
     text width=35.5cm,
     align=left
-] at ([xshift=2.8cm,yshift=-15.0cm]current page.north west)
+] at ([xshift=2.8cm,yshift=-12.8cm]current page.north west)
 {
-    {\fontsize{17}{21}\selectfont
+    {\fontsize{30}{37}\selectfont
 
     Semantic IDs (SIDs) используются для дискретного представления
     объектов в генеративных рекомендательных системах.
@@ -119,7 +146,7 @@
     align=left
 ] at ([xshift=2.8cm,yshift=-31.0cm]current page.north west)
 {
-{\fontsize{14}{18}\selectfont
+{\fontsize{24}{30}\selectfont
 
 \textbf{\textcolor{red}{Генерация без Semantic IDs}}
 
@@ -175,17 +202,17 @@ Semantic ID целевого объекта.
 \posterbox{2.0}{65.5}{37.3}{16.4}{teal}{fillteal}{Гибкая зона: 1--2 метода после примерки текста (объясните, что это))}
 
 % ---------- RIGHT: methods grid ----------
-\posterbox{79.1}{12.6}{37.8}{18.0}{blue}{fillblue}{Balanced RQ-KMeans / RQ-VAE}
+\posterbox{79.1}{10.4}{37.8}{20.2}{blue}{fillblue}{Balanced RQ-KMeans / RQ-VAE}
 
 \node[anchor=north, inner sep=0pt]
-  at ([xshift=98.0cm,yshift=-15.2cm]current page.north west)
-  {\includegraphics[width=30cm]{rq-rqvae.png}};
+  at ([xshift=98.0cm,yshift=-13.0cm]current page.north west)
+  {\includegraphics[width=33.5cm]{rq-rqvae.png}};
 
 \node[
     anchor=south east,
     text=gray,
     inner sep=0pt,
-    font=\fontsize{6.5}{8}\selectfont
+    font=\fontsize{11}{13}\selectfont
 ] at ([xshift=116.1cm,yshift=-30.0cm]current page.north west)
   {Источник: Mike X Cohen (2026), схема Sumit};
 
@@ -199,29 +226,26 @@ Semantic ID целевого объекта.
     align=left
 ] at ([xshift=79.9cm,yshift=-33.7cm]current page.north west)
 {
-    {\fontsize{11.5}{14}\selectfont
+    {\fontsize{21}{26}\selectfont
 
-    Размер кодбуков уменьшается в 2 раза с каждым уровнем:
+    Размер кодбука уменьшается вдвое с каждым уровнем:
 
     \[
         C_i = \frac{C_0}{2^i}.
     \]
 
-    Во время обучения используется случайная
-    \textbf{prefix-маска}: для каждого объекта выбирается глубина SID,
-    и обновляются только активные уровни.
+    Случайная \textbf{prefix-маска} выбирает глубину SID:
+    обновляются только уровни активного префикса.
 
     \vspace{0.25cm}
 
-    Вероятность использования последнего кодбука фиксирована на
-    \textbf{0.25}, а оставшаяся вероятность равномерно распределяется
-    между меньшими глубинами.
+    Последний кодбук используется с вероятностью \textbf{0.25};
+    остальные глубины делят оставшуюся вероятность.
 
     \vspace{0.25cm}
 
-    Ранние уровни обучаются чаще, а глубокие - реже, что стимулирует
-    формирование информативного представления уже на коротких
-    префиксах SID.
+    Ранние уровни обучаются чаще и формируют информативные
+    короткие префиксы SID.
 
     }
 
@@ -237,7 +261,7 @@ Semantic ID целевого объекта.
     align=left
 ] at ([xshift=99.3cm,yshift=-34.0cm]current page.north west)
 {
-{\fontsize{11.5}{15}\selectfont
+{\fontsize{22}{28}\selectfont
 Обучаемый \textbf{reference-вектор} задаёт семантический якорь для начального residual.\\[0.35cm]
 \textbf{Dot-product rating} сохраняет поток градиента и предотвращает collapse кодбука.\\[0.35cm]
 Регуляризация \textbf{SC/PD} усиливает сходство внутри SID и различия между кластерами.
@@ -248,10 +272,25 @@ Semantic ID целевого объекта.
 \posterbox{98.5}{48.6}{18.4}{15.6}{orange}{fillteal}{BPE}
 
 \posterbox{79.1}{65.2}{18.4}{16.7}{red}{fillpurple}{PSI}
+
+\node[
+    anchor=north west,
+    text=ink,
+    inner sep=0pt,
+    text width=16.8cm,
+    align=left
+] at ([xshift=79.9cm,yshift=-67.6cm]current page.north west)
+{
+{\fontsize{22}{28}\selectfont
+\textbf{Multi-resolution кодбуки} уменьшаются на глубоких уровнях и компактно кодируют residual.\\[0.35cm]
+\textbf{Progressive masking} обучает случайные SID-префиксы, усиливая семантическую иерархию.
+}
+};
+
 \posterbox{98.5}{65.2}{18.4}{16.7}{purple}{fillteal}{Spectral embeddings}
 
 % ---------- MIDDLE: RESULTS ----------
-\posterbox{40.3}{12.6}{37.8}{48.0}{orange}{fillorange}{Эксперименты и графики}
+\posterbox{40.3}{10.4}{37.8}{50.2}{orange}{fillorange}{Эксперименты и графики}
 \posterbox{40.3}{61.6}{37.8}{20.3}{headerred}{fillpink}{Главный результат}
 
 
