@@ -121,7 +121,7 @@ Semantic IDs (SIDs) используются для дискретного пр�
     }
 };
 % Вместо \posterbox используем Ti*k*Z-узел с рамкой и заливкой
-\posterbox{2.0}{28.8}{37.3}{35.7}{gray}{fillgray}{Сравниваемые модели}
+\posterbox{2.0}{28.8}{37.3}{35.7}{gray}{fillgray}{Постановка эксперимента}
 
 \node[
     anchor=north west,
@@ -131,56 +131,54 @@ Semantic IDs (SIDs) используются для дискретного пр�
     align=left
 ] at ([xshift=2.8cm,yshift=-31.0cm]current page.north west)
 {
-{\fontsize{24}{30}\selectfont
+    {\fontsize{26}{33}\selectfont
 
-\textbf{\textcolor{red}{Генерация без Semantic IDs}}
+\textbf{\textcolor{purple}{Что хотим выяснить}}
 
-\vspace{0.25cm}
+Связаны ли метрики качества Semantic ID с качеством рекомендаций?
+И сохраняется ли эта связь при переходе от одной задачи и модели к другой?
 
-\textbf{SASRec}: Transformer-бейзлайн, который кодирует историю взаимодействий
-и предсказывает следующий объект по его item ID.
+\vspace{0.65cm}
 
-\vspace{0.5cm}
+\begin{center}
+\textbf{\textcolor{purple}{метрики SID}}
+$\longrightarrow$
+\textbf{\textcolor{orange}{downstream-метрики}}
+\end{center}
 
-\textbf{\textcolor{orange}{Генерация с Semantic IDs}}
+\vspace{0.45cm}
 
-\vspace{0.25cm}
+\textbf{\textcolor{blue}{Единый протокол сравнения}}
 
-\textbf{TIGER-like} авторегрессионно генерирует последовательность
-токенов SID целевого объекта.
-
-\vspace{0.7cm}
-
-\textbf{\textcolor{blue}{Ранжирование без Semantic IDs}}
-
-\vspace{0.25cm}
-
-Базовые ранжирующие модели используют обычные \textbf{item ID}:
-
-\vspace{0.35cm}
-
-\textbf{DCNv2} объединяет счётчики и категориальные признаки
-в cross- и deep-блоках.
-
-\vspace{0.35cm}
-
-\textbf{TransAct-like} использует те же признаки и дополнительно
-принимает историю взаимодействий пользователя.
+Все варианты SID проверяем на датасете \textbf{Yambda-50M} и с единым временным
+разбиением. Для downstream-моделей используем одинаковые настройки обучения.
 
 \vspace{0.7cm}
 
-\textbf{\textcolor{teal}{Ранжирование с Semantic IDs}}
+\textbf{\textcolor{orange}{Генерация}}
 
-\vspace{0.25cm}
+\textbf{TIGER-like} авторегрессионно предсказывает SID следующего объекта.
+Качество измеряем по \textbf{Recall@100}.
 
-Обе модели дополнительно получают \textbf{SID целевого объекта}.
-В \textbf{TransAct-like} item ID в истории также заменяются
-соответствующими SID.
+В качестве ориентира используем \textbf{SASRec}, который предсказывает
+следующий объект напрямую по item ID.
 
 \vspace{0.7cm}
 
-Так мы измеряем эффект одного и того же SID в двух сценариях:
-\textbf{ранжировании} и \textbf{генерации}.
+\textbf{\textcolor{teal}{Ранжирование}}
+
+Проверяем два сценария: \textbf{DCNv2} без истории и \textbf{TransAct-like}
+с последовательностью взаимодействий пользователя.
+
+SID целевого объекта используется в обеих моделях, а в TransAct-like
+дополнительно кодирует объекты из истории.
+
+Качество измеряем по \textbf{ROC-AUC} и \textbf{pairwise accuracy}.
+
+\vspace{0.7cm}
+
+Для каждого варианта SID получаем результаты во всех трёх моделях и сравниваем,
+какие метрики SID действительно согласуются с ростом итогового качества.
 
 }
 };
