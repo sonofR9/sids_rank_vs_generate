@@ -5,6 +5,7 @@ from unittest.mock import patch
 import torch
 from torch import nn
 
+from sids_rank_vs_generate.data.generation import SIDLogQTable
 from sids_rank_vs_generate.evaluation.beam_search import (
     SemanticIDCatalog,
     semantic_beam_search,
@@ -97,6 +98,44 @@ class SemanticIDCatalogTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             SemanticIDCatalog([(0, 2)], codebook_sizes=(2, 2))
 
+    def test_sid_logq_changes_beam_order_without_an_alpha(self):
+        model = _DummyBeamModel()
+        history = torch.ones(1, 1, dtype=torch.long)
+        positions = torch.zeros_like(history)
+        mask = torch.ones_like(history, dtype=torch.bool)
+        catalog = SemanticIDCatalog(
+            semantic_ids=[(0, 0), (1, 1)],
+            codebook_sizes=(2, 2),
+        )
+        train_examples = [{"sid": [0, 0]} for _ in range(100)]
+        train_examples.append({"sid": [1, 1]})
+        sid_logq_table = SIDLogQTable(
+            train_examples,
+            codebook_sizes=(2, 2),
+            beta=1.0,
+        )
+
+        baseline, _ = semantic_beam_search(
+            model,
+            history,
+            positions,
+            mask,
+            beam_size=1,
+            sid_catalog=catalog,
+        )
+        corrected, _ = semantic_beam_search(
+            model,
+            history,
+            positions,
+            mask,
+            beam_size=1,
+            sid_catalog=catalog,
+            sid_logq_table=sid_logq_table,
+        )
+
+        self.assertEqual(baseline[0, 0].tolist(), [0, 0])
+        self.assertEqual(corrected[0, 0].tolist(), [1, 1])
+
 
 class SemanticTransformerRecallFeaturesTest(unittest.TestCase):
     def test_content_semantic_history_and_auxiliary_loss_work_together(self):
@@ -149,6 +188,23 @@ class SemanticTransformerRecallFeaturesTest(unittest.TestCase):
         self.assertTrue(torch.isfinite(output["loss"]))
         self.assertIsNotNone(output["ranking_loss"])
         self.assertEqual(output["preds"].shape, (2, 2))
+
+        sid_log_q = (
+            torch.log(torch.tensor([[0.9, 0.1], [0.2, 0.8]])),
+            torch.log(torch.tensor([[0.7, 0.3], [0.4, 0.6]])),
+        )
+        sid_logq_output = model(
+            history=torch.tensor([[1, 2], [2, 3]]),
+            positions=torch.tensor([[0, 1], [0, 1]]),
+            mask=torch.ones(2, 2, dtype=torch.bool),
+            sid=torch.tensor([[0, 1], [1, 0]]),
+            target=torch.tensor([2, 3]),
+            sid_log_q=sid_log_q,
+        )
+        self.assertTrue(torch.isfinite(sid_logq_output["loss"]))
+        self.assertFalse(
+            torch.allclose(output["sid_loss"], sid_logq_output["sid_loss"])
+        )
 
 
 class _PerfectSemanticModel(nn.Module):

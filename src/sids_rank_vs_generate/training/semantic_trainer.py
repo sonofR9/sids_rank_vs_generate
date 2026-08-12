@@ -24,6 +24,7 @@ def train_semantic(
     cfg,
     sid_to_items=None,
     sid_catalog=None,
+    sid_logq_table=None,
     tracker: ExperimentTracker | None = None,
 ):
     tracker = tracker or NullTracker()
@@ -38,7 +39,10 @@ def train_semantic(
 
     if cfg.resolve_collisions:
         validate_fn = validate_semantic_model_without_collisions
-        validation_kwargs = {"sid_catalog": sid_catalog}
+        validation_kwargs = {
+            "sid_catalog": sid_catalog,
+            "sid_logq_table": sid_logq_table,
+        }
     else:
         if sid_to_items is None:
             raise ValueError(
@@ -49,6 +53,7 @@ def train_semantic(
         validation_kwargs = {
             "sid_to_items": sid_to_items,
             "sid_catalog": sid_catalog,
+            "sid_logq_table": sid_logq_table,
         }
 
     metric_name = f"recall@{cfg.recall_k}"
@@ -73,6 +78,7 @@ def train_semantic(
                     batch["sid"],
                     target=batch["target"],
                     log_q=batch.get("log_q"),
+                    sid_log_q=batch.get("sid_log_q"),
                 )
 
             loss = output["loss"]

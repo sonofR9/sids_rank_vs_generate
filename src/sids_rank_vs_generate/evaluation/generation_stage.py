@@ -8,6 +8,7 @@ import polars as pl
 import torch
 
 from ..data.generation import (
+    SIDLogQTable,
     attach_item_log_q,
     build_generation_loaders,
     limit_examples,
@@ -65,7 +66,8 @@ class GenerationConfig:
     logq_eps: float = 1e-12
     logq_debug: bool = False
     gather_distributed_negatives: bool = False
-    
+    sid_logq_mode: str = "none"
+    sid_logq_beta: float = 1.0
 
     def __post_init__(self) -> None:
         if self.d_model % self.num_heads:
@@ -80,6 +82,10 @@ class GenerationConfig:
             raise ValueError("logq_mode must be one of: none, standard, corrected")
         if self.logq_eps <= 0 or self.logq_eps > 1:
             raise ValueError("logq_eps must be in (0, 1]")
+        if self.sid_logq_mode not in {"none", "standard"}:
+            raise ValueError("sid_logq_mode must be one of: none, standard")
+        if self.sid_logq_beta <= 0:
+            raise ValueError("sid_logq_beta must be positive")
 
 
 def _resolve_device(name: str) -> str:
@@ -176,8 +182,18 @@ class GenerationStage(IEvaluationStage):
                 train_examples,
                 eps=runtime.logq_eps,
             )
+        sid_logq_table = None
+        if runtime.sid_logq_mode == "standard":
+            sid_logq_table = SIDLogQTable(
+                train_examples,
+                codebook_sizes=(runtime.codebook_size,) * runtime.num_levels,
+                beta=runtime.sid_logq_beta,
+            )
         train_loader, validation_loader = build_generation_loaders(
-            train_examples, validation_examples, runtime
+            train_examples,
+            validation_examples,
+            runtime,
+            sid_logq_table=sid_logq_table,
         )
         sid_to_items = (
             None
@@ -203,6 +219,19 @@ class GenerationStage(IEvaluationStage):
                             "train": len(train_examples),
                             "validation": len(validation_examples),
                         },
+                        "sid_logq": {
+                            "alpha": 1.0 if sid_logq_table is not None else None,
+                            "train_interactions": (
+                                sid_logq_table.num_train_interactions
+                                if sid_logq_table is not None
+                                else None
+                            ),
+                            "unique_sids": (
+                                sid_logq_table.num_unique_sids
+                                if sid_logq_table is not None
+                                else None
+                            ),
+                        },
                     }
                 )
             )
@@ -213,6 +242,7 @@ class GenerationStage(IEvaluationStage):
                 runtime,
                 sid_to_items=sid_to_items,
                 sid_catalog=sid_catalog,
+                sid_logq_table=sid_logq_table,
                 tracker=tracker,
             )
             if runtime.resolve_collisions:
@@ -221,6 +251,7 @@ class GenerationStage(IEvaluationStage):
                     validation_loader,
                     runtime,
                     sid_catalog=sid_catalog,
+                    sid_logq_table=sid_logq_table,
                 )
             else:
                 metrics = validate_semantic_model_with_collisions(
@@ -229,6 +260,7 @@ class GenerationStage(IEvaluationStage):
                     runtime,
                     sid_to_items,
                     sid_catalog=sid_catalog,
+                    sid_logq_table=sid_logq_table,
                 )
             tracker.log_metrics(
                 {f"final.{name}": value for name, value in metrics.items()}
