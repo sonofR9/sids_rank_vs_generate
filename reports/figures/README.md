@@ -20,8 +20,9 @@ out of Git.
 
 ## Ranking
 
-- `ranking/dcnv2_transact_sid_quality/`: DCNv2 and TransAct Pairwise Accuracy
-  and ROC-AUC correlations against SID quality metrics.
+- `ranking/`: DCNv2 and TransAct Pairwise Accuracy and ROC-AUC correlations
+  against SID quality metrics. The `dcnv2/` and `transact/` directories hold
+  model-specific figures; shared CSV summaries live directly here.
 
 ## Reproduction
 
