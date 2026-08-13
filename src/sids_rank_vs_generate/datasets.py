@@ -12,9 +12,11 @@ DATASET_SIZES = ("50m",)
 DEFAULT_DATASET_SIZE = "50m"
 DEFAULT_CACHE_ROOT = Path.home() / ".cache" / "sids_rank_vs_generate" / "datasets"
 HF_DATASET_REPO = "yandex/yambda"
+HF_DATASET_REVISION = "dd6f3a19eef5866e346c3270e098baa641a44948"
 HF_LIKES_FILE = "flat/50m/likes.parquet"
 HF_EMBEDDINGS_FILE = "embeddings.parquet"
 HF_RANKING_REPO = "matfu21/yambda-50m-lag-features"
+HF_RANKING_REVISION = "b2dbecdf0cd0664812dbdc6bc68b6e172bfe7cbc"
 HF_RANKING_FILE = "listens.parquet"
 HF_ARTIST_MAPPING_FILE = "artist_item_mapping.parquet"
 HF_ALBUM_MAPPING_FILE = "album_item_mapping.parquet"
@@ -33,7 +35,13 @@ class DatasetFiles:
     album_mapping_path: Path | None = None
 
 
-def _hf_download(repo_id: str, *, filename: str, repo_type: str) -> str:
+def _hf_download(
+    repo_id: str,
+    *,
+    filename: str,
+    repo_type: str,
+    revision: str | None = None,
+) -> str:
     try:
         from huggingface_hub import hf_hub_download
     except ImportError as error:
@@ -45,6 +53,7 @@ def _hf_download(repo_id: str, *, filename: str, repo_type: str) -> str:
         repo_id=repo_id,
         filename=filename,
         repo_type=repo_type,
+        revision=revision,
     )
 
 
@@ -129,7 +138,12 @@ def resolve_dataset(
         raise ValueError("only Yambda-50M is supported")
     download = downloader or _hf_download
     interactions_path = Path(
-        download(HF_DATASET_REPO, filename=HF_LIKES_FILE, repo_type="dataset")
+        download(
+            HF_DATASET_REPO,
+            filename=HF_LIKES_FILE,
+            repo_type="dataset",
+            revision=HF_DATASET_REVISION,
+        )
     ).expanduser()
 
     dataset_dir = cache_root.expanduser() / "yambda-50m"
@@ -145,6 +159,7 @@ def resolve_dataset(
                     HF_DATASET_REPO,
                     filename=HF_EMBEDDINGS_FILE,
                     repo_type="dataset",
+                    revision=HF_DATASET_REVISION,
                 )
             ).expanduser()
         if not source.is_file():
@@ -167,6 +182,7 @@ def resolve_dataset(
                 HF_RANKING_REPO,
                 filename=HF_RANKING_FILE,
                 repo_type="dataset",
+                revision=HF_RANKING_REVISION,
             )
         ).expanduser(),
         artist_mapping_path=Path(
@@ -174,6 +190,7 @@ def resolve_dataset(
                 HF_DATASET_REPO,
                 filename=HF_ARTIST_MAPPING_FILE,
                 repo_type="dataset",
+                revision=HF_DATASET_REVISION,
             )
         ).expanduser(),
         album_mapping_path=Path(
@@ -181,6 +198,7 @@ def resolve_dataset(
                 HF_DATASET_REPO,
                 filename=HF_ALBUM_MAPPING_FILE,
                 repo_type="dataset",
+                revision=HF_DATASET_REVISION,
             )
         ).expanduser(),
     )

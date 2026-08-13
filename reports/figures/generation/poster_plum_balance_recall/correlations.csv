@@ -1,0 +1,121 @@
+sid_metric,sid_metric_label,downstream_metric,group,pearson_r,spearman_rho,num_points
+icr,Raw independent code rate (ICR),recall_at_100,ALL,0.7055536339791424,0.7185543824263876,36
+icr,Raw independent code rate (ICR),recall_at_100,R3VAE (rqkmeans),0.9678590576812347,0.8999999999999998,5
+icr,Raw independent code rate (ICR),recall_at_100,R3VAE (spherical),0.871191181714041,0.8285714285714287,6
+icr,Raw independent code rate (ICR),recall_at_100,RQKMeans,0.942640455104564,0.8999999999999998,5
+icr,Raw independent code rate (ICR),recall_at_100,RQVAE (ECM),,,3
+icr,Raw independent code rate (ICR),recall_at_100,RQVAE,0.9300710900096756,0.8285714285714287,6
+icr,Raw independent code rate (ICR),recall_at_100,RQVAE (RRS),,,3
+icr,Raw independent code rate (ICR),recall_at_100,PLUM,0.8270136763830922,0.5,3
+icr,Raw independent code rate (ICR),recall_at_100,BalanceRQKMeans,0.9892455846410666,1.0,3
+icr,Raw independent code rate (ICR),recall_at_100,RQVAE-token,-1.0,-0.9999999999999999,2
+collision_rate,Collision Rate,recall_at_100,ALL,-0.7055536339791424,-0.7185543824263876,36
+collision_rate,Collision Rate,recall_at_100,R3VAE (rqkmeans),-0.9678590576812348,-0.8999999999999998,5
+collision_rate,Collision Rate,recall_at_100,R3VAE (spherical),-0.871191181714041,-0.8285714285714287,6
+collision_rate,Collision Rate,recall_at_100,RQKMeans,-0.9426404551045638,-0.8999999999999998,5
+collision_rate,Collision Rate,recall_at_100,RQVAE (ECM),,,3
+collision_rate,Collision Rate,recall_at_100,RQVAE,-0.9300710900096754,-0.8285714285714287,6
+collision_rate,Collision Rate,recall_at_100,RQVAE (RRS),,,3
+collision_rate,Collision Rate,recall_at_100,PLUM,-0.8270136763830923,-0.5,3
+collision_rate,Collision Rate,recall_at_100,BalanceRQKMeans,-0.9892455846410666,-1.0,3
+collision_rate,Collision Rate,recall_at_100,RQVAE-token,1.0,0.9999999999999999,2
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,ALL,-0.9146110701116305,-0.8977069999032672,34
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,R3VAE (rqkmeans),-0.9615016346888441,-0.8207826816681234,5
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,R3VAE (spherical),-0.8656173409032007,-0.9411239481143202,6
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,RQKMeans,-0.930605928783467,-0.8999999999999998,5
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,RQVAE (ECM),,,3
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,RQVAE,-0.9496891653907937,-0.9411239481143202,6
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,RQVAE (RRS),,,3
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,PLUM,,,3
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,BalanceRQKMeans,-0.9188196353848264,-0.8660254037844387,3
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,RQVAE-token,,,0
+g_max,G_max,recall_at_100,ALL,-0.7660974360069742,-0.7510420842581367,36
+g_max,G_max,recall_at_100,R3VAE (rqkmeans),-0.9151168877200972,-0.7999999999999999,5
+g_max,G_max,recall_at_100,R3VAE (spherical),-0.8060359862110416,-0.7714285714285715,6
+g_max,G_max,recall_at_100,RQKMeans,-0.9224378117403468,-0.9746794344808963,5
+g_max,G_max,recall_at_100,RQVAE (ECM),,,3
+g_max,G_max,recall_at_100,RQVAE,-0.8324363645426599,-0.9276336570439174,6
+g_max,G_max,recall_at_100,RQVAE (RRS),,,3
+g_max,G_max,recall_at_100,PLUM,,,3
+g_max,G_max,recall_at_100,BalanceRQKMeans,-0.9851900927573966,-1.0,3
+g_max,G_max,recall_at_100,RQVAE-token,1.0,0.9999999999999999,2
+cur_total,CUR_Total,recall_at_100,ALL,-0.11486412083121635,-0.09759000729485331,34
+cur_total,CUR_Total,recall_at_100,R3VAE (rqkmeans),,,5
+cur_total,CUR_Total,recall_at_100,R3VAE (spherical),-0.5036344235603847,-0.39279220242478635,6
+cur_total,CUR_Total,recall_at_100,RQKMeans,,,5
+cur_total,CUR_Total,recall_at_100,RQVAE (ECM),,,3
+cur_total,CUR_Total,recall_at_100,RQVAE,,,6
+cur_total,CUR_Total,recall_at_100,RQVAE (RRS),,,3
+cur_total,CUR_Total,recall_at_100,PLUM,,,3
+cur_total,CUR_Total,recall_at_100,BalanceRQKMeans,,,3
+cur_total,CUR_Total,recall_at_100,RQVAE-token,,,0
+code_gini,Code Gini,recall_at_100,ALL,-0.9298837738902145,-0.8949859816188721,34
+code_gini,Code Gini,recall_at_100,R3VAE (rqkmeans),-0.9813309302808412,-0.8999999999999998,5
+code_gini,Code Gini,recall_at_100,R3VAE (spherical),-0.8945958471004893,-0.8285714285714287,6
+code_gini,Code Gini,recall_at_100,RQKMeans,-0.9578423486301879,-0.8999999999999998,5
+code_gini,Code Gini,recall_at_100,RQVAE (ECM),,,3
+code_gini,Code Gini,recall_at_100,RQVAE,-0.947877936930807,-0.8285714285714287,6
+code_gini,Code Gini,recall_at_100,RQVAE (RRS),,,3
+code_gini,Code Gini,recall_at_100,PLUM,-0.8217745443363104,-0.5,3
+code_gini,Code Gini,recall_at_100,BalanceRQKMeans,-0.9911248889556092,-1.0,3
+code_gini,Code Gini,recall_at_100,RQVAE-token,,,0
+code_entropy,Code Entropy,recall_at_100,ALL,0.5087244560835821,0.6366932111619363,34
+code_entropy,Code Entropy,recall_at_100,R3VAE (rqkmeans),0.9577385865302614,0.8999999999999998,5
+code_entropy,Code Entropy,recall_at_100,R3VAE (spherical),0.8517060673598691,0.8285714285714287,6
+code_entropy,Code Entropy,recall_at_100,RQKMeans,0.929794741184418,0.8999999999999998,5
+code_entropy,Code Entropy,recall_at_100,RQVAE (ECM),,,3
+code_entropy,Code Entropy,recall_at_100,RQVAE,0.9165794160273,0.942857142857143,6
+code_entropy,Code Entropy,recall_at_100,RQVAE (RRS),,,3
+code_entropy,Code Entropy,recall_at_100,PLUM,0.8257133067262851,0.5,3
+code_entropy,Code Entropy,recall_at_100,BalanceRQKMeans,0.9865107333795493,1.0,3
+code_entropy,Code Entropy,recall_at_100,RQVAE-token,,,0
+intra_code_similarity,Intra-code Similarity,recall_at_100,ALL,0.2385435675037525,0.8656126482213439,23
+intra_code_similarity,Intra-code Similarity,recall_at_100,R3VAE (rqkmeans),0.9786538290106642,0.8999999999999998,5
+intra_code_similarity,Intra-code Similarity,recall_at_100,R3VAE (spherical),0.9194603574945022,0.8285714285714287,6
+intra_code_similarity,Intra-code Similarity,recall_at_100,RQKMeans,0.9731712087645044,0.8999999999999998,5
+intra_code_similarity,Intra-code Similarity,recall_at_100,RQVAE (ECM),,,0
+intra_code_similarity,Intra-code Similarity,recall_at_100,RQVAE,0.9745236506781237,0.942857142857143,6
+intra_code_similarity,Intra-code Similarity,recall_at_100,RQVAE (RRS),,,0
+intra_code_similarity,Intra-code Similarity,recall_at_100,PLUM,,,0
+intra_code_similarity,Intra-code Similarity,recall_at_100,BalanceRQKMeans,,,1
+intra_code_similarity,Intra-code Similarity,recall_at_100,RQVAE-token,,,0
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,ALL,-0.1802028122670883,-0.0009171508148691805,34
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,R3VAE (rqkmeans),0.3734187050603539,-0.09999999999999999,5
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,R3VAE (spherical),0.7808117307585164,0.7714285714285715,6
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,RQKMeans,0.5481620120672757,0.6708203932499368,5
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,RQVAE (ECM),-0.6548500994376274,-0.5,3
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,RQVAE,0.7095121457958848,0.942857142857143,6
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,RQVAE (RRS),0.47960201754512144,0.5,3
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,PLUM,-0.5367190706668304,-0.5,3
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,BalanceRQKMeans,0.7374583485213765,0.5,3
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,RQVAE-token,,,0
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,ALL,-0.1534968897164225,0.18321632585354028,33
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,R3VAE (rqkmeans),0.38510272200059426,-0.19999999999999998,5
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,R3VAE (spherical),0.7731789394300652,0.5428571428571429,6
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,RQKMeans,0.5576901696651146,0.6708203932499368,5
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,RQVAE (ECM),-0.6785282081368098,-0.5,3
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,RQVAE,0.7207005851754158,0.942857142857143,6
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,RQVAE (RRS),0.4496175274499752,0.5,3
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,PLUM,-0.3132965935379648,-0.5,3
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,BalanceRQKMeans,1.0,0.9999999999999999,2
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,RQVAE-token,,,0
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,ALL,0.2479777003036912,0.8521282084037853,19
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,R3VAE (rqkmeans),0.7837985626970075,0.19999999999999998,4
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,R3VAE (spherical),0.9844080201752887,0.8999999999999998,5
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,RQKMeans,0.9504290596251299,0.9486832980505139,4
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,RQVAE (ECM),,,0
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,RQVAE,0.9862383796635885,0.9999999999999999,5
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,RQVAE (RRS),,,0
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,PLUM,,,0
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,BalanceRQKMeans,,,1
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,RQVAE-token,,,0
+valid_sid_rate,Valid SID Rate,recall_at_100,ALL,,,34
+valid_sid_rate,Valid SID Rate,recall_at_100,R3VAE (rqkmeans),,,5
+valid_sid_rate,Valid SID Rate,recall_at_100,R3VAE (spherical),,,6
+valid_sid_rate,Valid SID Rate,recall_at_100,RQKMeans,,,5
+valid_sid_rate,Valid SID Rate,recall_at_100,RQVAE (ECM),,,3
+valid_sid_rate,Valid SID Rate,recall_at_100,RQVAE,,,6
+valid_sid_rate,Valid SID Rate,recall_at_100,RQVAE (RRS),,,3
+valid_sid_rate,Valid SID Rate,recall_at_100,PLUM,,,3
+valid_sid_rate,Valid SID Rate,recall_at_100,BalanceRQKMeans,,,3
+valid_sid_rate,Valid SID Rate,recall_at_100,RQVAE-token,,,0

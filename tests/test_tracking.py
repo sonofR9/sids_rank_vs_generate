@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 from contextlib import contextmanager
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -34,6 +35,7 @@ class FakeMlflow:
         self.experiment_name = None
         self.runs = []
         self.stack = []
+        self.artifacts = []
 
     def set_tracking_uri(self, uri: str) -> None:
         self.tracking_uri = uri
@@ -50,6 +52,7 @@ class FakeMlflow:
             tags=tags,
             params={},
             metrics=[],
+            artifacts=[],
         )
         self.runs.append(run)
         self.stack.append(run)
@@ -66,6 +69,11 @@ class FakeMlflow:
 
     def log_metrics(self, metrics, *, step=None) -> None:
         self.stack[-1].metrics.append((step, metrics))
+
+    def log_artifact(self, local_path, artifact_path=None) -> None:
+        path = str(Path(local_path))
+        self.stack[-1].artifacts.append((path, artifact_path))
+        self.artifacts.append((self.stack[-1].name, path))
 
 
 class TrackingTest(unittest.TestCase):
@@ -111,6 +119,7 @@ class TrackingTest(unittest.TestCase):
             tracker.log_params({"seed": 42})
             with tracker.start_run("generation", nested=True) as child:
                 child.log_metrics({"train.loss": 0.5}, step=1)
+                child.log_artifact(Path("metrics.json"))
                 self.assertEqual(child.info()["run_id"], "run-2")
 
         self.assertEqual(fake.tracking_uri, "file:./mlruns")
@@ -120,6 +129,10 @@ class TrackingTest(unittest.TestCase):
         self.assertTrue(fake.runs[1].nested)
         self.assertEqual(fake.runs[0].params, {"seed": 42})
         self.assertEqual(fake.runs[1].metrics, [(1, {"train.loss": 0.5})])
+        self.assertEqual(
+            fake.artifacts,
+            [("generation", "metrics.json")],
+        )
 
     def test_mlflow_tracker_sanitizes_at_sign_in_metric_names(self) -> None:
         fake = FakeMlflow()
@@ -135,6 +148,20 @@ class TrackingTest(unittest.TestCase):
             fake.runs[0].metrics,
             [(1, {"validation.recall_at_100": 0.25})],
         )
+
+    def test_mlflow_tracker_logs_artifact_to_requested_directory(self) -> None:
+        fake = FakeMlflow()
+        tracker = MlflowTracker(MLflowConfig(enabled=True), mlflow_module=fake)
+        with TemporaryDirectory() as tmpdir:
+            artifact = Path(tmpdir) / "semantic_ids.parquet"
+            artifact.write_text("mapping", encoding="utf-8")
+            with tracker.start_run("parent"):
+                tracker.log_artifact(artifact, artifact_path="sid_mapping")
+
+            self.assertEqual(
+                fake.runs[0].artifacts,
+                [(str(artifact), "sid_mapping")],
+            )
 
     def test_enabled_tracking_has_actionable_missing_dependency_error(self) -> None:
         with patch(

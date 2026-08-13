@@ -1,0 +1,39 @@
+{
+  "tracking_uri": "http://51.250.47.231:5000",
+  "generation_experiments": [
+    "sid-comparison"
+  ],
+  "quality_experiments": [
+    "sid-quality-only-full-v2"
+  ],
+  "recall_metric": "metrics.evaluations.generation.recall_at_100",
+  "baseline_recall": 0.113,
+  "matched_runs": 36,
+  "generation_child_metric_rows": 0,
+  "local_sid_metric_backfill_rows": 6,
+  "reports_dir": "reports/poster_runs",
+  "embeddings_path": "/home/k.ryadinskiy/.cache/sids_rank_vs_generate/datasets/yambda-50m/embeddings.parquet",
+  "local_sid_metric_definitions": {
+    "p95_collision_group_size": "nearest p95 of full-path buckets with more than one item; 0 when none",
+    "cur_total": "mean over SID levels of used_codes / configured_codebook_size",
+    "code_gini": "Gini coefficient of full-path item-count distribution",
+    "code_entropy": "natural-log Shannon entropy of full-path item-count distribution",
+    "prefix_coherence_at_n": "equal-weight mean of within-prefix mean pairwise cosine similarities",
+    "intra_code_similarity": "prefix_coherence at the full SID depth",
+    "valid_sid_rate": "fraction of rows whose every SID component is within its configured codebook range"
+  },
+  "plotted_metrics": [
+    "icr",
+    "collision_rate",
+    "p95_collision_group_size",
+    "g_max",
+    "cur_total",
+    "code_gini",
+    "code_entropy",
+    "intra_code_similarity",
+    "prefix_coherence_1",
+    "prefix_coherence_2",
+    "prefix_coherence_3",
+    "valid_sid_rate"
+  ]
+}

@@ -1,0 +1,15 @@
+method,panel,num_levels,codebook_size,reason
+R3VAE (rqkmeans),varying_codebook_size,3,1024,missing configuration
+RQKMeans,varying_codebook_size,3,1024,missing configuration
+RQVAE (ECM),varying_levels,2,256,missing configuration
+RQVAE (ECM),varying_levels,4,256,missing configuration
+RQVAE (ECM),varying_codebook_size,3,1024,missing configuration
+RQVAE (RRS),varying_levels,2,256,missing configuration
+RQVAE (RRS),varying_levels,4,256,missing configuration
+RQVAE (RRS),varying_codebook_size,3,1024,missing configuration
+PLUM,varying_levels,2,256,missing configuration
+PLUM,varying_levels,4,256,missing configuration
+PLUM,varying_codebook_size,3,1024,missing configuration
+BalanceRQKMeans,varying_levels,2,256,missing configuration
+BalanceRQKMeans,varying_levels,4,256,missing configuration
+BalanceRQKMeans,varying_codebook_size,3,1024,missing configuration

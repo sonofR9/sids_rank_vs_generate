@@ -1,0 +1,6 @@
+target,icr,collision_rate,p95_collision_group_size,g_max,cur_total,code_gini,code_entropy,intra_code_similarity,prefix_coherence_1,prefix_coherence_2,prefix_coherence_3,valid_sid_rate
+recall100,44,44,42,44,42,42,42,31,42,41,25,42
+dcnv2,28,28,28,28,28,28,28,22,28,28,18,28
+dcnv2_roc_auc,28,28,28,28,28,28,28,22,28,28,18,28
+transact,28,28,28,28,28,28,28,22,28,28,18,28
+transact_roc_auc,28,28,28,28,28,28,28,22,28,28,18,28

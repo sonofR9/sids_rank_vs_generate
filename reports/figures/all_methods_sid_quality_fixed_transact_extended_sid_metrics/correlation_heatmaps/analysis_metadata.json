@@ -1,0 +1,354 @@
+{
+  "report": "reports/figures/all_methods_sid_quality_fixed_transact_extended_sid_metrics",
+  "dcnv2_roc_auc_source": "reports/figures/ranking/matched_runs.csv",
+  "targets": [
+    "recall100",
+    "dcnv2_pairwise",
+    "dcnv2_roc_auc",
+    "transact_pairwise",
+    "transact_roc_auc"
+  ],
+  "sid_metrics": [
+    "icr",
+    "collision_rate",
+    "p95_collision_group_size",
+    "g_max",
+    "cur_total",
+    "code_gini",
+    "code_entropy",
+    "intra_code_similarity",
+    "prefix_coherence_1",
+    "prefix_coherence_2",
+    "singleton_rate",
+    "collision_item_rate",
+    "pair_collision_probability",
+    "intra_code_similarity_v2",
+    "adjusted_semantic_variance_explained_1",
+    "normalized_conditional_entropy_1",
+    "pair_refinement_rate_1",
+    "load_balance_p25_1",
+    "load_balance_p75_1",
+    "load_balance_p90_1",
+    "adjusted_semantic_variance_explained_2",
+    "normalized_conditional_entropy_2",
+    "pair_refinement_rate_2",
+    "mean_active_branch_fraction_2",
+    "load_balance_p25_2",
+    "load_balance_p75_2",
+    "load_balance_p90_2",
+    "codebook_coverage_2",
+    "normalized_conditional_entropy_3",
+    "pair_refinement_rate_3",
+    "mean_active_branch_fraction_3",
+    "load_balance_p25_3",
+    "load_balance_p75_3",
+    "load_balance_p90_3",
+    "codebook_coverage_3",
+    "load_balance_p25_mean",
+    "load_balance_p75_mean",
+    "load_balance_p90_mean"
+  ],
+  "sid_metric_count": 38,
+  "candidate_sid_metric_count": 56,
+  "minimum_complete_pairs": 20,
+  "removed_sid_metrics": [
+    {
+      "sid_metric": "prefix_coherence_3",
+      "minimum_complete_pairs": 18,
+      "reason": "minimum complete-pair count 18 < 20"
+    },
+    {
+      "sid_metric": "valid_sid_rate",
+      "minimum_complete_pairs": 28,
+      "reason": "undefined Pearson or Spearman correlation"
+    },
+    {
+      "sid_metric": "prefix_coherence_4",
+      "minimum_complete_pairs": 4,
+      "reason": "minimum complete-pair count 4 < 20"
+    },
+    {
+      "sid_metric": "mean_active_branch_fraction_1",
+      "minimum_complete_pairs": 28,
+      "reason": "undefined Pearson or Spearman correlation"
+    },
+    {
+      "sid_metric": "codebook_coverage_1",
+      "minimum_complete_pairs": 28,
+      "reason": "undefined Pearson or Spearman correlation"
+    },
+    {
+      "sid_metric": "codebook_utilization_rate_1",
+      "minimum_complete_pairs": 28,
+      "reason": "undefined Pearson or Spearman correlation"
+    },
+    {
+      "sid_metric": "codebook_utilization_rate_2",
+      "minimum_complete_pairs": 28,
+      "reason": "undefined Pearson or Spearman correlation"
+    },
+    {
+      "sid_metric": "adjusted_semantic_variance_explained_3",
+      "minimum_complete_pairs": 18,
+      "reason": "minimum complete-pair count 18 < 20"
+    },
+    {
+      "sid_metric": "codebook_utilization_rate_3",
+      "minimum_complete_pairs": 24,
+      "reason": "undefined Pearson or Spearman correlation"
+    },
+    {
+      "sid_metric": "adjusted_semantic_variance_explained_4",
+      "minimum_complete_pairs": 4,
+      "reason": "minimum complete-pair count 4 < 20"
+    },
+    {
+      "sid_metric": "normalized_conditional_entropy_4",
+      "minimum_complete_pairs": 4,
+      "reason": "minimum complete-pair count 4 < 20"
+    },
+    {
+      "sid_metric": "pair_refinement_rate_4",
+      "minimum_complete_pairs": 4,
+      "reason": "minimum complete-pair count 4 < 20"
+    },
+    {
+      "sid_metric": "mean_active_branch_fraction_4",
+      "minimum_complete_pairs": 4,
+      "reason": "minimum complete-pair count 4 < 20"
+    },
+    {
+      "sid_metric": "load_balance_p25_4",
+      "minimum_complete_pairs": 4,
+      "reason": "minimum complete-pair count 4 < 20"
+    },
+    {
+      "sid_metric": "load_balance_p75_4",
+      "minimum_complete_pairs": 4,
+      "reason": "minimum complete-pair count 4 < 20"
+    },
+    {
+      "sid_metric": "load_balance_p90_4",
+      "minimum_complete_pairs": 4,
+      "reason": "minimum complete-pair count 4 < 20"
+    },
+    {
+      "sid_metric": "codebook_coverage_4",
+      "minimum_complete_pairs": 4,
+      "reason": "minimum complete-pair count 4 < 20"
+    },
+    {
+      "sid_metric": "codebook_utilization_rate_4",
+      "minimum_complete_pairs": 4,
+      "reason": "minimum complete-pair count 4 < 20; undefined Pearson or Spearman correlation"
+    }
+  ],
+  "cells": 190,
+  "generation_rows": 44,
+  "ranking_rows": 44,
+  "target_complete_rows": {
+    "recall100": 44,
+    "dcnv2_pairwise": 28,
+    "dcnv2_roc_auc": 28,
+    "transact_pairwise": 44,
+    "transact_roc_auc": 44
+  },
+  "undefined_pearson": 0,
+  "undefined_spearman": 0,
+  "color_limits": {
+    "pearson_r": {
+      "minimum": -0.7116263847282434,
+      "maximum": 0.5533452424236219
+    },
+    "spearman_rho": {
+      "minimum": -0.688387581684577,
+      "maximum": 0.5886223612646643
+    }
+  },
+  "below_recall_baseline": {
+    "recall_at_100_maximum": 0.113,
+    "generation_rows": 27,
+    "ranking_rows": 27,
+    "target_complete_rows": {
+      "recall100": 27,
+      "dcnv2_pairwise": 21,
+      "dcnv2_roc_auc": 21,
+      "transact_pairwise": 27,
+      "transact_roc_auc": 27
+    },
+    "sid_metrics": [
+      "icr",
+      "collision_rate",
+      "p95_collision_group_size",
+      "g_max",
+      "cur_total",
+      "code_gini",
+      "code_entropy",
+      "intra_code_similarity",
+      "prefix_coherence_1",
+      "prefix_coherence_2",
+      "singleton_rate",
+      "collision_item_rate",
+      "pair_collision_probability",
+      "intra_code_similarity_v2",
+      "adjusted_semantic_variance_explained_1",
+      "normalized_conditional_entropy_1",
+      "pair_refinement_rate_1",
+      "load_balance_p25_1",
+      "load_balance_p75_1",
+      "load_balance_p90_1",
+      "adjusted_semantic_variance_explained_2",
+      "normalized_conditional_entropy_2",
+      "pair_refinement_rate_2",
+      "mean_active_branch_fraction_2",
+      "load_balance_p25_2",
+      "load_balance_p75_2",
+      "load_balance_p90_2",
+      "codebook_coverage_2",
+      "load_balance_p25_mean",
+      "load_balance_p75_mean",
+      "load_balance_p90_mean"
+    ],
+    "sid_metric_count": 31,
+    "removed_sid_metrics": [
+      {
+        "sid_metric": "prefix_coherence_3",
+        "minimum_complete_pairs": 17,
+        "reason": "minimum complete-pair count 17 < 20"
+      },
+      {
+        "sid_metric": "valid_sid_rate",
+        "minimum_complete_pairs": 21,
+        "reason": "undefined Pearson or Spearman correlation"
+      },
+      {
+        "sid_metric": "prefix_coherence_4",
+        "minimum_complete_pairs": 4,
+        "reason": "minimum complete-pair count 4 < 20"
+      },
+      {
+        "sid_metric": "mean_active_branch_fraction_1",
+        "minimum_complete_pairs": 21,
+        "reason": "undefined Pearson or Spearman correlation"
+      },
+      {
+        "sid_metric": "codebook_coverage_1",
+        "minimum_complete_pairs": 21,
+        "reason": "undefined Pearson or Spearman correlation"
+      },
+      {
+        "sid_metric": "codebook_utilization_rate_1",
+        "minimum_complete_pairs": 21,
+        "reason": "undefined Pearson or Spearman correlation"
+      },
+      {
+        "sid_metric": "codebook_utilization_rate_2",
+        "minimum_complete_pairs": 21,
+        "reason": "undefined Pearson or Spearman correlation"
+      },
+      {
+        "sid_metric": "adjusted_semantic_variance_explained_3",
+        "minimum_complete_pairs": 17,
+        "reason": "minimum complete-pair count 17 < 20"
+      },
+      {
+        "sid_metric": "normalized_conditional_entropy_3",
+        "minimum_complete_pairs": 17,
+        "reason": "minimum complete-pair count 17 < 20"
+      },
+      {
+        "sid_metric": "pair_refinement_rate_3",
+        "minimum_complete_pairs": 17,
+        "reason": "minimum complete-pair count 17 < 20"
+      },
+      {
+        "sid_metric": "mean_active_branch_fraction_3",
+        "minimum_complete_pairs": 17,
+        "reason": "minimum complete-pair count 17 < 20"
+      },
+      {
+        "sid_metric": "load_balance_p25_3",
+        "minimum_complete_pairs": 17,
+        "reason": "minimum complete-pair count 17 < 20"
+      },
+      {
+        "sid_metric": "load_balance_p75_3",
+        "minimum_complete_pairs": 17,
+        "reason": "minimum complete-pair count 17 < 20"
+      },
+      {
+        "sid_metric": "load_balance_p90_3",
+        "minimum_complete_pairs": 17,
+        "reason": "minimum complete-pair count 17 < 20"
+      },
+      {
+        "sid_metric": "codebook_coverage_3",
+        "minimum_complete_pairs": 17,
+        "reason": "minimum complete-pair count 17 < 20"
+      },
+      {
+        "sid_metric": "codebook_utilization_rate_3",
+        "minimum_complete_pairs": 17,
+        "reason": "minimum complete-pair count 17 < 20; undefined Pearson or Spearman correlation"
+      },
+      {
+        "sid_metric": "adjusted_semantic_variance_explained_4",
+        "minimum_complete_pairs": 4,
+        "reason": "minimum complete-pair count 4 < 20"
+      },
+      {
+        "sid_metric": "normalized_conditional_entropy_4",
+        "minimum_complete_pairs": 4,
+        "reason": "minimum complete-pair count 4 < 20"
+      },
+      {
+        "sid_metric": "pair_refinement_rate_4",
+        "minimum_complete_pairs": 4,
+        "reason": "minimum complete-pair count 4 < 20"
+      },
+      {
+        "sid_metric": "mean_active_branch_fraction_4",
+        "minimum_complete_pairs": 4,
+        "reason": "minimum complete-pair count 4 < 20"
+      },
+      {
+        "sid_metric": "load_balance_p25_4",
+        "minimum_complete_pairs": 4,
+        "reason": "minimum complete-pair count 4 < 20"
+      },
+      {
+        "sid_metric": "load_balance_p75_4",
+        "minimum_complete_pairs": 4,
+        "reason": "minimum complete-pair count 4 < 20"
+      },
+      {
+        "sid_metric": "load_balance_p90_4",
+        "minimum_complete_pairs": 4,
+        "reason": "minimum complete-pair count 4 < 20"
+      },
+      {
+        "sid_metric": "codebook_coverage_4",
+        "minimum_complete_pairs": 4,
+        "reason": "minimum complete-pair count 4 < 20"
+      },
+      {
+        "sid_metric": "codebook_utilization_rate_4",
+        "minimum_complete_pairs": 4,
+        "reason": "minimum complete-pair count 4 < 20; undefined Pearson or Spearman correlation"
+      }
+    ],
+    "cells": 155,
+    "undefined_pearson": 0,
+    "undefined_spearman": 0,
+    "color_limits": {
+      "pearson_r": {
+        "minimum": -0.929372861783094,
+        "maximum": 0.924822888795029
+      },
+      "spearman_rho": {
+        "minimum": -0.9064265103315984,
+        "maximum": 0.9049000258076313
+      }
+    }
+  }
+}

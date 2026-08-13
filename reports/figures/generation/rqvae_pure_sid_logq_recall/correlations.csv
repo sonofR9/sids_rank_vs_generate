@@ -1,0 +1,25 @@
+downstream_metric,sid_metric,sid_metric_label,group,pearson_r,spearman_rho,num_points
+recall_at_100,icr,Raw independent code rate (ICR),ALL,-1.0,-0.9999999999999999,2
+recall_at_100,icr,Raw independent code rate (ICR),logq_mode=standard,-1.0,-0.9999999999999999,2
+recall_at_100,collision_rate,Collision Rate,ALL,1.0,0.9999999999999999,2
+recall_at_100,collision_rate,Collision Rate,logq_mode=standard,1.0,0.9999999999999999,2
+recall_at_100,p95_collision_group_size,p95 Collision Group Size,ALL,1.0,0.9999999999999999,2
+recall_at_100,p95_collision_group_size,p95 Collision Group Size,logq_mode=standard,1.0,0.9999999999999999,2
+recall_at_100,g_max,G_max,ALL,1.0,0.9999999999999999,2
+recall_at_100,g_max,G_max,logq_mode=standard,1.0,0.9999999999999999,2
+recall_at_100,cur_total,CUR_Total,ALL,,,2
+recall_at_100,cur_total,CUR_Total,logq_mode=standard,,,2
+recall_at_100,code_gini,Code Gini,ALL,1.0,0.9999999999999999,2
+recall_at_100,code_gini,Code Gini,logq_mode=standard,1.0,0.9999999999999999,2
+recall_at_100,code_entropy,Code Entropy,ALL,-1.0,-0.9999999999999999,2
+recall_at_100,code_entropy,Code Entropy,logq_mode=standard,-1.0,-0.9999999999999999,2
+recall_at_100,intra_code_similarity,Intra-code Similarity,ALL,-1.0,-0.9999999999999999,2
+recall_at_100,intra_code_similarity,Intra-code Similarity,logq_mode=standard,-1.0,-0.9999999999999999,2
+recall_at_100,prefix_coherence_1,Prefix Coherence@1,ALL,-1.0,-0.9999999999999999,2
+recall_at_100,prefix_coherence_1,Prefix Coherence@1,logq_mode=standard,-1.0,-0.9999999999999999,2
+recall_at_100,prefix_coherence_2,Prefix Coherence@2,ALL,-1.0,-0.9999999999999999,2
+recall_at_100,prefix_coherence_2,Prefix Coherence@2,logq_mode=standard,-1.0,-0.9999999999999999,2
+recall_at_100,prefix_coherence_3,Prefix Coherence@3,ALL,,,1
+recall_at_100,prefix_coherence_3,Prefix Coherence@3,logq_mode=standard,,,1
+recall_at_100,valid_sid_rate,Valid SID Rate,ALL,,,2
+recall_at_100,valid_sid_rate,Valid SID Rate,logq_mode=standard,,,2

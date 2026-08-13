@@ -1,0 +1,25 @@
+downstream_metric,sid_metric,sid_metric_label,group,pearson_r,spearman_rho,num_points
+recall_at_100,icr,Raw independent code rate (ICR),ALL,-0.889556705099701,-0.6,6
+recall_at_100,icr,Raw independent code rate (ICR),logq_mode=corrected,-0.889556705099701,-0.6,6
+recall_at_100,collision_rate,Collision Rate,ALL,0.8895567050997011,0.6,6
+recall_at_100,collision_rate,Collision Rate,logq_mode=corrected,0.8895567050997011,0.6,6
+recall_at_100,p95_collision_group_size,p95 Collision Group Size,ALL,0.9154096905437193,0.819688599970537,6
+recall_at_100,p95_collision_group_size,p95 Collision Group Size,logq_mode=corrected,0.9154096905437193,0.819688599970537,6
+recall_at_100,g_max,G_max,ALL,0.8994236361319798,0.7714285714285715,6
+recall_at_100,g_max,G_max,logq_mode=corrected,0.8994236361319798,0.7714285714285715,6
+recall_at_100,cur_total,CUR_Total,ALL,,,6
+recall_at_100,cur_total,CUR_Total,logq_mode=corrected,,,6
+recall_at_100,code_gini,Code Gini,ALL,0.9028299417968234,0.6,6
+recall_at_100,code_gini,Code Gini,logq_mode=corrected,0.9028299417968234,0.6,6
+recall_at_100,code_entropy,Code Entropy,ALL,-0.8956815785627543,-0.7142857142857143,6
+recall_at_100,code_entropy,Code Entropy,logq_mode=corrected,-0.8956815785627543,-0.7142857142857143,6
+recall_at_100,intra_code_similarity,Intra-code Similarity,ALL,-0.9010113802124675,-0.7142857142857143,6
+recall_at_100,intra_code_similarity,Intra-code Similarity,logq_mode=corrected,-0.9010113802124675,-0.7142857142857143,6
+recall_at_100,prefix_coherence_1,Prefix Coherence@1,ALL,-0.6432400139025842,-0.8285714285714287,6
+recall_at_100,prefix_coherence_1,Prefix Coherence@1,logq_mode=corrected,-0.6432400139025842,-0.8285714285714287,6
+recall_at_100,prefix_coherence_2,Prefix Coherence@2,ALL,-0.6461917183990253,-0.8285714285714287,6
+recall_at_100,prefix_coherence_2,Prefix Coherence@2,logq_mode=corrected,-0.6461917183990253,-0.8285714285714287,6
+recall_at_100,prefix_coherence_3,Prefix Coherence@3,ALL,-0.9191329294963094,-0.7999999999999999,5
+recall_at_100,prefix_coherence_3,Prefix Coherence@3,logq_mode=corrected,-0.9191329294963094,-0.7999999999999999,5
+recall_at_100,valid_sid_rate,Valid SID Rate,ALL,,,6
+recall_at_100,valid_sid_rate,Valid SID Rate,logq_mode=corrected,,,6

@@ -11,6 +11,7 @@ from .data import (
     load_interactions,
     prepare_interactions,
 )
+from .data.protocols import THREE_WAY_PROTOCOL_ID
 from .reproducibility import SID_EXPERIMENT_SEED, seed_everything
 
 
@@ -18,10 +19,13 @@ from .reproducibility import SID_EXPERIMENT_SEED, seed_everything
 class PipelineConfig:
     interactions_path: Path
     core_min_interactions_per_item: int = 5
-    history_days: float | None = 365.0
+    history_days: float | None = None
     test_days: float = 7.0
     timestamp_unit_seconds: float = 1.0
+    validation_fraction: float = 0.1
+    catalog_from_fit: bool = False
     latest_interactions: int | None = None
+    protocol_id: str = THREE_WAY_PROTOCOL_ID
 
     @property
     def preprocessing(self) -> PreprocessingConfig:
@@ -30,6 +34,9 @@ class PipelineConfig:
             history_days=self.history_days,
             test_days=self.test_days,
             timestamp_unit_seconds=self.timestamp_unit_seconds,
+            validation_fraction=self.validation_fraction,
+            catalog_from_fit=self.catalog_from_fit,
+            protocol_id=self.protocol_id,
         )
 
 

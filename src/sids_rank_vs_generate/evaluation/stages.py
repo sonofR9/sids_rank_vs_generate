@@ -10,6 +10,7 @@ import polars as pl
 
 from ..data import PreparedInteractions
 from ..datasets import DatasetFiles
+from ..sids.user_aware import IUserAwareSidPipeline
 from ..tracking import ExperimentTracker, NullTracker
 
 
@@ -23,6 +24,8 @@ class EvaluationContext:
     artifact_dir: Path
     max_rows: int | None = None
     tracker: ExperimentTracker = field(default_factory=NullTracker)
+    user_sid_pipeline: IUserAwareSidPipeline | None = None
+    fit_user_sids: pl.DataFrame | None = None
 
 
 class IEvaluationStage(ABC):

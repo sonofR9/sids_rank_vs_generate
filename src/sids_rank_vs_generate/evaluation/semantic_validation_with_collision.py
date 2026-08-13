@@ -7,7 +7,7 @@ from ..training.utils import autocast, move_to_device
 from .beam_search import semantic_beam_search
 
 
-# просто беру иду по всем предсказанным сидам, если у кого-то коллизия, то их все выписываю все, беру топ-к айтемомов
+# Разворачиваем SID с коллизиями в top-k айтемов
 def beams_to_items(user_beams, sid_to_items, k):
     predicted_items = []
 
@@ -28,6 +28,7 @@ def validate_semantic_model_with_collisions(
     cfg,
     sid_to_items,
     sid_catalog=None,
+    sid_logq_table=None,
 ):
     model.eval()
 
@@ -38,8 +39,15 @@ def validate_semantic_model_with_collisions(
     token_total = 0
     top1_exact = 0
     all_predictions = []
+    reciprocal_rank = 0.0
+    recommended_items = set()
     for batch in val_loader:
         batch = move_to_device(batch, cfg.device)
+        model_kwargs = {}
+        if "user_features" in batch:
+            model_kwargs["user_features"] = batch["user_features"]
+        if "sid_log_q" in batch:
+            model_kwargs["sid_log_q"] = batch["sid_log_q"]
 
         with autocast(batch["history"].device, cfg.use_bf16):
             out = model(
@@ -47,7 +55,7 @@ def validate_semantic_model_with_collisions(
                 batch["positions"],
                 batch["mask"],
                 batch["sid"],
-                target=batch["target"],
+                **model_kwargs,
             )
 
         preds = out["preds"]
@@ -64,6 +72,8 @@ def validate_semantic_model_with_collisions(
             beam_size=cfg.num_beams,
             use_bf16=cfg.use_bf16,
             sid_catalog=sid_catalog,
+            sid_logq_table=sid_logq_table,
+            user_features=model_kwargs.get("user_features"),
         )
 
         for user_beams, target_item in zip(beams, batch["target"]):
@@ -74,6 +84,11 @@ def validate_semantic_model_with_collisions(
             )
             all_predictions.extend(predicted_items)
             recall_sum += float(int(target_item.item()) in set(predicted_items))
+            recommended_items.update(predicted_items)
+            if int(target_item.item()) in predicted_items:
+                reciprocal_rank += 1.0 / (
+                    predicted_items.index(int(target_item.item())) + 1
+                )
             total += 1
     _, counts = np.unique(all_predictions, return_counts=True)
     idx = np.argsort(counts)[::-1]
@@ -82,15 +97,17 @@ def validate_semantic_model_with_collisions(
     prediction_total = np.sum(counts)
     coverage_ratio = cumsum / max(prediction_total, 1)
     threshold = 0.95
-    idx_95 = (
-        np.searchsorted(coverage_ratio, threshold) + 1
-        if prediction_total
-        else 0
-    )
+    idx_95 = np.searchsorted(coverage_ratio, threshold) + 1 if prediction_total else 0
+
+    catalog = {item for items in sid_to_items.values() for item in items}
     return {
         "top1_sid_token_acc": token_correct / max(token_total, 1),
         "top1_sid_exact": top1_exact / max(total, 1),
         f"recall@{cfg.recall_k}": recall_sum / max(total, 1),
+        f"mrr@{cfg.recall_k}": reciprocal_rank / max(total, 1),
+        f"catalog_coverage@{cfg.recall_k}": (
+            len(recommended_items) / max(len(catalog), 1)
+        ),
         "beam_size": cfg.num_beams,
         "Effective vocab size": idx_95,
     }
