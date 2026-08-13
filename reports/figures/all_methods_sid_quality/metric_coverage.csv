@@ -10,6 +10,10 @@ recall100,icr,PLUM,3
 recall100,icr,BalanceRQKMeans,3
 recall100,icr,RQVAE + item LogQ,6
 recall100,icr,RQVAE + pure SID LogQ,2
+recall100,icr,UAQ30 v1 capacity,2
+recall100,icr,UAQ30 v2 capacity,3
+recall100,icr,UAQ30 v1 anchor,1
+recall100,icr,UAQ30 v2 anchor,1
 recall100,collision_rate,R3VAE (rqkmeans),5
 recall100,collision_rate,R3VAE (spherical),6
 recall100,collision_rate,RQKMeans,5
@@ -21,6 +25,10 @@ recall100,collision_rate,PLUM,3
 recall100,collision_rate,BalanceRQKMeans,3
 recall100,collision_rate,RQVAE + item LogQ,6
 recall100,collision_rate,RQVAE + pure SID LogQ,2
+recall100,collision_rate,UAQ30 v1 capacity,2
+recall100,collision_rate,UAQ30 v2 capacity,3
+recall100,collision_rate,UAQ30 v1 anchor,1
+recall100,collision_rate,UAQ30 v2 anchor,1
 recall100,p95_collision_group_size,R3VAE (rqkmeans),5
 recall100,p95_collision_group_size,R3VAE (spherical),6
 recall100,p95_collision_group_size,RQKMeans,5
@@ -32,6 +40,10 @@ recall100,p95_collision_group_size,PLUM,3
 recall100,p95_collision_group_size,BalanceRQKMeans,3
 recall100,p95_collision_group_size,RQVAE + item LogQ,6
 recall100,p95_collision_group_size,RQVAE + pure SID LogQ,2
+recall100,p95_collision_group_size,UAQ30 v1 capacity,2
+recall100,p95_collision_group_size,UAQ30 v2 capacity,3
+recall100,p95_collision_group_size,UAQ30 v1 anchor,1
+recall100,p95_collision_group_size,UAQ30 v2 anchor,1
 recall100,g_max,R3VAE (rqkmeans),5
 recall100,g_max,R3VAE (spherical),6
 recall100,g_max,RQKMeans,5
@@ -43,6 +55,10 @@ recall100,g_max,PLUM,3
 recall100,g_max,BalanceRQKMeans,3
 recall100,g_max,RQVAE + item LogQ,6
 recall100,g_max,RQVAE + pure SID LogQ,2
+recall100,g_max,UAQ30 v1 capacity,2
+recall100,g_max,UAQ30 v2 capacity,3
+recall100,g_max,UAQ30 v1 anchor,1
+recall100,g_max,UAQ30 v2 anchor,1
 recall100,cur_total,R3VAE (rqkmeans),5
 recall100,cur_total,R3VAE (spherical),6
 recall100,cur_total,RQKMeans,5
@@ -54,6 +70,10 @@ recall100,cur_total,PLUM,3
 recall100,cur_total,BalanceRQKMeans,3
 recall100,cur_total,RQVAE + item LogQ,6
 recall100,cur_total,RQVAE + pure SID LogQ,2
+recall100,cur_total,UAQ30 v1 capacity,2
+recall100,cur_total,UAQ30 v2 capacity,3
+recall100,cur_total,UAQ30 v1 anchor,1
+recall100,cur_total,UAQ30 v2 anchor,1
 recall100,code_gini,R3VAE (rqkmeans),5
 recall100,code_gini,R3VAE (spherical),6
 recall100,code_gini,RQKMeans,5
@@ -65,6 +85,10 @@ recall100,code_gini,PLUM,3
 recall100,code_gini,BalanceRQKMeans,3
 recall100,code_gini,RQVAE + item LogQ,6
 recall100,code_gini,RQVAE + pure SID LogQ,2
+recall100,code_gini,UAQ30 v1 capacity,2
+recall100,code_gini,UAQ30 v2 capacity,3
+recall100,code_gini,UAQ30 v1 anchor,1
+recall100,code_gini,UAQ30 v2 anchor,1
 recall100,code_entropy,R3VAE (rqkmeans),5
 recall100,code_entropy,R3VAE (spherical),6
 recall100,code_entropy,RQKMeans,5
@@ -76,6 +100,10 @@ recall100,code_entropy,PLUM,3
 recall100,code_entropy,BalanceRQKMeans,3
 recall100,code_entropy,RQVAE + item LogQ,6
 recall100,code_entropy,RQVAE + pure SID LogQ,2
+recall100,code_entropy,UAQ30 v1 capacity,2
+recall100,code_entropy,UAQ30 v2 capacity,3
+recall100,code_entropy,UAQ30 v1 anchor,1
+recall100,code_entropy,UAQ30 v2 anchor,1
 recall100,intra_code_similarity,R3VAE (rqkmeans),5
 recall100,intra_code_similarity,R3VAE (spherical),6
 recall100,intra_code_similarity,RQKMeans,5
@@ -87,6 +115,10 @@ recall100,intra_code_similarity,PLUM,2
 recall100,intra_code_similarity,BalanceRQKMeans,2
 recall100,intra_code_similarity,RQVAE + item LogQ,6
 recall100,intra_code_similarity,RQVAE + pure SID LogQ,2
+recall100,intra_code_similarity,UAQ30 v1 capacity,2
+recall100,intra_code_similarity,UAQ30 v2 capacity,3
+recall100,intra_code_similarity,UAQ30 v1 anchor,1
+recall100,intra_code_similarity,UAQ30 v2 anchor,1
 recall100,prefix_coherence_1,R3VAE (rqkmeans),5
 recall100,prefix_coherence_1,R3VAE (spherical),6
 recall100,prefix_coherence_1,RQKMeans,5
@@ -98,6 +130,10 @@ recall100,prefix_coherence_1,PLUM,3
 recall100,prefix_coherence_1,BalanceRQKMeans,3
 recall100,prefix_coherence_1,RQVAE + item LogQ,6
 recall100,prefix_coherence_1,RQVAE + pure SID LogQ,2
+recall100,prefix_coherence_1,UAQ30 v1 capacity,2
+recall100,prefix_coherence_1,UAQ30 v2 capacity,3
+recall100,prefix_coherence_1,UAQ30 v1 anchor,1
+recall100,prefix_coherence_1,UAQ30 v2 anchor,1
 recall100,prefix_coherence_2,R3VAE (rqkmeans),5
 recall100,prefix_coherence_2,R3VAE (spherical),6
 recall100,prefix_coherence_2,RQKMeans,5
@@ -109,6 +145,10 @@ recall100,prefix_coherence_2,PLUM,3
 recall100,prefix_coherence_2,BalanceRQKMeans,3
 recall100,prefix_coherence_2,RQVAE + item LogQ,6
 recall100,prefix_coherence_2,RQVAE + pure SID LogQ,2
+recall100,prefix_coherence_2,UAQ30 v1 capacity,2
+recall100,prefix_coherence_2,UAQ30 v2 capacity,3
+recall100,prefix_coherence_2,UAQ30 v1 anchor,1
+recall100,prefix_coherence_2,UAQ30 v2 anchor,1
 recall100,prefix_coherence_3,R3VAE (rqkmeans),4
 recall100,prefix_coherence_3,R3VAE (spherical),5
 recall100,prefix_coherence_3,RQKMeans,4
@@ -120,6 +160,10 @@ recall100,prefix_coherence_3,PLUM,2
 recall100,prefix_coherence_3,BalanceRQKMeans,2
 recall100,prefix_coherence_3,RQVAE + item LogQ,5
 recall100,prefix_coherence_3,RQVAE + pure SID LogQ,1
+recall100,prefix_coherence_3,UAQ30 v1 capacity,2
+recall100,prefix_coherence_3,UAQ30 v2 capacity,3
+recall100,prefix_coherence_3,UAQ30 v1 anchor,1
+recall100,prefix_coherence_3,UAQ30 v2 anchor,1
 recall100,valid_sid_rate,R3VAE (rqkmeans),5
 recall100,valid_sid_rate,R3VAE (spherical),6
 recall100,valid_sid_rate,RQKMeans,5
@@ -131,6 +175,10 @@ recall100,valid_sid_rate,PLUM,3
 recall100,valid_sid_rate,BalanceRQKMeans,3
 recall100,valid_sid_rate,RQVAE + item LogQ,6
 recall100,valid_sid_rate,RQVAE + pure SID LogQ,2
+recall100,valid_sid_rate,UAQ30 v1 capacity,2
+recall100,valid_sid_rate,UAQ30 v2 capacity,3
+recall100,valid_sid_rate,UAQ30 v1 anchor,1
+recall100,valid_sid_rate,UAQ30 v2 anchor,1
 dcnv2,icr,R3VAE (rqkmeans),5
 dcnv2,icr,R3VAE (spherical),6
 dcnv2,icr,RQKMeans,5
@@ -142,6 +190,10 @@ dcnv2,icr,PLUM,0
 dcnv2,icr,BalanceRQKMeans,0
 dcnv2,icr,RQVAE + item LogQ,0
 dcnv2,icr,RQVAE + pure SID LogQ,0
+dcnv2,icr,UAQ30 v1 capacity,0
+dcnv2,icr,UAQ30 v2 capacity,0
+dcnv2,icr,UAQ30 v1 anchor,0
+dcnv2,icr,UAQ30 v2 anchor,0
 dcnv2,collision_rate,R3VAE (rqkmeans),5
 dcnv2,collision_rate,R3VAE (spherical),6
 dcnv2,collision_rate,RQKMeans,5
@@ -153,6 +205,10 @@ dcnv2,collision_rate,PLUM,0
 dcnv2,collision_rate,BalanceRQKMeans,0
 dcnv2,collision_rate,RQVAE + item LogQ,0
 dcnv2,collision_rate,RQVAE + pure SID LogQ,0
+dcnv2,collision_rate,UAQ30 v1 capacity,0
+dcnv2,collision_rate,UAQ30 v2 capacity,0
+dcnv2,collision_rate,UAQ30 v1 anchor,0
+dcnv2,collision_rate,UAQ30 v2 anchor,0
 dcnv2,p95_collision_group_size,R3VAE (rqkmeans),5
 dcnv2,p95_collision_group_size,R3VAE (spherical),6
 dcnv2,p95_collision_group_size,RQKMeans,5
@@ -164,6 +220,10 @@ dcnv2,p95_collision_group_size,PLUM,0
 dcnv2,p95_collision_group_size,BalanceRQKMeans,0
 dcnv2,p95_collision_group_size,RQVAE + item LogQ,0
 dcnv2,p95_collision_group_size,RQVAE + pure SID LogQ,0
+dcnv2,p95_collision_group_size,UAQ30 v1 capacity,0
+dcnv2,p95_collision_group_size,UAQ30 v2 capacity,0
+dcnv2,p95_collision_group_size,UAQ30 v1 anchor,0
+dcnv2,p95_collision_group_size,UAQ30 v2 anchor,0
 dcnv2,g_max,R3VAE (rqkmeans),5
 dcnv2,g_max,R3VAE (spherical),6
 dcnv2,g_max,RQKMeans,5
@@ -175,6 +235,10 @@ dcnv2,g_max,PLUM,0
 dcnv2,g_max,BalanceRQKMeans,0
 dcnv2,g_max,RQVAE + item LogQ,0
 dcnv2,g_max,RQVAE + pure SID LogQ,0
+dcnv2,g_max,UAQ30 v1 capacity,0
+dcnv2,g_max,UAQ30 v2 capacity,0
+dcnv2,g_max,UAQ30 v1 anchor,0
+dcnv2,g_max,UAQ30 v2 anchor,0
 dcnv2,cur_total,R3VAE (rqkmeans),5
 dcnv2,cur_total,R3VAE (spherical),6
 dcnv2,cur_total,RQKMeans,5
@@ -186,6 +250,10 @@ dcnv2,cur_total,PLUM,0
 dcnv2,cur_total,BalanceRQKMeans,0
 dcnv2,cur_total,RQVAE + item LogQ,0
 dcnv2,cur_total,RQVAE + pure SID LogQ,0
+dcnv2,cur_total,UAQ30 v1 capacity,0
+dcnv2,cur_total,UAQ30 v2 capacity,0
+dcnv2,cur_total,UAQ30 v1 anchor,0
+dcnv2,cur_total,UAQ30 v2 anchor,0
 dcnv2,code_gini,R3VAE (rqkmeans),5
 dcnv2,code_gini,R3VAE (spherical),6
 dcnv2,code_gini,RQKMeans,5
@@ -197,6 +265,10 @@ dcnv2,code_gini,PLUM,0
 dcnv2,code_gini,BalanceRQKMeans,0
 dcnv2,code_gini,RQVAE + item LogQ,0
 dcnv2,code_gini,RQVAE + pure SID LogQ,0
+dcnv2,code_gini,UAQ30 v1 capacity,0
+dcnv2,code_gini,UAQ30 v2 capacity,0
+dcnv2,code_gini,UAQ30 v1 anchor,0
+dcnv2,code_gini,UAQ30 v2 anchor,0
 dcnv2,code_entropy,R3VAE (rqkmeans),5
 dcnv2,code_entropy,R3VAE (spherical),6
 dcnv2,code_entropy,RQKMeans,5
@@ -208,6 +280,10 @@ dcnv2,code_entropy,PLUM,0
 dcnv2,code_entropy,BalanceRQKMeans,0
 dcnv2,code_entropy,RQVAE + item LogQ,0
 dcnv2,code_entropy,RQVAE + pure SID LogQ,0
+dcnv2,code_entropy,UAQ30 v1 capacity,0
+dcnv2,code_entropy,UAQ30 v2 capacity,0
+dcnv2,code_entropy,UAQ30 v1 anchor,0
+dcnv2,code_entropy,UAQ30 v2 anchor,0
 dcnv2,intra_code_similarity,R3VAE (rqkmeans),5
 dcnv2,intra_code_similarity,R3VAE (spherical),6
 dcnv2,intra_code_similarity,RQKMeans,5
@@ -219,6 +295,10 @@ dcnv2,intra_code_similarity,PLUM,0
 dcnv2,intra_code_similarity,BalanceRQKMeans,0
 dcnv2,intra_code_similarity,RQVAE + item LogQ,0
 dcnv2,intra_code_similarity,RQVAE + pure SID LogQ,0
+dcnv2,intra_code_similarity,UAQ30 v1 capacity,0
+dcnv2,intra_code_similarity,UAQ30 v2 capacity,0
+dcnv2,intra_code_similarity,UAQ30 v1 anchor,0
+dcnv2,intra_code_similarity,UAQ30 v2 anchor,0
 dcnv2,prefix_coherence_1,R3VAE (rqkmeans),5
 dcnv2,prefix_coherence_1,R3VAE (spherical),6
 dcnv2,prefix_coherence_1,RQKMeans,5
@@ -230,6 +310,10 @@ dcnv2,prefix_coherence_1,PLUM,0
 dcnv2,prefix_coherence_1,BalanceRQKMeans,0
 dcnv2,prefix_coherence_1,RQVAE + item LogQ,0
 dcnv2,prefix_coherence_1,RQVAE + pure SID LogQ,0
+dcnv2,prefix_coherence_1,UAQ30 v1 capacity,0
+dcnv2,prefix_coherence_1,UAQ30 v2 capacity,0
+dcnv2,prefix_coherence_1,UAQ30 v1 anchor,0
+dcnv2,prefix_coherence_1,UAQ30 v2 anchor,0
 dcnv2,prefix_coherence_2,R3VAE (rqkmeans),5
 dcnv2,prefix_coherence_2,R3VAE (spherical),6
 dcnv2,prefix_coherence_2,RQKMeans,5
@@ -241,6 +325,10 @@ dcnv2,prefix_coherence_2,PLUM,0
 dcnv2,prefix_coherence_2,BalanceRQKMeans,0
 dcnv2,prefix_coherence_2,RQVAE + item LogQ,0
 dcnv2,prefix_coherence_2,RQVAE + pure SID LogQ,0
+dcnv2,prefix_coherence_2,UAQ30 v1 capacity,0
+dcnv2,prefix_coherence_2,UAQ30 v2 capacity,0
+dcnv2,prefix_coherence_2,UAQ30 v1 anchor,0
+dcnv2,prefix_coherence_2,UAQ30 v2 anchor,0
 dcnv2,prefix_coherence_3,R3VAE (rqkmeans),4
 dcnv2,prefix_coherence_3,R3VAE (spherical),5
 dcnv2,prefix_coherence_3,RQKMeans,4
@@ -252,6 +340,10 @@ dcnv2,prefix_coherence_3,PLUM,0
 dcnv2,prefix_coherence_3,BalanceRQKMeans,0
 dcnv2,prefix_coherence_3,RQVAE + item LogQ,0
 dcnv2,prefix_coherence_3,RQVAE + pure SID LogQ,0
+dcnv2,prefix_coherence_3,UAQ30 v1 capacity,0
+dcnv2,prefix_coherence_3,UAQ30 v2 capacity,0
+dcnv2,prefix_coherence_3,UAQ30 v1 anchor,0
+dcnv2,prefix_coherence_3,UAQ30 v2 anchor,0
 dcnv2,valid_sid_rate,R3VAE (rqkmeans),5
 dcnv2,valid_sid_rate,R3VAE (spherical),6
 dcnv2,valid_sid_rate,RQKMeans,5
@@ -263,6 +355,10 @@ dcnv2,valid_sid_rate,PLUM,0
 dcnv2,valid_sid_rate,BalanceRQKMeans,0
 dcnv2,valid_sid_rate,RQVAE + item LogQ,0
 dcnv2,valid_sid_rate,RQVAE + pure SID LogQ,0
+dcnv2,valid_sid_rate,UAQ30 v1 capacity,0
+dcnv2,valid_sid_rate,UAQ30 v2 capacity,0
+dcnv2,valid_sid_rate,UAQ30 v1 anchor,0
+dcnv2,valid_sid_rate,UAQ30 v2 anchor,0
 transact,icr,R3VAE (rqkmeans),5
 transact,icr,R3VAE (spherical),6
 transact,icr,RQKMeans,5
@@ -274,6 +370,10 @@ transact,icr,PLUM,0
 transact,icr,BalanceRQKMeans,0
 transact,icr,RQVAE + item LogQ,0
 transact,icr,RQVAE + pure SID LogQ,0
+transact,icr,UAQ30 v1 capacity,0
+transact,icr,UAQ30 v2 capacity,0
+transact,icr,UAQ30 v1 anchor,0
+transact,icr,UAQ30 v2 anchor,0
 transact,collision_rate,R3VAE (rqkmeans),5
 transact,collision_rate,R3VAE (spherical),6
 transact,collision_rate,RQKMeans,5
@@ -285,6 +385,10 @@ transact,collision_rate,PLUM,0
 transact,collision_rate,BalanceRQKMeans,0
 transact,collision_rate,RQVAE + item LogQ,0
 transact,collision_rate,RQVAE + pure SID LogQ,0
+transact,collision_rate,UAQ30 v1 capacity,0
+transact,collision_rate,UAQ30 v2 capacity,0
+transact,collision_rate,UAQ30 v1 anchor,0
+transact,collision_rate,UAQ30 v2 anchor,0
 transact,p95_collision_group_size,R3VAE (rqkmeans),5
 transact,p95_collision_group_size,R3VAE (spherical),6
 transact,p95_collision_group_size,RQKMeans,5
@@ -296,6 +400,10 @@ transact,p95_collision_group_size,PLUM,0
 transact,p95_collision_group_size,BalanceRQKMeans,0
 transact,p95_collision_group_size,RQVAE + item LogQ,0
 transact,p95_collision_group_size,RQVAE + pure SID LogQ,0
+transact,p95_collision_group_size,UAQ30 v1 capacity,0
+transact,p95_collision_group_size,UAQ30 v2 capacity,0
+transact,p95_collision_group_size,UAQ30 v1 anchor,0
+transact,p95_collision_group_size,UAQ30 v2 anchor,0
 transact,g_max,R3VAE (rqkmeans),5
 transact,g_max,R3VAE (spherical),6
 transact,g_max,RQKMeans,5
@@ -307,6 +415,10 @@ transact,g_max,PLUM,0
 transact,g_max,BalanceRQKMeans,0
 transact,g_max,RQVAE + item LogQ,0
 transact,g_max,RQVAE + pure SID LogQ,0
+transact,g_max,UAQ30 v1 capacity,0
+transact,g_max,UAQ30 v2 capacity,0
+transact,g_max,UAQ30 v1 anchor,0
+transact,g_max,UAQ30 v2 anchor,0
 transact,cur_total,R3VAE (rqkmeans),5
 transact,cur_total,R3VAE (spherical),6
 transact,cur_total,RQKMeans,5
@@ -318,6 +430,10 @@ transact,cur_total,PLUM,0
 transact,cur_total,BalanceRQKMeans,0
 transact,cur_total,RQVAE + item LogQ,0
 transact,cur_total,RQVAE + pure SID LogQ,0
+transact,cur_total,UAQ30 v1 capacity,0
+transact,cur_total,UAQ30 v2 capacity,0
+transact,cur_total,UAQ30 v1 anchor,0
+transact,cur_total,UAQ30 v2 anchor,0
 transact,code_gini,R3VAE (rqkmeans),5
 transact,code_gini,R3VAE (spherical),6
 transact,code_gini,RQKMeans,5
@@ -329,6 +445,10 @@ transact,code_gini,PLUM,0
 transact,code_gini,BalanceRQKMeans,0
 transact,code_gini,RQVAE + item LogQ,0
 transact,code_gini,RQVAE + pure SID LogQ,0
+transact,code_gini,UAQ30 v1 capacity,0
+transact,code_gini,UAQ30 v2 capacity,0
+transact,code_gini,UAQ30 v1 anchor,0
+transact,code_gini,UAQ30 v2 anchor,0
 transact,code_entropy,R3VAE (rqkmeans),5
 transact,code_entropy,R3VAE (spherical),6
 transact,code_entropy,RQKMeans,5
@@ -340,6 +460,10 @@ transact,code_entropy,PLUM,0
 transact,code_entropy,BalanceRQKMeans,0
 transact,code_entropy,RQVAE + item LogQ,0
 transact,code_entropy,RQVAE + pure SID LogQ,0
+transact,code_entropy,UAQ30 v1 capacity,0
+transact,code_entropy,UAQ30 v2 capacity,0
+transact,code_entropy,UAQ30 v1 anchor,0
+transact,code_entropy,UAQ30 v2 anchor,0
 transact,intra_code_similarity,R3VAE (rqkmeans),5
 transact,intra_code_similarity,R3VAE (spherical),6
 transact,intra_code_similarity,RQKMeans,5
@@ -351,6 +475,10 @@ transact,intra_code_similarity,PLUM,0
 transact,intra_code_similarity,BalanceRQKMeans,0
 transact,intra_code_similarity,RQVAE + item LogQ,0
 transact,intra_code_similarity,RQVAE + pure SID LogQ,0
+transact,intra_code_similarity,UAQ30 v1 capacity,0
+transact,intra_code_similarity,UAQ30 v2 capacity,0
+transact,intra_code_similarity,UAQ30 v1 anchor,0
+transact,intra_code_similarity,UAQ30 v2 anchor,0
 transact,prefix_coherence_1,R3VAE (rqkmeans),5
 transact,prefix_coherence_1,R3VAE (spherical),6
 transact,prefix_coherence_1,RQKMeans,5
@@ -362,6 +490,10 @@ transact,prefix_coherence_1,PLUM,0
 transact,prefix_coherence_1,BalanceRQKMeans,0
 transact,prefix_coherence_1,RQVAE + item LogQ,0
 transact,prefix_coherence_1,RQVAE + pure SID LogQ,0
+transact,prefix_coherence_1,UAQ30 v1 capacity,0
+transact,prefix_coherence_1,UAQ30 v2 capacity,0
+transact,prefix_coherence_1,UAQ30 v1 anchor,0
+transact,prefix_coherence_1,UAQ30 v2 anchor,0
 transact,prefix_coherence_2,R3VAE (rqkmeans),5
 transact,prefix_coherence_2,R3VAE (spherical),6
 transact,prefix_coherence_2,RQKMeans,5
@@ -373,6 +505,10 @@ transact,prefix_coherence_2,PLUM,0
 transact,prefix_coherence_2,BalanceRQKMeans,0
 transact,prefix_coherence_2,RQVAE + item LogQ,0
 transact,prefix_coherence_2,RQVAE + pure SID LogQ,0
+transact,prefix_coherence_2,UAQ30 v1 capacity,0
+transact,prefix_coherence_2,UAQ30 v2 capacity,0
+transact,prefix_coherence_2,UAQ30 v1 anchor,0
+transact,prefix_coherence_2,UAQ30 v2 anchor,0
 transact,prefix_coherence_3,R3VAE (rqkmeans),4
 transact,prefix_coherence_3,R3VAE (spherical),5
 transact,prefix_coherence_3,RQKMeans,4
@@ -384,6 +520,10 @@ transact,prefix_coherence_3,PLUM,0
 transact,prefix_coherence_3,BalanceRQKMeans,0
 transact,prefix_coherence_3,RQVAE + item LogQ,0
 transact,prefix_coherence_3,RQVAE + pure SID LogQ,0
+transact,prefix_coherence_3,UAQ30 v1 capacity,0
+transact,prefix_coherence_3,UAQ30 v2 capacity,0
+transact,prefix_coherence_3,UAQ30 v1 anchor,0
+transact,prefix_coherence_3,UAQ30 v2 anchor,0
 transact,valid_sid_rate,R3VAE (rqkmeans),5
 transact,valid_sid_rate,R3VAE (spherical),6
 transact,valid_sid_rate,RQKMeans,5
@@ -395,3 +535,7 @@ transact,valid_sid_rate,PLUM,0
 transact,valid_sid_rate,BalanceRQKMeans,0
 transact,valid_sid_rate,RQVAE + item LogQ,0
 transact,valid_sid_rate,RQVAE + pure SID LogQ,0
+transact,valid_sid_rate,UAQ30 v1 capacity,0
+transact,valid_sid_rate,UAQ30 v2 capacity,0
+transact,valid_sid_rate,UAQ30 v1 anchor,0
+transact,valid_sid_rate,UAQ30 v2 anchor,0

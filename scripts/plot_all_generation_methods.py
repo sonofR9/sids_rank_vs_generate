@@ -67,7 +67,17 @@ BASE_METHOD_ORDER = (
     "R3VAE (rqkmeans)", "R3VAE (spherical)", "RQKMeans", "RQVAE (ECM)",
     "RQVAE", "RQVAE (RRS)", "RQVAE-token",
 )
-METHOD_ORDER = (*BASE_METHOD_ORDER, "PLUM", "BalanceRQKMeans", "RQVAE + item LogQ", "RQVAE + pure SID LogQ")
+METHOD_ORDER = (
+    *BASE_METHOD_ORDER,
+    "PLUM",
+    "BalanceRQKMeans",
+    "RQVAE + item LogQ",
+    "RQVAE + pure SID LogQ",
+    "UAQ30 v1 capacity",
+    "UAQ30 v2 capacity",
+    "UAQ30 v1 anchor",
+    "UAQ30 v2 anchor",
+)
 METHOD_STYLE = {
     "R3VAE (rqkmeans)": ("#72B7B2", "o", False), "R3VAE (spherical)": ("#54A24B", "o", False),
     "RQKMeans": ("#4C78A8", "o", False), "RQVAE (ECM)": ("#B279A2", "o", False),
@@ -75,6 +85,10 @@ METHOD_STYLE = {
     "RQVAE-token": ("#FF9DA6", "s", True), "PLUM": ("#9D755D", "^", False),
     "BalanceRQKMeans": ("#7A5195", "s", False), "RQVAE + item LogQ": ("#8C6D31", "P", False),
     "RQVAE + pure SID LogQ": ("#E15759", "X", False),
+    "UAQ30 v1 capacity": ("#003F5C", "v", True),
+    "UAQ30 v2 capacity": ("#2F4B7C", "v", False),
+    "UAQ30 v1 anchor": ("#00A6A6", "<", True),
+    "UAQ30 v2 anchor": ("#007C91", "<", False),
 }
 EXTENSION_METHODS = {"PLUM", "BalanceRQKMeans"}
 
@@ -228,6 +242,7 @@ def main() -> None:
     parser.add_argument("--item-logq-report", type=Path)
     parser.add_argument("--pure-sid-logq-report", type=Path)
     parser.add_argument("--poster-extensions-report", type=Path)
+    parser.add_argument("--user-aware-report", type=Path)
     parser.add_argument(
         "--poster-extensions-33148-report",
         type=Path,
@@ -254,6 +269,9 @@ def main() -> None:
     args.poster_extensions_33148_report = args.poster_extensions_33148_report or first_existing(
         Path("reports/figures/generation/poster_plum_balance_recall_33148/matched_generation_runs.csv"),
     )
+    args.user_aware_report = args.user_aware_report or first_existing(
+        Path("reports/figures/generation/user_aware_recall/user_aware_generation_runs.csv"),
+    )
     args.ranking_report = args.ranking_report or first_existing(
         Path("reports/figures/ranking/matched_runs.csv"),
         Path("reports/figures/ranking/sid_quality_correlations/matched_runs.csv"),
@@ -263,8 +281,9 @@ def main() -> None:
     pure_sid_logq = normalize(read_csv(args.pure_sid_logq_report, "pure_sid_logq", required=False), method="RQVAE + pure SID LogQ")
     extensions = normalize(read_csv(args.poster_extensions_report, "poster_extensions", required=False))
     extensions_33148 = normalize(read_csv(args.poster_extensions_33148_report, "poster_extensions_33148", required=False))
+    user_aware = normalize(read_csv(args.user_aware_report, "user_aware", required=False))
     generation = deduplicate(numeric(filter_extensions(pd.concat([
-        raw, item_logq, pure_sid_logq, extensions, extensions_33148,
+        raw, item_logq, pure_sid_logq, extensions, extensions_33148, user_aware,
     ], ignore_index=True))))
     ranking = deduplicate(numeric(filter_extensions(normalize(read_csv(args.ranking_report, "ranking")))))
     combined = pd.concat([generation, ranking], ignore_index=True)
