@@ -18,7 +18,8 @@ together so results can be inspected without access to MLflow.
 - `all_methods_sid_quality/`: combined two-panel figures. For each SID metric,
   it contains Recall@100, DCNv2 Pairwise Accuracy, and TransAct Pairwise
   Accuracy views across all compatible method families, including both LogQ
-variants. PLUM and BalanceRQKMeans require the 33,148-item catalog tag.
+  variants and compatible UAQ30 user-aware generation runs. PLUM,
+  BalanceRQKMeans, and UAQ30 use the 33,148-item catalog.
 
 The intermediate raw-SID snapshot from `sid_quality_correlations.zip` is not
 kept separately: the later export contains the final figures and one additional
