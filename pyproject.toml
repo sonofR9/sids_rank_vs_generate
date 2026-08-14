@@ -21,6 +21,7 @@ mlflow = ["mlflow>=3.0"]
 
 [project.scripts]
 sids-run = "sids_rank_vs_generate.experiment:main"
+diger-reference = "sids_rank_vs_generate.diger_reference:main"
 sasrec-baseline = "sids_rank_vs_generate.experiments.sasrec:main"
 sasrec-train = "sids_rank_vs_generate.experiments.sasrec:main"
 
