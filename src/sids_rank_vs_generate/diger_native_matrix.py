@@ -29,6 +29,12 @@ DEFAULT_CANDIDATES = (
 )
 
 
+def absolute_without_symlinks(path: Path) -> Path:
+    """Сделать путь абсолютным без раскрытия venv symlink"""
+
+    return Path(os.path.abspath(path.expanduser()))
+
+
 def select_candidate(
     results: dict[str, dict[str, Any]],
     candidates: Sequence[DecodeCandidate] = DEFAULT_CANDIDATES,
@@ -362,7 +368,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     summary = run_matrix(
         repo=args.repo.expanduser().resolve(),
-        diger_python=args.diger_python.expanduser().resolve(),
+        diger_python=absolute_without_symlinks(args.diger_python),
         pilot_root=args.pilot_root.expanduser().resolve(),
         output_root=args.output_root.expanduser().resolve(),
         variant=args.variant,

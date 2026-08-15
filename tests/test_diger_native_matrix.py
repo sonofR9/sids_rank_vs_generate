@@ -4,6 +4,7 @@ import pytest
 
 from sids_rank_vs_generate.diger_native_matrix import (
     DEFAULT_CANDIDATES,
+    absolute_without_symlinks,
     select_candidate,
 )
 
@@ -35,3 +36,15 @@ def test_select_candidate_prefers_smaller_beam_on_tie() -> None:
 def test_select_candidate_requires_every_validation_result() -> None:
     with pytest.raises(ValueError, match="missing DIGER validation results"):
         select_candidate({"native-b150": _result(0.10, 0.04)})
+
+
+def test_absolute_diger_python_keeps_virtualenv_symlink(tmp_path) -> None:
+    target = tmp_path / "real-python"
+    target.touch()
+    link = tmp_path / "venv-python"
+    link.symlink_to(target)
+
+    normalized = absolute_without_symlinks(link)
+
+    assert normalized == link.absolute()
+    assert normalized != target.resolve()
