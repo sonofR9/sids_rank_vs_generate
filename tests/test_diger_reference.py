@@ -10,11 +10,13 @@ from sids_rank_vs_generate.data.preprocessing import PreparedInteractions
 from sids_rank_vs_generate.diger_reference import (
     DigerReferenceConfig,
     DigerReferencePaths,
+    _best_checkpoint_bundle,
     build_reference_examples,
     build_upstream_config,
     export_reference_sids,
     finalize_existing_reference_run,
     parse_reference_metrics,
+    validate_reference_rqvae,
 )
 from sids_rank_vs_generate.tracking import MLflowConfig
 
@@ -133,6 +135,53 @@ def test_parse_and_export_reference_results(tmp_path: Path) -> None:
     assert original["item_id"].to_list() == [100, 101]
 
 
+def test_best_checkpoint_bundle_follows_validation_log(tmp_path: Path) -> None:
+    checkpoint_dir = tmp_path / "myckpt" / "yambda50m" / "checkpoint"
+    checkpoint_dir.mkdir(parents=True)
+    for epoch in (3, 7):
+        checkpoint = checkpoint_dir / f"{epoch}.pt"
+        checkpoint.touch()
+        Path(f"{checkpoint}.rqvae").touch()
+        checkpoint.with_suffix(".code.json").write_text("[]\n", encoding="utf-8")
+    log_path = tmp_path / "diger.log"
+    log_path.write_text(
+        "Loading model parameters from "
+        "./myckpt/yambda50m/checkpoint/3.pt\n",
+        encoding="utf-8",
+    )
+
+    checkpoint, code_path = _best_checkpoint_bundle(tmp_path, log_path)
+
+    assert checkpoint == (checkpoint_dir / "3.pt").resolve()
+    assert code_path == (checkpoint_dir / "3.code.json").resolve()
+
+
+def test_validate_reference_rqvae_checks_manifest(tmp_path: Path) -> None:
+    config = DigerReferenceConfig(rqvae_epochs=500)
+    checkpoint = tmp_path / "best_collision_model.pth"
+    checkpoint.touch()
+    (tmp_path / "rqvae_manifest.json").write_text(
+        json.dumps(
+            {
+                "reference_commit": "cd72dcdc25d28e0acfa5aea14788ad863b41ab4f",
+                "embedding_sha256": "embedding-hash",
+                "num_levels": 3,
+                "codebook_size": 256,
+                "epochs": 500,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    resolved = validate_reference_rqvae(
+        checkpoint,
+        config=config,
+        embedding_sha256="embedding-hash",
+    )
+
+    assert resolved == checkpoint.resolve()
+
+
 def test_finalize_existing_run_without_retraining(tmp_path: Path) -> None:
     config = DigerReferenceConfig(
         variant="frqud", rqvae_epochs=1, joint_epochs=1, num_workers=1
@@ -152,6 +201,8 @@ def test_finalize_existing_run_without_retraining(tmp_path: Path) -> None:
     (paths.run / "diger_config.json").write_text("{}\n", encoding="utf-8")
     (paths.run / "diger.log").write_text(
         "Best Validation Score: 0.12\n"
+        "Loading model parameters from "
+        "./myckpt/yambda50m/checkpoint/best.pt\n"
         "Test Results: {'recall@10': np.float64(0.2)}\n",
         encoding="utf-8",
     )
@@ -161,6 +212,8 @@ def test_finalize_existing_run_without_retraining(tmp_path: Path) -> None:
         json.dumps([[-1, -1, -1, -1], [1, 2, 3, 0], [4, 5, 6, 1]]),
         encoding="utf-8",
     )
+    (code_dir / "best.pt").touch()
+    (code_dir / "best.pt.rqvae").touch()
 
     result = finalize_existing_reference_run(
         config=config,
@@ -170,5 +223,6 @@ def test_finalize_existing_run_without_retraining(tmp_path: Path) -> None:
 
     assert result["status"] == "FINISHED"
     assert result["metrics"]["test.recall@10"] == 0.2
+    assert result["artifacts"]["best_joint_checkpoint"].endswith("best.pt")
     assert (paths.run / "run_complete.json").is_file()
     assert (paths.run / "sid_mapping" / "semantic_ids.parquet").is_file()

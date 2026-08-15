@@ -31,6 +31,7 @@ DIGER_COMMIT = "cd72dcdc25d28e0acfa5aea14788ad863b41ab4f"
 DIGER_DATASET_NAME = "yambda50m"
 _TEST_RESULTS_RE = re.compile(r"Test Results:\s*(\{.*\})")
 _BEST_VALIDATION_RE = re.compile(r"Best Validation Score:\s*([^\s]+)")
+_LOADED_CHECKPOINT_RE = re.compile(r"Loading model parameters from\s+([^\s]+\.pt)")
 _NUMPY_FLOAT_RE = re.compile(
     r"np\.float(?:16|32|64)?\(" r"([-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?)" r"\)"
 )
@@ -639,6 +640,36 @@ def train_reference_rqvae(
     return canonical
 
 
+def validate_reference_rqvae(
+    checkpoint: Path,
+    *,
+    config: DigerReferenceConfig,
+    embedding_sha256: str,
+) -> Path:
+    """Проверить совместимость готового RQ-VAE"""
+
+    resolved = checkpoint.expanduser().resolve()
+    if not resolved.is_file():
+        raise FileNotFoundError(f"DIGER RQ-VAE checkpoint is missing: {resolved}")
+    manifest_path = resolved.parent / "rqvae_manifest.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"DIGER RQ-VAE manifest is missing: {manifest_path}")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    expected = {
+        "reference_commit": DIGER_COMMIT,
+        "embedding_sha256": embedding_sha256,
+        "num_levels": config.num_levels,
+        "codebook_size": config.codebook_size,
+        "epochs": config.rqvae_epochs,
+    }
+    actual = {name: manifest.get(name) for name in expected}
+    if actual != expected:
+        raise ValueError(
+            f"incompatible DIGER RQ-VAE manifest at {manifest_path}: {actual}"
+        )
+    return resolved
+
+
 def parse_reference_metrics(log_path: Path) -> dict[str, float]:
     metrics: dict[str, float] = {}
     for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines():
@@ -727,6 +758,30 @@ def _newest_code_table(run_dir: Path) -> Path:
     return candidates[-1]
 
 
+def _best_checkpoint_bundle(run_dir: Path, log_path: Path) -> tuple[Path, Path]:
+    """Найти checkpoint, выбранный upstream по validation"""
+
+    matches = _LOADED_CHECKPOINT_RE.findall(log_path.read_text(encoding="utf-8"))
+    if matches:
+        checkpoint = Path(matches[-1])
+        if not checkpoint.is_absolute():
+            checkpoint = run_dir / checkpoint
+        checkpoint = checkpoint.resolve()
+        code_path = checkpoint.with_suffix(".code.json")
+        required = (checkpoint, Path(f"{checkpoint}.rqvae"), code_path)
+        missing = [str(path) for path in required if not path.is_file()]
+        if missing:
+            raise FileNotFoundError(
+                "best DIGER checkpoint bundle is incomplete: " + ", ".join(missing)
+            )
+        return checkpoint, code_path
+
+    code_path = _newest_code_table(run_dir)
+    suffix = ".code.json"
+    checkpoint = code_path.with_name(code_path.name.removesuffix(suffix) + ".pt")
+    return checkpoint, code_path
+
+
 def _finalize_reference_artifacts(
     *,
     config: DigerReferenceConfig,
@@ -740,7 +795,7 @@ def _finalize_reference_artifacts(
         raise FileNotFoundError("completed DIGER log and config are required")
     embedding_shape = data_manifest["embedding_shape"]
     metrics = parse_reference_metrics(log_path)
-    code_path = _newest_code_table(paths.run)
+    checkpoint_path, code_path = _best_checkpoint_bundle(paths.run, log_path)
     sid_artifacts = export_reference_sids(
         code_path,
         catalog_size=int(embedding_shape[0]),
@@ -759,6 +814,7 @@ def _finalize_reference_artifacts(
         "metrics": metrics,
         "artifacts": {
             "rqvae_checkpoint": str(rqvae_checkpoint),
+            "best_joint_checkpoint": str(checkpoint_path),
             "joint_code_table": str(code_path),
             "log": str(log_path),
             **sid_artifacts,
@@ -840,6 +896,7 @@ def run_reference_experiment(
     diger_env_bin: Path,
     gpu: int,
     tracking: MLflowConfig,
+    rqvae_checkpoint_override: Path | None = None,
 ) -> dict[str, Any]:
     if gpu < 0:
         raise ValueError("gpu must be non-negative")
@@ -860,15 +917,22 @@ def run_reference_experiment(
     checkout_reference(paths.source)
     dataset = resolve_dataset(config.dataset_size)
     data_manifest = prepare_reference_data(dataset, paths.prepared, config)
-    rqvae_checkpoint = train_reference_rqvae(
-        source=paths.source,
-        prepared_dir=paths.prepared,
-        destination=paths.rqvae,
-        diger_python=diger_python,
-        gpu=gpu,
-        config=config,
-        embedding_sha256=str(data_manifest["embedding_sha256"]),
-    )
+    if rqvae_checkpoint_override is None:
+        rqvae_checkpoint = train_reference_rqvae(
+            source=paths.source,
+            prepared_dir=paths.prepared,
+            destination=paths.rqvae,
+            diger_python=diger_python,
+            gpu=gpu,
+            config=config,
+            embedding_sha256=str(data_manifest["embedding_sha256"]),
+        )
+    else:
+        rqvae_checkpoint = validate_reference_rqvae(
+            rqvae_checkpoint_override,
+            config=config,
+            embedding_sha256=str(data_manifest["embedding_sha256"]),
+        )
     embedding_shape = data_manifest["embedding_shape"]
     upstream_config = build_upstream_config(
         config,
@@ -903,6 +967,11 @@ def run_reference_experiment(
                     },
                     "data": data_manifest,
                     "gpu": gpu,
+                    "rqvae_checkpoint_override": (
+                        str(rqvae_checkpoint)
+                        if rqvae_checkpoint_override is not None
+                        else None
+                    ),
                 }
             )
         )
@@ -945,11 +1014,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--latest-interactions", type=int)
     parser.add_argument("--max-train-examples", type=int)
     parser.add_argument("--rqvae-epochs", type=int, default=2_000)
+    parser.add_argument("--rqvae-checkpoint", type=Path)
     parser.add_argument("--joint-epochs", type=int, default=120)
+    parser.add_argument("--max-history-len", type=int, default=50)
     parser.add_argument("--train-batch-size", type=int, default=256)
     parser.add_argument("--eval-batch-size", type=int, default=32)
     parser.add_argument("--num-workers", type=int, default=8)
     parser.add_argument("--num-beams", type=int, default=20)
+    parser.add_argument("--early-stop", type=int, default=15)
     parser.add_argument("--mlflow", action="store_true")
     parser.add_argument(
         "--finalize-existing",
@@ -972,12 +1044,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         protocol_id=args.protocol_id,
         latest_interactions=args.latest_interactions,
         max_train_examples=args.max_train_examples,
+        max_history_len=args.max_history_len,
         rqvae_epochs=args.rqvae_epochs,
         joint_epochs=args.joint_epochs,
         train_batch_size=args.train_batch_size,
         eval_batch_size=args.eval_batch_size,
         num_workers=args.num_workers,
         num_beams=args.num_beams,
+        early_stop=args.early_stop,
     )
     paths = DigerReferencePaths.build(args.work_root, run_name)
     tracking = MLflowConfig(
@@ -1000,6 +1074,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             diger_env_bin=args.diger_env_bin.expanduser().resolve(),
             gpu=args.gpu,
             tracking=tracking,
+            rqvae_checkpoint_override=(
+                args.rqvae_checkpoint.expanduser().resolve()
+                if args.rqvae_checkpoint is not None
+                else None
+            ),
         )
     print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
     return 0
