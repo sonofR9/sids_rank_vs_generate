@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import asdict
 from pathlib import Path
 
 import polars as pl
@@ -12,8 +13,10 @@ from sids_rank_vs_generate.diger_reference import (
     build_reference_examples,
     build_upstream_config,
     export_reference_sids,
+    finalize_existing_reference_run,
     parse_reference_metrics,
 )
+from sids_rank_vs_generate.tracking import MLflowConfig
 
 
 def _prepared() -> PreparedInteractions:
@@ -93,7 +96,8 @@ def test_parse_and_export_reference_results(tmp_path: Path) -> None:
     log_path = tmp_path / "diger.log"
     log_path.write_text(
         "Best Validation Score: 0.123\n"
-        "Test Results: {'recall@1': 0.1, 'recall@10': 0.2, 'ndcg@10': 0.15}\n",
+        "Test Results: {'recall@1': np.float64(0.1), "
+        "'recall@10': np.float32(0.2), 'ndcg@10': 0.15}\n",
         encoding="utf-8",
     )
     metrics = parse_reference_metrics(log_path)
@@ -127,3 +131,44 @@ def test_parse_and_export_reference_results(tmp_path: Path) -> None:
     assert raw.columns == ["item_id", "sid_0", "sid_1", "sid_2"]
     assert with_conflict.columns == ["item_id", "sid_0", "sid_1", "sid_2", "sid_3"]
     assert original["item_id"].to_list() == [100, 101]
+
+
+def test_finalize_existing_run_without_retraining(tmp_path: Path) -> None:
+    config = DigerReferenceConfig(
+        variant="frqud", rqvae_epochs=1, joint_epochs=1, num_workers=1
+    )
+    paths = DigerReferencePaths.build(tmp_path, "recovered")
+    paths.prepared.mkdir(parents=True)
+    paths.rqvae.mkdir(parents=True)
+    paths.run.mkdir(parents=True)
+    (paths.prepared / "manifest.json").write_text(
+        json.dumps({"config": asdict(config), "embedding_shape": [2, 3]}),
+        encoding="utf-8",
+    )
+    pl.DataFrame({"original_item_id": [100, 101], "item_id": [0, 1]}).write_parquet(
+        paths.prepared / "item_mapping.parquet"
+    )
+    (paths.rqvae / "best_collision_model.pth").touch()
+    (paths.run / "diger_config.json").write_text("{}\n", encoding="utf-8")
+    (paths.run / "diger.log").write_text(
+        "Best Validation Score: 0.12\n"
+        "Test Results: {'recall@10': np.float64(0.2)}\n",
+        encoding="utf-8",
+    )
+    code_dir = paths.run / "myckpt" / "yambda50m" / "checkpoint"
+    code_dir.mkdir(parents=True)
+    (code_dir / "best.code.json").write_text(
+        json.dumps([[-1, -1, -1, -1], [1, 2, 3, 0], [4, 5, 6, 1]]),
+        encoding="utf-8",
+    )
+
+    result = finalize_existing_reference_run(
+        config=config,
+        paths=paths,
+        tracking=MLflowConfig(enabled=False),
+    )
+
+    assert result["status"] == "FINISHED"
+    assert result["metrics"]["test.recall@10"] == 0.2
+    assert (paths.run / "run_complete.json").is_file()
+    assert (paths.run / "sid_mapping" / "semantic_ids.parquet").is_file()

@@ -31,6 +31,9 @@ DIGER_COMMIT = "cd72dcdc25d28e0acfa5aea14788ad863b41ab4f"
 DIGER_DATASET_NAME = "yambda50m"
 _TEST_RESULTS_RE = re.compile(r"Test Results:\s*(\{.*\})")
 _BEST_VALIDATION_RE = re.compile(r"Best Validation Score:\s*([^\s]+)")
+_NUMPY_FLOAT_RE = re.compile(
+    r"np\.float(?:16|32|64)?\(" r"([-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?)" r"\)"
+)
 _RUN_NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
@@ -641,7 +644,8 @@ def parse_reference_metrics(log_path: Path) -> dict[str, float]:
     for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines():
         test_match = _TEST_RESULTS_RE.search(line)
         if test_match:
-            parsed = ast.literal_eval(test_match.group(1))
+            payload = _NUMPY_FLOAT_RE.sub(r"\1", test_match.group(1))
+            parsed = ast.literal_eval(payload)
             if isinstance(parsed, dict):
                 metrics.update(
                     {f"test.{name}": float(value) for name, value in parsed.items()}
@@ -721,6 +725,112 @@ def _newest_code_table(run_dir: Path) -> Path:
     if not candidates:
         raise RuntimeError("upstream DIGER run did not produce a SID code table")
     return candidates[-1]
+
+
+def _finalize_reference_artifacts(
+    *,
+    config: DigerReferenceConfig,
+    paths: DigerReferencePaths,
+    data_manifest: dict[str, Any],
+    rqvae_checkpoint: Path,
+) -> tuple[dict[str, Any], tuple[Path, ...]]:
+    log_path = paths.run / "diger.log"
+    config_path = paths.run / "diger_config.json"
+    if not log_path.is_file() or not config_path.is_file():
+        raise FileNotFoundError("completed DIGER log and config are required")
+    embedding_shape = data_manifest["embedding_shape"]
+    metrics = parse_reference_metrics(log_path)
+    code_path = _newest_code_table(paths.run)
+    sid_artifacts = export_reference_sids(
+        code_path,
+        catalog_size=int(embedding_shape[0]),
+        item_mapping_path=paths.prepared / "item_mapping.parquet",
+        destination=paths.run / "sid_mapping",
+        num_levels=config.num_levels,
+    )
+    completion_path = paths.run / "run_complete.json"
+    result = {
+        "schema_version": 1,
+        "status": "FINISHED",
+        "reference_repository": DIGER_REPOSITORY,
+        "reference_commit": DIGER_COMMIT,
+        "config": asdict(config),
+        "data": data_manifest,
+        "metrics": metrics,
+        "artifacts": {
+            "rqvae_checkpoint": str(rqvae_checkpoint),
+            "joint_code_table": str(code_path),
+            "log": str(log_path),
+            **sid_artifacts,
+        },
+    }
+    _atomic_json(completion_path, result)
+    artifacts = (
+        completion_path,
+        config_path,
+        log_path,
+        *map(Path, sid_artifacts.values()),
+    )
+    return result, artifacts
+
+
+def finalize_existing_reference_run(
+    *,
+    config: DigerReferenceConfig,
+    paths: DigerReferencePaths,
+    tracking: MLflowConfig,
+) -> dict[str, Any]:
+    """Упаковать завершённый upstream run без повторного обучения"""
+
+    completion_path = paths.run / "run_complete.json"
+    if completion_path.exists():
+        raise FileExistsError(f"DIGER run is already finalized: {completion_path}")
+    manifest_path = paths.prepared / "manifest.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"prepared DIGER manifest is missing: {manifest_path}")
+    data_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if data_manifest.get("config") != asdict(config):
+        raise ValueError("finalize config does not match the prepared DIGER run")
+    rqvae_checkpoint = paths.rqvae / "best_collision_model.pth"
+    if not rqvae_checkpoint.is_file():
+        raise FileNotFoundError(
+            f"DIGER RQ-VAE checkpoint is missing: {rqvae_checkpoint}"
+        )
+
+    tracker = create_tracker(tracking)
+    with tracker.start_run(
+        tracking.run_name or f"{paths.run.name}-finalize",
+        tags={
+            "method": "diger-reference",
+            "variant": config.variant,
+            "reference_commit": DIGER_COMMIT,
+            "protocol_id": config.protocol_id,
+            "recovered_without_retraining": "true",
+        },
+    ):
+        tracker.log_params(
+            flatten_parameters(
+                {
+                    "diger": asdict(config),
+                    "reference": {
+                        "repository": DIGER_REPOSITORY,
+                        "commit": DIGER_COMMIT,
+                    },
+                    "data": data_manifest,
+                    "recovered_without_retraining": True,
+                }
+            )
+        )
+        result, artifacts = _finalize_reference_artifacts(
+            config=config,
+            paths=paths,
+            data_manifest=data_manifest,
+            rqvae_checkpoint=rqvae_checkpoint,
+        )
+        tracker.log_metrics(result["metrics"])
+        for artifact in artifacts:
+            tracker.log_artifact(artifact, artifact_path="diger_reference_v0_1")
+    return result
 
 
 def run_reference_experiment(
@@ -810,38 +920,14 @@ def run_reference_experiment(
             environment=environment,
             log_path=log_path,
         )
-        metrics = parse_reference_metrics(log_path)
-        code_path = _newest_code_table(paths.run)
-        sid_artifacts = export_reference_sids(
-            code_path,
-            catalog_size=int(embedding_shape[0]),
-            item_mapping_path=paths.prepared / "item_mapping.parquet",
-            destination=paths.run / "sid_mapping",
-            num_levels=config.num_levels,
+        result, artifacts = _finalize_reference_artifacts(
+            config=config,
+            paths=paths,
+            data_manifest=data_manifest,
+            rqvae_checkpoint=rqvae_checkpoint,
         )
-        result = {
-            "schema_version": 1,
-            "status": "FINISHED",
-            "reference_repository": DIGER_REPOSITORY,
-            "reference_commit": DIGER_COMMIT,
-            "config": asdict(config),
-            "data": data_manifest,
-            "metrics": metrics,
-            "artifacts": {
-                "rqvae_checkpoint": str(rqvae_checkpoint),
-                "joint_code_table": str(code_path),
-                "log": str(log_path),
-                **sid_artifacts,
-            },
-        }
-        _atomic_json(completion_path, result)
-        tracker.log_metrics(metrics)
-        for artifact in (
-            completion_path,
-            config_path,
-            log_path,
-            *map(Path, sid_artifacts.values()),
-        ):
+        tracker.log_metrics(result["metrics"])
+        for artifact in artifacts:
             tracker.log_artifact(artifact, artifact_path="diger_reference_v0_1")
     return result
 
@@ -865,6 +951,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--num-workers", type=int, default=8)
     parser.add_argument("--num-beams", type=int, default=20)
     parser.add_argument("--mlflow", action="store_true")
+    parser.add_argument(
+        "--finalize-existing",
+        action="store_true",
+        help="Package a completed upstream run without retraining it.",
+    )
     parser.add_argument("--tracking-uri", default=os.environ.get("MLFLOW_TRACKING_URI"))
     parser.add_argument("--experiment-name", default="sids-rank-vs-generate")
     return parser
@@ -893,16 +984,23 @@ def main(argv: Sequence[str] | None = None) -> int:
         enabled=args.mlflow,
         tracking_uri=args.tracking_uri,
         experiment_name=args.experiment_name,
-        run_name=run_name,
+        run_name=(f"{run_name}-recovered" if args.finalize_existing else run_name),
         tags=(("method", "diger-reference-v0.1"), ("variant", args.variant)),
     )
-    result = run_reference_experiment(
-        config=config,
-        paths=paths,
-        diger_env_bin=args.diger_env_bin.expanduser().resolve(),
-        gpu=args.gpu,
-        tracking=tracking,
-    )
+    if args.finalize_existing:
+        result = finalize_existing_reference_run(
+            config=config,
+            paths=paths,
+            tracking=tracking,
+        )
+    else:
+        result = run_reference_experiment(
+            config=config,
+            paths=paths,
+            diger_env_bin=args.diger_env_bin.expanduser().resolve(),
+            gpu=args.gpu,
+            tracking=tracking,
+        )
     print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
     return 0
 
