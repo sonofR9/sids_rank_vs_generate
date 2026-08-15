@@ -66,3 +66,23 @@ python -u experiments/diger_reference_v0_1.py \
 
 Официальная реализация в этой версии считает Recall@1/5/10 и NDCG@5/10. После
 первого сигнала raw SID можно прогнать через общий генератор проекта для Recall@100.
+
+## Общий downstream Recall@100
+
+Для сравнения с остальными SID используется исходный трёхуровневый mapping на
+оригинальные item ID. Общий runner сам сопоставляет его с внутренним каталогом.
+
+```bash
+export DIGER_VARIANT="both"
+export DIGER_SID_PATH="/path/to/semantic_ids_original_items.parquet"
+export SID_REPORTS_DIR="/path/to/shared/results/diger-common-v0.1"
+
+python -u run.py experiments/diger_poster_generation.py \
+  --skip-ranking \
+  --mlflow \
+  --mlflow-tracking-uri "http://51.250.47.231:5000"
+```
+
+Для FrqUD нужно заменить `DIGER_VARIANT` на `frqud` и указать его SID-файл.
+Конфиг фиксирует poster-каталог из 33 148 айтемов и тот же recipe генерации,
+который использовался для общей серии качества SID.

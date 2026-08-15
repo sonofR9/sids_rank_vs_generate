@@ -12,6 +12,7 @@ from .config import (
     UserAwareRQKMeansConfig,
 )
 from .plum_rq_vae_pipeline import PlumRQVAEPipeline
+from .precomputed import PrecomputedSidConfig, PrecomputedSidPipeline
 from .rq_kmeans_pipeline import RQKMeansPipeline
 from .rq_vae_pipeline import RQVAEPipeline
 from .user_aware import (
@@ -39,6 +40,8 @@ __all__ = [
     "FrequencyUserSidMapper",
     "PlumRQVAEPipeline",
     "PlumRQVAEConfig",
+    "PrecomputedSidConfig",
+    "PrecomputedSidPipeline",
     "RQKMeansConfig",
     "RQKMeansPipeline",
     "RQVAEConfig",

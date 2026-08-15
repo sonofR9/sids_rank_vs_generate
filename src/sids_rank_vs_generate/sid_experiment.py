@@ -292,6 +292,7 @@ def run_sid_experiment(
                 }
             )
         )
+        sid.set_item_mapping(prepared.item_mapping)
         sid.train(item_features)
         sid_output = sid.update(item_features)
     sid_columns = _validate_sid_output(item_features, sid_output)

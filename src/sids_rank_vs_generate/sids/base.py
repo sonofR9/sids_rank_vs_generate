@@ -19,6 +19,11 @@ class ISidPipeline(ABC):
 
         self._tracker = tracker
 
+    def set_item_mapping(self, mapping: pl.DataFrame) -> None:
+        """Attach the original-to-dense item mapping when a SID needs it."""
+
+        del mapping
+
     @property
     def tracker(self) -> ExperimentTracker:
         return getattr(self, "_tracker", NullTracker())
