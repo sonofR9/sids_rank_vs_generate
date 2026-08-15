@@ -205,6 +205,40 @@ class ProfileConditionedGeneratorTest(unittest.TestCase):
             torch.equal(embeddings[2], torch.tensor([0.0, 1.0, 0.0, 0.0]))
         )
 
+    def test_content_embeddings_can_be_zero_padded_for_a_larger_model(self):
+        embeddings = _initial_item_embeddings(
+            pl.DataFrame(
+                {
+                    "item_id": [10],
+                    "normalized_embed": [[1.0, 2.0]],
+                }
+            ),
+            {10: 1},
+            column="normalized_embed",
+            d_model=4,
+            scale=2.0,
+            pad_to_model_dim=True,
+        )
+
+        self.assertTrue(
+            torch.equal(embeddings[1], torch.tensor([2.0, 4.0, 0.0, 0.0]))
+        )
+
+    def test_content_padding_requires_a_larger_model_dimension(self):
+        with self.assertRaisesRegex(ValueError, "dimension 1"):
+            _initial_item_embeddings(
+                pl.DataFrame(
+                    {
+                        "item_id": [10],
+                        "normalized_embed": [[1.0, 2.0]],
+                    }
+                ),
+                {10: 1},
+                column="normalized_embed",
+                d_model=1,
+                pad_to_model_dim=True,
+            )
+
     def test_auxiliary_loss_does_not_treat_duplicate_targets_as_negatives(self):
         model = SemanticTransformerModel(3, model_config(use_user_profile=False))
         pooled_history = torch.randn(3, 4)

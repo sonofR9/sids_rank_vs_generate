@@ -82,6 +82,7 @@ class GenerationConfig:
     initialize_item_embeddings_from_content: bool = False
     content_embedding_column: str = "normalized_embed"
     content_embedding_scale: float = 1.0
+    pad_content_embeddings_to_model_dim: bool = False
     sid_only_validation_during_training: bool = False
     validation_metric: str | None = None
     use_bf16: bool = True
@@ -209,16 +210,26 @@ def _initial_item_embeddings(
     column: str,
     d_model: int,
     scale: float = 1.0,
+    pad_to_model_dim: bool = False,
 ) -> torch.Tensor:
     if column not in items.columns:
         raise ValueError(f"item features must contain {column!r}")
     rows = items.select("item_id", column)
     values = torch.tensor(rows[column].to_list(), dtype=torch.float32)
-    if values.ndim != 2 or values.size(1) != d_model:
+    if values.ndim != 2:
         raise ValueError(
             f"content embeddings must have dimension {d_model}, "
-            f"received {values.size(1) if values.ndim == 2 else 'invalid'}"
+            "received invalid"
         )
+    if values.size(1) != d_model:
+        if not pad_to_model_dim or values.size(1) > d_model:
+            raise ValueError(
+                f"content embeddings must have dimension {d_model}, "
+                f"received {values.size(1)}"
+            )
+        padded = torch.zeros(values.size(0), d_model, dtype=values.dtype)
+        padded[:, : values.size(1)] = values
+        values = padded
     if not torch.isfinite(values).all():
         raise ValueError("content embeddings must contain only finite values")
     values = values * float(scale)
@@ -388,6 +399,9 @@ class GenerationStage(IEvaluationStage):
                 column=runtime.content_embedding_column,
                 d_model=runtime.d_model,
                 scale=runtime.content_embedding_scale,
+                pad_to_model_dim=(
+                    runtime.pad_content_embeddings_to_model_dim
+                ),
             )
         model = SemanticTransformerModel(
             len(item2idx),
