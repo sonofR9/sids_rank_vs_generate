@@ -112,3 +112,26 @@ class UserAwareRQKMeansConfig:
             raise ValueError("user_profile_weight must be non-negative")
         if self.kmeans_batch_size <= 0 or self.predict_batch_size <= 0:
             raise ValueError("batch sizes must be positive")
+
+@dataclass(frozen=True)
+class RQVAELetterConfig:
+    hidden_dim: int = 128
+    latent_dim: int = 128
+    num_levels: int = 3
+    codebook_size: int = 256
+    batch_size: int = 1024
+    num_epochs: int = 20
+    lr: float = 5e-4
+    beta: float = 0.25
+
+    collaborative_embedding_dim: int = 128
+    collaborative_embedding_column: str = "collaborative_embed"
+    collaborative_weight: float = 2e-2
+
+    diversity_clusters: int = 10
+    diversity_weight: float = 1e-4
+
+    pretrain_epochs: int = 3
+    pretrain_lr: float = 5e-3
+    num_workers: int = 4
+    device: str | None = None
