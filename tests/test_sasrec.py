@@ -14,6 +14,7 @@ import torch
 from sids_rank_vs_generate.data import PreprocessingConfig, prepare_interactions
 from sids_rank_vs_generate.experiments.sasrec import (
     SASRecConfig,
+    SASRecModel,
     _apply_negative_logq_correction,
     _build_in_batch_item_counts,
     _cuda_autocast_dtype,
@@ -109,6 +110,61 @@ class SASRecSmokeTest(unittest.TestCase):
         self.assertEqual(first.train_losses, second.train_losses)
         self.assertEqual(first.metrics, second.metrics)
         self.assertTrue(all(math.isfinite(loss) for loss in first.train_losses))
+
+    def test_history_concat_uses_frozen_pretrained_features(self) -> None:
+        content = torch.arange(
+            self.prepared.catalog_size * 3,
+            dtype=torch.float32,
+        ).reshape(self.prepared.catalog_size, 3)
+        config = replace(
+            self.config,
+            pretrained_embedding_mode="history-concat",
+        )
+
+        model, result = run_sasrec(
+            self.prepared,
+            config,
+            initial_item_embeddings=content,
+        )
+
+        self.assertFalse(result.content_initialized)
+        self.assertTrue(result.content_features_used)
+        self.assertIsNotNone(model.pretrained_item_embeddings)
+        self.assertIsNotNone(model.history_input_projection)
+        self.assertFalse(model.pretrained_item_embeddings.weight.requires_grad)
+        self.assertEqual(
+            model.history_input_projection.in_features,
+            self.config.embedding_dim + 3,
+        )
+        self.assertEqual(
+            model.history_input_projection.out_features,
+            self.config.embedding_dim,
+        )
+
+    def test_history_concat_accepts_content_width_different_from_model(self) -> None:
+        content = torch.ones((self.prepared.catalog_size, 5))
+        config = replace(
+            self.config,
+            pretrained_embedding_mode="history-concat",
+        )
+        model = SASRecModel(
+            self.prepared.catalog_size,
+            config,
+            initial_item_embeddings=content,
+        )
+
+        history = torch.tensor([[0, 1]], dtype=torch.long)
+        encoded = model.encode(history, torch.tensor([2]))
+        self.assertEqual(tuple(encoded.shape), (1, self.config.embedding_dim))
+        self.assertTrue(torch.isfinite(encoded).all())
+
+    def test_history_concat_requires_pretrained_embeddings(self) -> None:
+        config = replace(
+            self.config,
+            pretrained_embedding_mode="history-concat",
+        )
+        with self.assertRaisesRegex(ValueError, "requires pretrained"):
+            SASRecModel(self.prepared.catalog_size, config)
 
     def test_in_batch_sampling_uses_histories_and_targets(self) -> None:
         padding_item_id = 10
@@ -253,6 +309,8 @@ class SASRecSmokeTest(unittest.TestCase):
                     "in-batch-logq",
                     "--training-negatives",
                     "3",
+                    "--pretrained-embedding-mode",
+                    "history-concat",
                     "--topk",
                     "2",
                     "--seed",
@@ -270,6 +328,11 @@ class SASRecSmokeTest(unittest.TestCase):
                 payload["config"]["training_objective"],
                 "in-batch-logq",
             )
+            self.assertEqual(
+                payload["config"]["pretrained_embedding_mode"],
+                "history-concat",
+            )
+            self.assertTrue(payload["content_features_used"])
 
 
 if __name__ == "__main__":

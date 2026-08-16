@@ -1,0 +1,66 @@
+{
+  "experiment": "sasrec_baseline",
+  "data": {
+    "interactions": 634642,
+    "train_interactions": 630107,
+    "fit_interactions": 568448,
+    "validation_interactions": 61659,
+    "test_interactions": 4535,
+    "users": 8032,
+    "catalog_size": 33148,
+    "test_start_timestamp": "25879010.0",
+    "validation_start_timestamp": "24244930.0",
+    "fit_fingerprint": "d38868d1e6d1626c576662a735f74e9ad1f0d7d910975c6ede5350aeb4402455",
+    "protocol_id": "three-way",
+    "validation_reuses_test": false
+  },
+  "config": {
+    "embedding_dim": 128,
+    "max_seq_len": 100,
+    "num_layers": 2,
+    "num_heads": 2,
+    "dropout": 0.1,
+    "batch_size": 128,
+    "epochs": 10,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "training_objective": "sampled-uniform",
+    "training_negatives": 100,
+    "eval_item_chunk_size": 20000,
+    "freeze_item_embeddings": false,
+    "pretrained_embedding_mode": "history-concat",
+    "topk": 100,
+    "seed": 42,
+    "num_workers": 0,
+    "device": "cuda"
+  },
+  "device": "cuda",
+  "train_examples": 622088,
+  "eval_users": 1404,
+  "content_initialized": false,
+  "content_features_used": true,
+  "train_losses": [
+    3.401222597082383,
+    2.7881448119850023,
+    2.531631952625288,
+    2.333789960081671,
+    2.1696959230626045,
+    2.024883680391397,
+    1.8989060180327435,
+    1.7846676688848506,
+    1.681731981774361,
+    1.5896035984166756
+  ],
+  "metrics": {
+    "hitrate": 0.24216524216524216,
+    "recall": 0.12814152311278762,
+    "ndcg": 0.03873293807274987,
+    "coverage": 0.6169301315313142
+  },
+  "dataset": {
+    "name": "Yambda-50M",
+    "event_type": "likes",
+    "interactions_path": "/home/k.ryadinskiy/.cache/huggingface/hub/datasets--yandex--yambda/snapshots/dd6f3a19eef5866e346c3270e098baa641a44948/flat/50m/likes.parquet",
+    "embeddings_path": "/home/k.ryadinskiy/.cache/sids_rank_vs_generate/datasets/yambda-50m/embeddings.parquet"
+  }
+}

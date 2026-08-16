@@ -35,6 +35,12 @@
       "transact_roc_auc": "metrics.evaluations.ranking.transact.test.roc_auc"
     }
   },
+  "ranking_baselines": {
+    "dcnv2_pairwise_accuracy": 0.549144446849823,
+    "dcnv2_roc_auc": 0.8093270063400269,
+    "transact_pairwise_accuracy": 0.7616394758224487,
+    "transact_roc_auc": 0.9367052912712097
+  },
   "filters": {
     "parent_only": true,
     "status": "FINISHED",
