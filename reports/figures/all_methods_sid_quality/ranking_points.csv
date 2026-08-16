@@ -1,4 +1,10 @@
 method,num_levels,codebook_size,recall_at_100,dcnv2_pairwise_accuracy,transact_pairwise_accuracy,run_name,catalog_size,source,icr,collision_rate,p95_collision_group_size,g_max,cur_total,code_gini,code_entropy,intra_code_similarity,prefix_coherence_1,prefix_coherence_2,prefix_coherence_3,valid_sid_rate
+PLUM,3,128,,0.5279126167297363,0.6124595403671265,poster-ranking-plum-none-l3-c128eq-cbs256x128x64-full-seed42,,ranking,0.9128690629011552,0.0871309370988446,,15.0,,,,,,,,
+PLUM,3,256,,0.5311488509178162,0.5970873832702637,poster-ranking-plum-none-l3-c256eq-cbs512x256x128-full-seed42,,ranking,0.9541880616174584,0.0458119383825417,,6.0,,,,,,,,
+PLUM,3,512,,0.530339777469635,0.6201456189155579,poster-ranking-plum-none-l3-c512eq-cbs1024x512x256-full-seed42,,ranking,0.9691912708600772,0.0308087291399229,,10.0,,,,,,,,
+BalanceRQKMeans,3,128,,0.5271035432815552,0.6241909265518188,poster-ranking-balance-none-l3-c128-full-seed42,,ranking,0.8327182284980744,0.1672817715019255,,37.0,,,,,,,,
+BalanceRQKMeans,3,256,,0.5295307636260986,0.6173139214515686,poster-ranking-balance-none-l3-c256-full-seed42,,ranking,0.9262676508344032,0.0737323491655969,,15.0,,,,,,,,
+BalanceRQKMeans,3,512,,0.5279126167297363,0.6120550036430359,poster-ranking-balance-none-l3-c512-full-seed42,,ranking,0.9600449293966624,0.0399550706033375,,8.0,,,,,,,,
 RQVAE (RRS),3,256,,0.5335760712623596,0.6177184581756592,sid-quality-rqvae-rqkmeans-rrs-l3-c256-full-seed42,,ranking,1.0,0.0,0.0,1.0,1.0,0.0,10.408737661968935,,0.7042641185689718,0.8639924846321716,,1.0
 RQVAE (ECM),3,256,,0.5360032320022583,0.6185275316238403,sid-quality-rqvae-rqkmeans-ecm-l3-c256-full-seed42,,ranking,1.0,0.0,0.0,1.0,1.0,0.0,10.408737661968935,,0.7035534364404157,0.8615206652579929,,1.0
 RQVAE (RRS),3,128,,0.5254854559898376,0.6221683025360107,sid-quality-rqvae-rqkmeans-rrs-l3-c128-full-seed42,,ranking,1.0,0.0,0.0,1.0,1.0,0.0,10.408737661968935,,0.6526624606922269,0.8130483187079818,,1.0

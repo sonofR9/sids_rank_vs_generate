@@ -24,6 +24,8 @@ from matplotlib.ticker import MaxNLocator
 
 LEVEL_SWEEP = (2, 3, 4)
 CODEBOOK_SWEEP = (128, 256, 512, 1024)
+SASREC_AUDIO_UNIFORM_RECALL = 0.12302921437950205
+SASREC_HISTORY_CONCAT_RECALL = 0.12814152311278762
 
 
 @dataclass(frozen=True)
@@ -58,9 +60,24 @@ SID_METRICS = (
 )
 
 TARGETS = (
-    TargetSpec("recall100", "recall_at_100", "Recall@100", 0.113),
-    TargetSpec("dcnv2", "dcnv2_pairwise_accuracy", "DCNv2 Pairwise Accuracy"),
-    TargetSpec("transact", "transact_pairwise_accuracy", "TransAct Pairwise Accuracy"),
+    TargetSpec(
+        "recall100",
+        "recall_at_100",
+        "Recall@100",
+        SASREC_AUDIO_UNIFORM_RECALL,
+    ),
+    TargetSpec(
+        "dcnv2",
+        "dcnv2_pairwise_accuracy",
+        "DCNv2 Pairwise Accuracy",
+        0.549144446849823,
+    ),
+    TargetSpec(
+        "transact",
+        "transact_pairwise_accuracy",
+        "TransAct Pairwise Accuracy",
+        0.7616394758224487,
+    ),
 )
 
 BASE_METHOD_ORDER = (
@@ -99,8 +116,8 @@ def read_csv(path: Path, source: str, *, required: bool = True) -> pd.DataFrame:
             raise SystemExit(f"Report table not found: {path}")
         return pd.DataFrame({"source": pd.Series(dtype=str)})
     frame = pd.read_csv(path)
-    frame["source"] = source
-    return frame
+    source_column = pd.Series(source, index=frame.index, name="source", dtype=str)
+    return pd.concat([frame, source_column], axis=1)
 
 
 def first_existing(*candidates: Path) -> Path:
@@ -138,7 +155,16 @@ def normalize(frame: pd.DataFrame, *, method: str | None = None) -> pd.DataFrame
 def is_33148_extension(frame: pd.DataFrame) -> pd.Series:
     catalog = pd.to_numeric(frame["catalog_size"], errors="coerce").eq(33148)
     named = frame["run_name"].astype(str).str.contains(r"(?:^|-)catalog33148(?:-|$)", regex=True, na=False)
-    return catalog | named
+    # The committed poster exports predate the catalog-size field. Their
+    # `poster-(ranking-)?plum/balance-*` names are the explicit full-catalog
+    # provenance marker; legacy 12,464-item runs use different experiments.
+    poster_full_catalog = (
+        frame["source"].isin({"ranking", "poster_extensions", "poster_extensions_33148"})
+        & frame["run_name"].astype(str).str.match(
+            r"^poster(?:-ranking)?-(?:plum|balance)-", na=False
+        )
+    )
+    return catalog | named | poster_full_catalog
 
 
 def filter_extensions(frame: pd.DataFrame) -> pd.DataFrame:
@@ -206,16 +232,30 @@ def plot_metric(frame: pd.DataFrame, sid_metric: MetricSpec, target: TargetSpec,
     plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10.5, "axes.titlesize": 13, "axes.labelsize": 12, "xtick.labelsize": 9.5, "ytick.labelsize": 9.5, "legend.fontsize": 7.7, "axes.linewidth": 0.8, "pdf.fonttype": 42, "ps.fonttype": 42})
     figure, axes = plt.subplots(1, 2, figsize=(12.6, 5.7), sharey=True, facecolor="white")
     x_limits = padded_limits(shown[sid_metric.column])
-    y_values = shown[target.column] if target.baseline is None else pd.concat([shown[target.column], pd.Series([target.baseline])])
+    baselines = [(target.baseline, "#7B8794", (0, (5, 3)))] if target.baseline is not None else []
+    if target.key == "recall100":
+        baselines.append((SASREC_HISTORY_CONCAT_RECALL, "#0F766E", (0, (2, 2))))
+    baseline_values = [value for value, _, _ in baselines]
+    y_values = shown[target.column] if not baseline_values else pd.concat([shown[target.column], pd.Series(baseline_values)])
     y_limits = padded_limits(y_values)
     draw_panel(axes[0], left, sid_metric.column, target.column, "num_levels", "Varying number of codebooks (C=256)", "L: 2 → 3 → 4", x_limits, y_limits, target.baseline)
     draw_panel(axes[1], right, sid_metric.column, target.column, "codebook_size", "Varying codebook size (L=3)", "C: 128 → 256 → 512 → 1024", x_limits, y_limits, target.baseline)
+    if target.key == "recall100":
+        for ax in axes:
+            ax.axhline(SASREC_HISTORY_CONCAT_RECALL, color="#0F766E", linestyle=(0, (2, 2)), linewidth=1.2, zorder=0)
     figure.supxlabel(sid_metric.label, fontsize=12, y=0.16)
     figure.supylabel(target.label, fontsize=12, x=0.016)
     present = [method for method in METHOD_ORDER if method in set(shown.method)]
     handles = [Line2D([0], [0], color=METHOD_STYLE[method][0], linewidth=1.1, marker=METHOD_STYLE[method][1], markersize=6, markerfacecolor=METHOD_STYLE[method][0] if METHOD_STYLE[method][2] else "white", markeredgewidth=1.4, label=method) for method in present]
     if target.baseline is not None:
-        handles.append(Line2D([0], [0], color="#7B8794", linewidth=1.2, linestyle=(0, (5, 3)), label="SASRec"))
+        baseline_label = (
+            "SASRec-Audio-Uniform"
+            if target.key == "recall100"
+            else f"{target.label.split()[0]} item-only"
+        )
+        handles.append(Line2D([0], [0], color="#7B8794", linewidth=1.2, linestyle=(0, (5, 3)), label=baseline_label))
+    if target.key == "recall100":
+        handles.append(Line2D([0], [0], color="#0F766E", linewidth=1.2, linestyle=(0, (2, 2)), label="SASRec history-concat"))
     figure.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.01), ncol=4, frameon=False, handlelength=1.8, columnspacing=1.15)
     figure.subplots_adjust(left=0.075, right=0.985, top=0.90, bottom=0.38, wspace=0.06)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -226,9 +266,10 @@ def plot_metric(frame: pd.DataFrame, sid_metric: MetricSpec, target: TargetSpec,
     return True
 
 
-def coverage(frame: pd.DataFrame) -> pd.DataFrame:
+def coverage(frames: dict[str, pd.DataFrame]) -> pd.DataFrame:
     rows = []
     for target in TARGETS:
+        frame = frames[target.key]
         for metric in SID_METRICS:
             for method in METHOD_ORDER:
                 points = frame[frame.method.eq(method)].dropna(subset=[metric.column, target.column])
@@ -249,6 +290,11 @@ def main() -> None:
         help="Completed 33,148-item PLUM/Balance export to add to the legacy report.",
     )
     parser.add_argument("--ranking-report", type=Path)
+    parser.add_argument(
+        "--transact-report",
+        type=Path,
+        help="Full TransAct SID-token export, including PLUM/Balance and LogQ variants.",
+    )
     parser.add_argument("--output-dir", type=Path, default=Path("reports/figures/all_methods_sid_quality"))
     args = parser.parse_args()
     args.raw_report = args.raw_report or first_existing(
@@ -276,6 +322,9 @@ def main() -> None:
         Path("reports/figures/ranking/matched_runs.csv"),
         Path("reports/figures/ranking/sid_quality_correlations/matched_runs.csv"),
     )
+    args.transact_report = args.transact_report or first_existing(
+        Path("reports/figures/ranking/transact_sid_token_history/matched_runs.csv"),
+    )
     raw = normalize(read_csv(args.raw_report, "raw_sid"))
     item_logq = normalize(read_csv(args.item_logq_report, "item_logq", required=False), method="RQVAE + item LogQ")
     pure_sid_logq = normalize(read_csv(args.pure_sid_logq_report, "pure_sid_logq", required=False), method="RQVAE + pure SID LogQ")
@@ -286,16 +335,40 @@ def main() -> None:
         raw, item_logq, pure_sid_logq, extensions, extensions_33148, user_aware,
     ], ignore_index=True))))
     ranking = deduplicate(numeric(filter_extensions(normalize(read_csv(args.ranking_report, "ranking")))))
-    combined = pd.concat([generation, ranking], ignore_index=True)
+    transact_ranking = deduplicate(
+        numeric(
+            filter_extensions(
+                normalize(read_csv(args.transact_report, "ranking_transact", required=False))
+            )
+        )
+    )
+    if transact_ranking.empty:
+        transact_ranking = ranking.copy()
+    target_frames = {
+        "recall100": generation,
+        "dcnv2": ranking,
+        "transact": transact_ranking,
+    }
     args.output_dir.mkdir(parents=True, exist_ok=True)
     generation.to_csv(args.output_dir / "generation_points.csv", index=False)
     ranking.to_csv(args.output_dir / "ranking_points.csv", index=False)
-    coverage(combined).to_csv(args.output_dir / "metric_coverage.csv", index=False)
-    written = sum(plot_metric(generation if target.key == "recall100" else ranking, metric, target, args.output_dir / target.key) for target in TARGETS for metric in SID_METRICS)
+    transact_ranking.to_csv(args.output_dir / "transact_ranking_points.csv", index=False)
+    coverage(target_frames).to_csv(args.output_dir / "metric_coverage.csv", index=False)
+    written = sum(
+        plot_metric(
+            target_frames[target.key],
+            metric,
+            target,
+            args.output_dir / target.key,
+        )
+        for target in TARGETS
+        for metric in SID_METRICS
+    )
     print(f"Figures: {written} (expected: {len(TARGETS) * len(SID_METRICS)})")
     print(f"Output: {args.output_dir}")
     print("Recall methods:", ", ".join(method for method in METHOD_ORDER if method in set(generation.method)))
     print("Ranking methods:", ", ".join(method for method in METHOD_ORDER if method in set(ranking.method)))
+    print("TransAct methods:", ", ".join(method for method in METHOD_ORDER if method in set(transact_ranking.method)))
 
 
 if __name__ == "__main__":
