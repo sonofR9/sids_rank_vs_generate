@@ -18,12 +18,10 @@ from pathlib import Path
 from typing import Any, Iterable
 
 import matplotlib.pyplot as plt
-import mlflow
 import numpy as np
 import pandas as pd
 from matplotlib.lines import Line2D
 from matplotlib.ticker import MaxNLocator
-from mlflow.tracking import MlflowClient
 from scipy.stats import pearsonr, spearmanr
 
 
@@ -119,6 +117,14 @@ RANKING_METRICS = (
         ("evaluations.ranking.transact.test.auc",),
     ),
 )
+
+# Item-only controls from the matching content-only ranking runs.
+RANKING_BASELINES = {
+    "dcnv2_pairwise_accuracy": 0.549144446849823,
+    "dcnv2_roc_auc": 0.8093270063400269,
+    "transact_pairwise_accuracy": 0.7616394758224487,
+    "transact_roc_auc": 0.9367052912712097,
+}
 
 METHOD_ORDER = (
     "R3VAE (rqkmeans)",
@@ -344,6 +350,8 @@ def parse_run_config(row: pd.Series) -> dict[str, Any]:
 
 
 def load_runs(experiment_names: list[str]) -> tuple[pd.DataFrame, dict[str, str]]:
+    import mlflow
+
     frames = []
     experiment_ids: dict[str, str] = {}
     for experiment_name in experiment_names:
@@ -505,7 +513,7 @@ def flatten_json(value: Any, prefix: str = "") -> dict[str, Any]:
     return output
 
 
-def artifact_metric_backfill(client: MlflowClient, run_id: str) -> dict[str, float]:
+def artifact_metric_backfill(client: Any, run_id: str) -> dict[str, float]:
     """Best-effort read of small JSON metric artifacts for PLUM/Balance runs."""
     interesting_names = {"metrics.json", "result.json", "results.json", "summary.json"}
     queue = [""]
@@ -553,6 +561,8 @@ def collect_candidates(
     include_token: bool,
     artifact_backfill: bool,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    from mlflow.tracking import MlflowClient
+
     client = MlflowClient()
     records: list[dict[str, Any]] = []
     for _, row in eligible_parent_runs(runs).iterrows():
@@ -751,6 +761,7 @@ def draw_panel(
     title: str,
     sweep_text: str,
     y_limits: tuple[float, float],
+    baseline: float | None,
 ) -> None:
     for method in METHOD_ORDER:
         points = frame[frame.method.eq(method)].sort_values(order_column)
@@ -771,6 +782,14 @@ def draw_panel(
             edgecolors=color,
             linewidths=1.55,
             zorder=3,
+        )
+    if baseline is not None:
+        ax.axhline(
+            baseline,
+            color="#7B8794",
+            linestyle=(0, (5, 3)),
+            linewidth=1.2,
+            zorder=0,
         )
     ax.set_title(title, pad=9, fontweight="normal")
     ax.set_ylim(*y_limits)
@@ -838,7 +857,11 @@ def plot_metric(
         }
     )
     figure, axes = plt.subplots(1, 2, figsize=(12, 5.4), sharey=True, facecolor="white")
-    y_limits = padded_limits(shown[ranking_spec.column])
+    baseline = RANKING_BASELINES.get(ranking_spec.column)
+    y_values = shown[ranking_spec.column]
+    if baseline is not None:
+        y_values = pd.concat([y_values, pd.Series([baseline])], ignore_index=True)
+    y_limits = padded_limits(y_values)
     x_limits = padded_limits(shown[sid_spec.column])
     for axis in axes:
         axis.set_facecolor("white")
@@ -852,6 +875,7 @@ def plot_metric(
         "Varying number of codebooks (C=256)",
         "L: 2 → 3 → 4",
         y_limits,
+        baseline,
     )
     draw_panel(
         axes[1],
@@ -862,6 +886,7 @@ def plot_metric(
         "Varying codebook size (L=3)",
         "C: 128 → 256 → 512 → 1024",
         y_limits,
+        baseline,
     )
     figure.supxlabel(sid_spec.label, fontsize=12, y=0.145)
     figure.supylabel(ranking_spec.label, fontsize=12, x=0.016)
@@ -881,6 +906,22 @@ def plot_metric(
                 markerfacecolor=color if filled else "white",
                 markeredgewidth=1.4,
                 label=method,
+            )
+        )
+    if baseline is not None:
+        baseline_label = (
+            "DCNv2 item-only"
+            if ranking_spec.column.startswith("dcnv2")
+            else "TransAct item-only"
+        )
+        handles.append(
+            Line2D(
+                [0],
+                [0],
+                color="#7B8794",
+                linewidth=1.2,
+                linestyle=(0, (5, 3)),
+                label=baseline_label,
             )
         )
     figure.legend(
@@ -1005,6 +1046,8 @@ def git_value(repo_root: Path, *arguments: str) -> str:
 
 
 def main() -> None:
+    import mlflow
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tracking-uri", required=True)
     parser.add_argument(
@@ -1104,6 +1147,7 @@ def main() -> None:
             "sid": sid_mapping,
             "ranking": ranking_mapping,
         },
+        "ranking_baselines": RANKING_BASELINES,
         "filters": {
             "parent_only": True,
             "status": "FINISHED",

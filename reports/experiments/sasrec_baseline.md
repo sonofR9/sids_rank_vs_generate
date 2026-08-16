@@ -92,6 +92,32 @@ python run.py \
 The source embedding path is needed only when preparing the compact
 Yambda-50M embedding cache for the first time. Later runs reuse the cache.
 
+### Pretrained-history concatenation control
+
+The requested SASRec control is available with:
+
+```bash
+sasrec-baseline \
+  --pretrained-embedding-mode history-concat \
+  --epochs 10 \
+  --metrics-json reports/experiments/sasrec/metrics/sasrec_yambda_50m_audio_history_concat_seed42.json
+```
+
+In this mode the learned item-id embedding and the frozen normalized audio
+embedding are concatenated for every history position. A linear projection maps
+the concatenation back to the configured SASRec dimension. The output item
+table remains the learned item-id table, so this is a distinct baseline from
+the existing audio-initialized run. The full Yambda-50M run completed on a
+Tesla V100 with seed 42:
+
+| Configuration | Recall@100 | HitRate@100 | NDCG@100 | Coverage@100 |
+| --- | ---: | ---: | ---: | ---: |
+| [SASRec history-concat](sasrec/metrics/sasrec_yambda_50m_audio_history_concat_seed42.json) | **0.1281415231** | **0.2421652422** | **0.0387329381** | 0.6169301315 |
+
+Relative to SASRec-Audio-Uniform, history-concat improves Recall@100 by 4.16%,
+HitRate@100 by 1.34%, and NDCG@100 by 5.71%, while reducing Coverage@100 by
+9.84%.
+
 ## Full-run results
 
 All metrics use a cutoff of 100.
