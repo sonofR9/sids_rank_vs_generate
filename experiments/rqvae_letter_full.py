@@ -11,10 +11,9 @@ from sids_rank_vs_generate.experiment import (
     TrainingConfig,
     YambdaDatasetConfig,
 )
-from sids_rank_vs_generate.sids.plum_rq_vae_pipeline import RQVAELetterPipeline
+from sids_rank_vs_generate.sids.rqvae_letter_pipeline import RQVAELetterPipeline
 from sids_rank_vs_generate.sids.config import RQVAELetterConfig
 from sids_rank_vs_generate.tracking import MLflowConfig
-
 
 def positive_int(name: str, default: int) -> int:
     value = int(os.environ.get(name, str(default)))
