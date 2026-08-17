@@ -60,7 +60,7 @@ class RQVAELetterPipeline(ISidPipeline):
             hidden_dim=self.config.hidden_dim,
             num_levels=self.config.num_levels,
             codebook_size=self.config.codebook_size,
-            codebook_sizes=self.config.codebook_sizes,
+            codebook_sizes=(self.config.codebook_size,) * self.config.num_levels,
             batch_size=self.config.batch_size,
             num_epochs=self.config.num_epochs,
             lr=self.config.lr,
@@ -92,7 +92,7 @@ class RQVAELetterPipeline(ISidPipeline):
         rqkmeans = RQKMeans(
             num_levels=self.config.num_levels,
             codebook_size=self.config.codebook_size,
-            codebook_sizes=self.config.codebook_sizes,
+            codebook_sizes=(self.config.codebook_size,) * self.config.num_levels,
             device=self.config.device,
         )
 
