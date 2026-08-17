@@ -11,15 +11,19 @@ from ..tracking import ExperimentTracker, NullTracker
 
 
 class RQVAE(nn.Module):
-    def __init__(self, dim=128, hidden_dim=128, num_levels=3, codebook_size=2048, codebook_sizes=None, batch_size=256, num_epochs=50, lr=5e-4, beta=0.25, collaborative_weight=2e-2, diversity_weight=1e-4, diversity_clusters=10, num_workers=4, device=None, pretrain_epochs=3, pretrain_lr=5e-3):
+    def __init__(self, dim=128, hidden_dim=128, latent_dim=128, num_levels=3, codebook_size=2048, codebook_sizes=None, batch_size=256, num_epochs=50, lr=5e-4, beta=0.25, collaborative_weight=2e-2, diversity_weight=1e-4, diversity_clusters=10, num_workers=4, device=None, pretrain_epochs=3, pretrain_lr=5e-3):
         super().__init__()
         seed_everything(SID_EXPERIMENT_SEED)
 
         self.dim = dim
-        self.latent_dim = 128
+        self.latent_dim = latent_dim
         self.num_levels = num_levels
         self.codebook_size = codebook_size
-        self.codebook_sizes = codebook_sizes or [codebook_size] * num_levels
+        self.codebook_sizes = tuple(codebook_sizes or [codebook_size] * num_levels)
+        if len(self.codebook_sizes) != num_levels:
+            raise ValueError("codebook_sizes must have one entry per level")
+        if any(size < 2 * diversity_clusters for size in self.codebook_sizes):
+            raise ValueError("each codebook must be at least twice diversity_clusters")
         self.batch_size = batch_size
         self.num_epochs = num_epochs
         self.lr = lr
@@ -91,8 +95,15 @@ class RQVAE(nn.Module):
 
     @torch.no_grad()
     def init_codebooks(self, codebooks):
+        if len(codebooks) != self.num_levels:
+            raise ValueError("expected one initialized codebook per level")
         for level, codebook in enumerate(codebooks):
             codebook = torch.as_tensor(codebook, dtype=self.codebooks[level].dtype, device=self.device)
+            if codebook.shape != self.codebooks[level].shape:
+                raise ValueError(
+                    f"codebook {level} has shape {tuple(codebook.shape)}, "
+                    f"expected {tuple(self.codebooks[level].shape)}"
+                )
             self.codebooks[level].copy_(codebook)
 
         self.init_diversity_clusters()
@@ -101,6 +112,8 @@ class RQVAE(nn.Module):
     def constrained_kmeans_labels(embeddings, num_clusters, iterations=5):
         values = embeddings.detach().float().cpu().numpy()
         count = len(values)
+        if count < 2 * num_clusters:
+            raise ValueError("each diversity cluster must contain at least two codebook entries")
         seed_indices = np.linspace(0, count - 1, num_clusters, dtype=np.int64)
         centers = values[seed_indices].copy()
         capacities = np.full(num_clusters, count // num_clusters, dtype=np.int64)
@@ -168,6 +181,11 @@ class RQVAE(nn.Module):
         }
 
     def collaborative_loss(self, z_q, collaborative):
+        if z_q.shape != collaborative.shape:
+            raise ValueError(
+                "collaborative embeddings must have the same batch shape as latent embeddings; "
+                f"got {tuple(collaborative.shape)} and {tuple(z_q.shape)}"
+            )
         logits = z_q @ collaborative.T
         labels = torch.arange(z_q.size(0), device=z_q.device)
         return F.cross_entropy(logits, labels)
@@ -230,6 +248,11 @@ class RQVAE(nn.Module):
         X = self.converter(X)
         collaborative_embeddings = self.converter(collaborative_embeddings, column="collaborative_embed")
 
+        if len(X) == 0:
+            raise ValueError("cannot train RQVAE on an empty dataset")
+        if len(X) != len(collaborative_embeddings):
+            raise ValueError("embedding and collaborative embedding counts must match")
+
         dataset = TensorDataset(torch.tensor(X, dtype=torch.float32), torch.tensor(collaborative_embeddings, dtype=torch.float32))
         loader = DataLoader(dataset, batch_size=self.batch_size, shuffle=True, drop_last=False, pin_memory=str(self.device).startswith("cuda"), num_workers=self.num_workers)
         opt = torch.optim.AdamW(self.parameters(), lr=self.lr)
@@ -265,6 +288,8 @@ class RQVAE(nn.Module):
     @torch.no_grad()
     def transform(self, df):
         X = self.converter(df)
+        if len(X) == 0:
+            return pl.DataFrame({"item_id": df["item_id"], **{f"sid_{level}": pl.Series([], dtype=pl.Int32) for level in range(self.num_levels)}})
         loader = DataLoader(EmbeddingDataset(X), batch_size=self.batch_size, shuffle=False, pin_memory=str(self.device).startswith("cuda"), num_workers=self.num_workers)
 
         self.eval()

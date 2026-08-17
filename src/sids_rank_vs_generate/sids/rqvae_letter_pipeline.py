@@ -19,6 +19,8 @@ class RQVAELetterPipeline(ISidPipeline):
         self.requires_collaborative_embeddings = True
 
     def encode(self, X):
+        if self.model is None:
+            raise RuntimeError("train() must be called before encode()")
         loader = DataLoader(
             EmbeddingDataset(X),
             batch_size=self.config.batch_size,
@@ -39,6 +41,8 @@ class RQVAELetterPipeline(ISidPipeline):
 
     def train(self, df: pl.DataFrame, *, collaborative_embeddings: pl.DataFrame):
         X = RQVAE.converter(df)
+        if len(X) == 0:
+            raise ValueError("cannot train RQVAELetterPipeline on an empty dataframe")
 
         collaborative_embeddings = (
             df.select("item_id")
@@ -54,10 +58,13 @@ class RQVAELetterPipeline(ISidPipeline):
                 self.config.collaborative_embedding_column: "collaborative_embed"
             })
         )
+        if collaborative_embeddings["collaborative_embed"].null_count():
+            raise ValueError("missing collaborative embeddings for one or more item_id values")
 
         self.model = RQVAE(
             dim=X.shape[1],
             hidden_dim=self.config.hidden_dim,
+            latent_dim=self.config.latent_dim,
             num_levels=self.config.num_levels,
             codebook_size=self.config.codebook_size,
             codebook_sizes=(self.config.codebook_size,) * self.config.num_levels,
@@ -89,13 +96,15 @@ class RQVAELetterPipeline(ISidPipeline):
 
         latent = self.encode(X)
 
-        rqkmeans = RQKMeans(
-            num_levels=self.config.num_levels,
-            codebook_size=self.config.codebook_size,
-            codebook_sizes=(self.config.codebook_size,) * self.config.num_levels,
-        )
+        if len(X) < self.config.codebook_size:
+            raise ValueError(
+                "codebook_size cannot exceed the number of training items "
+                f"({self.config.codebook_size} > {len(X)})"
+            )
 
-        rqkmeans.fit(latent, tracker=self.tracker)
+        rqkmeans = RQKMeans(codebook_sizes=(self.config.codebook_size,) * self.config.num_levels)
+
+        rqkmeans.fit(latent)
 
         self.model.init_codebooks(rqkmeans.codebooks)
 
@@ -106,10 +115,13 @@ class RQVAELetterPipeline(ISidPipeline):
         )
 
     def update(self, df: pl.DataFrame) -> pl.DataFrame:
+        if self.model is None:
+            raise RuntimeError("train() must be called before update()")
         return self.model.transform(df)
 
     def summary(self):
+        if self.model is None:
+            raise RuntimeError("train() must be called before summary()")
         return {
             "training_metrics": self.model.training_metrics,
         }
-        

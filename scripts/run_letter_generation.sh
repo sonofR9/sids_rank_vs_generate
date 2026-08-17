@@ -2,6 +2,8 @@
 set -euo pipefail
 
 PYTHON_BIN="${PYTHON_BIN:-python}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 
 MLFLOW_TRACKING_URI="${MLFLOW_TRACKING_URI:-http://51.250.47.231:5000}"
 MLFLOW_EXPERIMENT_NAME="${MLFLOW_EXPERIMENT_NAME:-letter-semantic-sizes}"
@@ -16,16 +18,19 @@ run_one() {
 
     echo "Starting ${run_name} on GPU ${gpu}"
 
-    CUDA_VISIBLE_DEVICES="${gpu}" \
-    NUM_LEVELS="${levels}" \
-    CODEBOOK_SIZE="${codebook}" \
-    PYTHONUNBUFFERED=1 \
-    "${PYTHON_BIN}" run.py experiments/rqvae_letter_full.py \
-        --skip-ranking \
-        --mlflow \
-        --mlflow-tracking-uri "${MLFLOW_TRACKING_URI}" \
-        --mlflow-experiment-name "${MLFLOW_EXPERIMENT_NAME}" \
-        --mlflow-run-name "${run_name}"
+    (
+        cd "${REPO_ROOT}"
+        CUDA_VISIBLE_DEVICES="${gpu}" \
+        NUM_LEVELS="${levels}" \
+        CODEBOOK_SIZE="${codebook}" \
+        PYTHONUNBUFFERED=1 \
+        "${PYTHON_BIN}" run.py experiments/rqvae_letter_full.py \
+            --skip-ranking \
+            --mlflow \
+            --mlflow-tracking-uri "${MLFLOW_TRACKING_URI}" \
+            --mlflow-experiment-name "${MLFLOW_EXPERIMENT_NAME}" \
+            --mlflow-run-name "${run_name}"
+    )
 
     echo "Finished ${run_name} on GPU ${gpu}"
 }
