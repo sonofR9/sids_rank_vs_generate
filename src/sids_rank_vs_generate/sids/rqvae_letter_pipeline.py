@@ -93,7 +93,6 @@ class RQVAELetterPipeline(ISidPipeline):
             num_levels=self.config.num_levels,
             codebook_size=self.config.codebook_size,
             codebook_sizes=(self.config.codebook_size,) * self.config.num_levels,
-            device=self.config.device,
         )
 
         rqkmeans.fit(latent, tracker=self.tracker)
