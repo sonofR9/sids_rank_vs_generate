@@ -34,15 +34,23 @@ run_one() {
 
 case "${RUN_SET}" in
   baseline) run_one 3 256 512 ;;
+  l7-c256) run_one 7 256 2048 ;;
   l10-c256) run_one 10 256 2048 ;;
+  l7-c128) run_one 7 128 1024 ;;
+  l7-c32) run_one 7 32 512 ;;
   l10-c32) run_one 10 32 512 ;;
+
   all)
     run_one 3 256 512
+    run_one 7 256 2048
     run_one 10 256 2048
+    run_one 7 128 1024
+    run_one 7 32 512
     run_one 10 32 512
     ;;
+
   *)
-    echo "Unknown RUN_SET=${RUN_SET}; use baseline, l10-c256, l10-c32, or all" >&2
+    echo "Unknown RUN_SET=${RUN_SET}" >&2
     exit 2
     ;;
 esac
