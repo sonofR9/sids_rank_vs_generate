@@ -14,9 +14,17 @@ from sids_rank_vs_generate.sids import (
 )
 
 
-NUM_LEVELS = int(os.environ.get("NUM_LEVELS", "3"))
-CODEBOOK_SIZE = int(os.environ.get("CODEBOOK_SIZE", "256"))
-NUM_MERGES = int(os.environ.get("NUM_MERGES", "512"))
+def positive_int(name: str, default: int, *, allow_zero: bool = False) -> int:
+    value = int(os.environ.get(name, str(default)))
+    if value < 0 or (value == 0 and not allow_zero):
+        qualifier = "non-negative" if allow_zero else "positive"
+        raise ValueError(f"{name} must be {qualifier}")
+    return value
+
+
+NUM_LEVELS = positive_int("NUM_LEVELS", 3)
+CODEBOOK_SIZE = positive_int("CODEBOOK_SIZE", 256)
+NUM_MERGES = positive_int("NUM_MERGES", 512, allow_zero=True)
 
 COLLISION_RESOLUTION = os.environ.get(
     "COLLISION_RESOLUTION",

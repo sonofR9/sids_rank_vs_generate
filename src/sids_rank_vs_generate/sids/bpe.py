@@ -104,14 +104,17 @@ class BPE:
         if not self._fitted:
             raise RuntimeError("Сначала вызови BPE.fit()")
 
+        sequences = [list(sequence) for sequence in sequences]
+        self._validate_base_tokens(sequences)
+
         return [
-            self._encode_sequence(
-                list(sequence)
-            )
+            self._encode_sequence(sequence)
             for sequence in sequences
         ]
 
     def fit_transform(self, sequences):
+        # Materialize once so this also works when ``sequences`` is a generator.
+        sequences = [list(sequence) for sequence in sequences]
         self.fit(sequences)
         return self.transform(sequences)
 

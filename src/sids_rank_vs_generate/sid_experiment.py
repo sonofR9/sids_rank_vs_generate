@@ -171,7 +171,9 @@ def _to_builtin(value: Any) -> Any:
 
 
 def _sid_configuration(sid: Any) -> Any:
-    configuration = getattr(sid, "config", None)
+    configuration = getattr(sid, "tracking_config", None)
+    if configuration is None:
+        configuration = getattr(sid, "config", None)
     if configuration is None:
         return None
     if is_dataclass(configuration) and not isinstance(configuration, type):
@@ -300,7 +302,12 @@ def run_sid_experiment(
         on="item_id",
         how="inner",
     )
-    codebook_sizes = infer_codebook_sizes(getattr(sid, "config", None), sid_output)
+    configured_sizes = getattr(sid, "sid_codebook_sizes", None)
+    codebook_sizes = (
+        tuple(configured_sizes)
+        if configured_sizes is not None
+        else infer_codebook_sizes(getattr(sid, "config", None), sid_output)
+    )
     embedding_col = (
         "normalized_embed" if "normalized_embed" in item_features.columns else "embed"
     )

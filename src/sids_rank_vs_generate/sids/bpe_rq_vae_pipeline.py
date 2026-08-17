@@ -57,18 +57,32 @@ class BPERQVAEPipeline(RQVAEPipeline):
 
         super().__init__(base_config)
 
+    @property
+    def sid_codebook_sizes(self) -> tuple[int, ...]:
+        """Vocabulary capacity of every post-BPE SID position.
+
+        BPE tokens and PAD are valid values at each original RQ position, so
+        downstream models must reserve the complete BPE vocabulary, not only
+        the RQ-VAE's base codebook.
+        """
+
+        return (self.bpe.vocab_size,) * self.bpe_config.num_levels
+
+    @property
+    def tracking_config(self) -> BPE_RQVAEConfig:
+        """Expose the complete configuration in experiment metadata."""
+
+        return self.bpe_config
+
     def train(
         self,
         df: pl.DataFrame,
     ) -> None:
         super().train(df)
 
-        if self.model is None:
-            raise RuntimeError(
-                "RQ-VAE model was not initialized"
-            )
-
-        sids = self.model.transform(df)
+        # Use the configured assignment policy (nearest/ECM/RRS) consistently
+        # both while learning merges and while emitting final IDs.
+        sids = self.assign(df)
 
         sid_columns = [
             f"sid_{i}"
@@ -86,12 +100,7 @@ class BPERQVAEPipeline(RQVAEPipeline):
         self,
         df: pl.DataFrame,
     ) -> pl.DataFrame:
-        if self.model is None:
-            raise RuntimeError(
-                "Сначала вызови train()!"
-            )
-
-        sids = self.model.transform(df)
+        sids = self.assign(df)
 
         sid_columns = [
             f"sid_{i}"

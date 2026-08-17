@@ -8,29 +8,41 @@ MLFLOW_TRACKING_URI="${MLFLOW_TRACKING_URI:-http://51.250.47.231:5000}"
 MLFLOW_EXPERIMENT_NAME="${MLFLOW_EXPERIMENT_NAME:-sid-comparison}"
 MODEL_CACHE_DIR="${MODEL_CACHE_DIR:-reports/poster_cache}"
 
-LEVELS=3
-CODEBOOK=256
-NUM_MERGES=512
+RUN_SET="${RUN_SET:-all}"
 
-RUN_NAME="bpe-l${LEVELS}-c${CODEBOOK}-m${NUM_MERGES}"
+run_one() {
+  local levels="$1"
+  local codebook="$2"
+  local merges="$3"
+  local run_name="bpe-l${levels}-c${codebook}-m${merges}"
 
-echo "========================================"
-echo "Starting ${RUN_NAME}"
-echo "GPU=${GPU}"
-echo "L=${LEVELS}, C=${CODEBOOK}, merges=${NUM_MERGES}"
-echo "========================================"
+  echo "Starting ${run_name} on GPU ${GPU}"
+  CUDA_VISIBLE_DEVICES="${GPU}" \
+  ASSIGNMENT_METHOD="nearest" \
+  COLLISION_RESOLUTION="none" \
+  NUM_LEVELS="${levels}" \
+  CODEBOOK_SIZE="${codebook}" \
+  NUM_MERGES="${merges}" \
+  MODEL_CACHE_DIR="${MODEL_CACHE_DIR}" \
+  PYTHONUNBUFFERED=1 \
+  "${PYTHON_BIN}" run.py experiments/bpe_full.py \
+      --mlflow \
+      --mlflow-tracking-uri "${MLFLOW_TRACKING_URI}" \
+      --mlflow-experiment-name "${MLFLOW_EXPERIMENT_NAME}" \
+      --mlflow-run-name "${run_name}"
+}
 
-CUDA_VISIBLE_DEVICES="${GPU}" \
-SID_MODEL="bpe" \
-R3_INIT="rqkmeans" \
-ASSIGNMENT_METHOD="nearest" \
-COLLISION_RESOLUTION="none" \
-NUM_LEVELS="${LEVELS}" \
-CODEBOOK_SIZE="${CODEBOOK}" \
-NUM_MERGES="${NUM_MERGES}" \
-MODEL_CACHE_DIR="${MODEL_CACHE_DIR}" \
-"${PYTHON_BIN}" run.py experiments/bpe_full.py \
-    --mlflow \
-    --mlflow-tracking-uri "${MLFLOW_TRACKING_URI}" \
-    --mlflow-experiment-name "${MLFLOW_EXPERIMENT_NAME}" \
-    --mlflow-run-name "${RUN_NAME}"
+case "${RUN_SET}" in
+  baseline) run_one 3 256 512 ;;
+  l10-c256) run_one 10 256 2048 ;;
+  l10-c32) run_one 10 32 512 ;;
+  all)
+    run_one 3 256 512
+    run_one 10 256 2048
+    run_one 10 32 512
+    ;;
+  *)
+    echo "Unknown RUN_SET=${RUN_SET}; use baseline, l10-c256, l10-c32, or all" >&2
+    exit 2
+    ;;
+esac

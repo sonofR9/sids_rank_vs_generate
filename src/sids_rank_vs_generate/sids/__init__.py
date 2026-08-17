@@ -14,6 +14,7 @@ from .config import (
 from .plum_rq_vae_pipeline import PlumRQVAEPipeline
 from .rq_kmeans_pipeline import RQKMeansPipeline
 from .rq_vae_pipeline import RQVAEPipeline
+from .bpe_rq_vae_pipeline import BPE_RQVAEConfig, BPERQVAEPipeline
 from .user_aware import (
     IUserAwareSidPipeline,
     UserAwareSidTrainingData,
@@ -34,6 +35,8 @@ from .user_sid_mapper import (
 
 __all__ = [
     "ISidPipeline",
+    "BPE_RQVAEConfig",
+    "BPERQVAEPipeline",
     "IUserAwareSidPipeline",
     "IUserSidMapper",
     "FrequencyUserSidMapper",
