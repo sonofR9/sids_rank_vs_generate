@@ -9,6 +9,7 @@ from .config import (
     PlumRQVAEConfig,
     RQKMeansConfig,
     RQVAEConfig,
+    RQVAELetterConfig,
     UserAwareRQKMeansConfig,
 )
 from .plum_rq_vae_pipeline import PlumRQVAEPipeline
@@ -31,9 +32,13 @@ from .user_sid_mapper import (
     mapping_ambiguity_metrics,
     mapping_fit_support_metrics,
 )
-
+from .rqvae_letter_pipeline import RQVAELetterPipeline
 __all__ = [
     "ISidPipeline",
+    "RQVAEPipeline",
+    "RQVAELetterPipeline",
+    "RQVAELetterConfig",
+    "RQVAELetterPipeline",
     "IUserAwareSidPipeline",
     "IUserSidMapper",
     "FrequencyUserSidMapper",
