@@ -5,6 +5,8 @@ from typing import Hashable
 
 import polars as pl
 
+from ..tracking import ExperimentTracker, NullTracker
+
 
 Token = Hashable
 Sequence = list[Token]
@@ -46,7 +48,13 @@ class BPE:
 
         self._fitted = False
 
-    def fit(self, sequences) -> "BPE":
+    def fit(
+        self,
+        sequences,
+        *,
+        tracker: ExperimentTracker | None = None,
+    ) -> "BPE":
+        tracker = tracker or NullTracker()
         sequences = [list(seq) for seq in sequences]
 
         if not sequences:
@@ -95,6 +103,13 @@ class BPE:
                 )
                 for sequence in sequences
             ]
+            tracker.log_metrics(
+                {
+                    "fit.bpe_pair_frequency": frequency,
+                    "fit.bpe_merges": self._next_token_id,
+                },
+                step=self._next_token_id,
+            )
 
         self._fitted = True
 
@@ -112,23 +127,30 @@ class BPE:
             for sequence in sequences
         ]
 
-    def fit_transform(self, sequences):
+    def fit_transform(
+        self,
+        sequences,
+        *,
+        tracker: ExperimentTracker | None = None,
+    ):
         # Materialize once so this also works when ``sequences`` is a generator.
         sequences = [list(sequence) for sequence in sequences]
-        self.fit(sequences)
+        self.fit(sequences, tracker=tracker)
         return self.transform(sequences)
 
     def fit_polars(
         self,
         df: pl.DataFrame,
         sid_columns: list[str],
+        *,
+        tracker: ExperimentTracker | None = None,
     ) -> "BPE":
         sequences = self._df_to_sequences(
             df,
             sid_columns,
         )
 
-        self.fit(sequences)
+        self.fit(sequences, tracker=tracker)
 
         return self
 

@@ -7,6 +7,7 @@ import polars as pl
 from .bpe import BPE
 from .config import RQVAEConfig
 from .rq_vae_pipeline import RQVAEPipeline
+from ..reproducibility import SID_EXPERIMENT_SEED, seed_everything
 
 
 @dataclass(frozen=True)
@@ -78,6 +79,7 @@ class BPERQVAEPipeline(RQVAEPipeline):
         self,
         df: pl.DataFrame,
     ) -> None:
+        seed_everything(SID_EXPERIMENT_SEED)
         super().train(df)
 
         # Use the configured assignment policy (nearest/ECM/RRS) consistently
@@ -94,6 +96,7 @@ class BPERQVAEPipeline(RQVAEPipeline):
         self.bpe.fit_polars(
             sids,
             sid_columns=sid_columns,
+            tracker=self.tracker,
         )
 
     def update(
