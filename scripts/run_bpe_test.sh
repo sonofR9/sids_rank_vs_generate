@@ -5,7 +5,7 @@ GPU="${GPU:-0}"
 PYTHON_BIN="${PYTHON_BIN:-python}"
 
 MLFLOW_TRACKING_URI="${MLFLOW_TRACKING_URI:-http://51.250.47.231:5000}"
-MLFLOW_EXPERIMENT_NAME="${MLFLOW_EXPERIMENT_NAME:-sid-comparison}"
+MLFLOW_EXPERIMENT_NAME="${MLFLOW_EXPERIMENT_NAME:bpe}"
 MODEL_CACHE_DIR="${MODEL_CACHE_DIR:-reports/poster_cache}"
 
 RUN_SET="${RUN_SET:-all}"
@@ -26,6 +26,7 @@ run_one() {
   MODEL_CACHE_DIR="${MODEL_CACHE_DIR}" \
   PYTHONUNBUFFERED=1 \
   "${PYTHON_BIN}" run.py experiments/bpe_full.py \
+      --skip-ranking \
       --mlflow \
       --mlflow-tracking-uri "${MLFLOW_TRACKING_URI}" \
       --mlflow-experiment-name "${MLFLOW_EXPERIMENT_NAME}" \
