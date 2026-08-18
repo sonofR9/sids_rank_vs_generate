@@ -82,7 +82,8 @@ TARGETS = (
 )
 
 BASE_METHOD_ORDER = (
-    "R3VAE (rqkmeans)", "R3VAE (spherical)", "RQKMeans", "RQVAE (ECM)",
+    "R3VAE (rqkmeans)", "R3VAE (spherical)", "RQKMeans",
+    "OneRec Pair Alignment", "RQVAE (ECM)",
     "RQVAE", "RQVAE (RRS)", "RQVAE-token",
 )
 METHOD_ORDER = (
@@ -92,6 +93,7 @@ METHOD_ORDER = (
     "RQVAE + item LogQ",
     "RQVAE + pure SID LogQ",
     "DIGER",
+    "LETTER",
     "BPE (three-way)",
     "UAQ30 v1 capacity",
     "UAQ30 v2 capacity",
@@ -101,11 +103,13 @@ METHOD_ORDER = (
 METHOD_STYLE = {
     "R3VAE (rqkmeans)": ("#72B7B2", "o", False), "R3VAE (spherical)": ("#54A24B", "o", False),
     "RQKMeans": ("#4C78A8", "o", False), "RQVAE (ECM)": ("#B279A2", "o", False),
+    "OneRec Pair Alignment": ("#2A9D8F", "P", True),
     "RQVAE": ("#F58518", "o", False), "RQVAE (RRS)": ("#E45756", "D", False),
     "RQVAE-token": ("#FF9DA6", "s", True), "PLUM": ("#9D755D", "^", False),
     "BalanceRQKMeans": ("#7A5195", "s", False), "RQVAE + item LogQ": ("#8C6D31", "P", False),
     "RQVAE + pure SID LogQ": ("#E15759", "X", False),
     "DIGER": ("#006D77", "*", True),
+    "LETTER": ("#D1495B", "p", True),
     "BPE (three-way)": ("#1D3557", "h", True),
     "UAQ30 v1 capacity": ("#003F5C", "v", True),
     "UAQ30 v2 capacity": ("#2F4B7C", "v", False),
@@ -262,7 +266,10 @@ def plot_metric(frame: pd.DataFrame, sid_metric: MetricSpec, target: TargetSpec,
         for ax in axes:
             ax.axhline(SASREC_AUDIO_UNIFORM_RECALL, color="#334155", linestyle="-.", linewidth=1.25, zorder=0)
             ax.axhline(SASREC_HISTORY_CONCAT_RECALL, color="#0F766E", linestyle=(0, (2, 2)), linewidth=1.2, zorder=0)
-    figure.supxlabel(sid_metric.label, fontsize=12, y=0.16)
+    is_recall = target.key == "recall100"
+    # Recall figures carry three SASRec reference lines and therefore have a
+    # taller legend. Keep the shared x-label in the clear gap above that legend.
+    figure.supxlabel(sid_metric.label, fontsize=12, y=0.25 if is_recall else 0.16)
     figure.supylabel(target.label, fontsize=12, x=0.016)
     present = [method for method in METHOD_ORDER if method in set(shown.method)]
     handles = [Line2D([0], [0], color=METHOD_STYLE[method][0], linewidth=1.1, marker=METHOD_STYLE[method][1], markersize=6, markerfacecolor=METHOD_STYLE[method][0] if METHOD_STYLE[method][2] else "white", markeredgewidth=1.4, label=method) for method in present]
@@ -277,7 +284,13 @@ def plot_metric(frame: pd.DataFrame, sid_metric: MetricSpec, target: TargetSpec,
         handles.append(Line2D([0], [0], color="#334155", linewidth=1.25, linestyle="-.", label="SASRec + audio init"))
         handles.append(Line2D([0], [0], color="#0F766E", linewidth=1.2, linestyle=(0, (2, 2)), label="SASRec + audio history-concat"))
     figure.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.01), ncol=4, frameon=False, handlelength=1.8, columnspacing=1.15)
-    figure.subplots_adjust(left=0.075, right=0.985, top=0.90, bottom=0.38, wspace=0.06)
+    figure.subplots_adjust(
+        left=0.075,
+        right=0.985,
+        top=0.90,
+        bottom=0.42 if is_recall else 0.38,
+        wspace=0.06,
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     stem = f"{target.key}_vs_{sid_metric.stem}"
     for extension in ("png", "pdf", "svg"):
@@ -303,6 +316,7 @@ def main() -> None:
     parser.add_argument("--item-logq-report", type=Path)
     parser.add_argument("--pure-sid-logq-report", type=Path)
     parser.add_argument("--diger-report", type=Path)
+    parser.add_argument("--letter-report", type=Path)
     parser.add_argument("--bpe-report", type=Path)
     parser.add_argument("--poster-extensions-report", type=Path)
     parser.add_argument("--user-aware-report", type=Path)
@@ -333,6 +347,9 @@ def main() -> None:
     args.diger_report = args.diger_report or first_existing(
         Path("reports/figures/generation/diger_recall_scale_poster/diger_generation_runs.csv"),
     )
+    args.letter_report = args.letter_report or first_existing(
+        Path("reports/figures/generation/letter/letter_generation_runs.csv"),
+    )
     args.bpe_report = args.bpe_report or first_existing(
         Path("reports/figures/generation/bpe_three_way/bpe_generation_runs.csv"),
     )
@@ -357,12 +374,13 @@ def main() -> None:
     item_logq = normalize(read_csv(args.item_logq_report, "item_logq", required=False), method="RQVAE + item LogQ")
     pure_sid_logq = normalize(read_csv(args.pure_sid_logq_report, "pure_sid_logq", required=False), method="RQVAE + pure SID LogQ")
     diger = normalize(read_csv(args.diger_report, "diger", required=False), method="DIGER")
+    letter = normalize(read_csv(args.letter_report, "letter", required=False), method="LETTER")
     bpe = normalize(read_csv(args.bpe_report, "bpe", required=False), method="BPE (three-way)")
     extensions = normalize(read_csv(args.poster_extensions_report, "poster_extensions", required=False))
     extensions_33148 = normalize(read_csv(args.poster_extensions_33148_report, "poster_extensions_33148", required=False))
     user_aware = normalize(read_csv(args.user_aware_report, "user_aware", required=False))
     generation = deduplicate(numeric(filter_extensions(pd.concat([
-        raw, item_logq, pure_sid_logq, diger, bpe, extensions, extensions_33148, user_aware,
+        raw, item_logq, pure_sid_logq, diger, letter, bpe, extensions, extensions_33148, user_aware,
     ], ignore_index=True))))
     ranking = deduplicate(numeric(filter_extensions(normalize(read_csv(args.ranking_report, "ranking")))))
     transact_ranking = deduplicate(
