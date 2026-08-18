@@ -1,0 +1,2 @@
+method,num_levels,codebook_size,recall_at_100,icr,catalog_size,data_scope,protocol_id,variant,model_variant,run_name,run_id,experiment_name,recall_metric,icr_metric
+DIGER,3,256,0.15098126672613738,0.9431639917943767,33148,full,poster-full-33148-v1,both,strong128,both-strong128-poster-recall-scale,72fbe0681c2d4dcdb3c09879b3f7d671,diger-recall-scale-v0.1,evaluations.generation.recall_at_100,sid.independent_code_rate

@@ -24,6 +24,7 @@ from matplotlib.ticker import MaxNLocator
 
 LEVEL_SWEEP = (2, 3, 4)
 CODEBOOK_SWEEP = (128, 256, 512, 1024)
+SASREC_VANILLA_RECALL = 0.113
 SASREC_AUDIO_UNIFORM_RECALL = 0.12302921437950205
 SASREC_HISTORY_CONCAT_RECALL = 0.12814152311278762
 
@@ -64,7 +65,7 @@ TARGETS = (
         "recall100",
         "recall_at_100",
         "Recall@100",
-        SASREC_AUDIO_UNIFORM_RECALL,
+        SASREC_VANILLA_RECALL,
     ),
     TargetSpec(
         "dcnv2",
@@ -90,6 +91,8 @@ METHOD_ORDER = (
     "BalanceRQKMeans",
     "RQVAE + item LogQ",
     "RQVAE + pure SID LogQ",
+    "DIGER",
+    "BPE (three-way)",
     "UAQ30 v1 capacity",
     "UAQ30 v2 capacity",
     "UAQ30 v1 anchor",
@@ -102,6 +105,8 @@ METHOD_STYLE = {
     "RQVAE-token": ("#FF9DA6", "s", True), "PLUM": ("#9D755D", "^", False),
     "BalanceRQKMeans": ("#7A5195", "s", False), "RQVAE + item LogQ": ("#8C6D31", "P", False),
     "RQVAE + pure SID LogQ": ("#E15759", "X", False),
+    "DIGER": ("#006D77", "*", True),
+    "BPE (three-way)": ("#1D3557", "h", True),
     "UAQ30 v1 capacity": ("#003F5C", "v", True),
     "UAQ30 v2 capacity": ("#2F4B7C", "v", False),
     "UAQ30 v1 anchor": ("#00A6A6", "<", True),
@@ -205,7 +210,8 @@ def draw_panel(ax: plt.Axes, frame: pd.DataFrame, x_column: str, y_column: str, 
         color, marker, filled = METHOD_STYLE[method]
         if len(points) > 1:
             ax.plot(points[x_column], points[y_column], color=color, linewidth=1.25, alpha=0.72, zorder=1)
-        ax.scatter(points[x_column], points[y_column], s=58, marker=marker, facecolors=color if filled else "white", edgecolors=color, linewidths=1.55, zorder=3)
+        marker_size = 110 if method == "DIGER" else 58
+        ax.scatter(points[x_column], points[y_column], s=marker_size, marker=marker, facecolors=color if filled else "white", edgecolors=color, linewidths=1.55, zorder=4 if method == "DIGER" else 3)
     if baseline is not None:
         ax.axhline(baseline, color="#7B8794", linestyle=(0, (5, 3)), linewidth=1.2, zorder=0)
     ax.set_title(title, pad=9, fontweight="normal")
@@ -223,7 +229,11 @@ def draw_panel(ax: plt.Axes, frame: pd.DataFrame, x_column: str, y_column: str, 
 
 
 def plot_metric(frame: pd.DataFrame, sid_metric: MetricSpec, target: TargetSpec, output_dir: Path) -> bool:
-    left = frame[frame.codebook_size.eq(256) & frame.num_levels.isin(LEVEL_SWEEP)]
+    is_bpe = frame.method.eq("BPE (three-way)")
+    left = frame[
+        frame.codebook_size.eq(256)
+        & (frame.num_levels.isin(LEVEL_SWEEP) | is_bpe)
+    ]
     right = frame[frame.num_levels.eq(3) & frame.codebook_size.isin(CODEBOOK_SWEEP)]
     shown = pd.concat([left, right], ignore_index=True).dropna(subset=[sid_metric.column, target.column])
     shown = shown.drop_duplicates(["method", "run_name"])
@@ -234,14 +244,23 @@ def plot_metric(frame: pd.DataFrame, sid_metric: MetricSpec, target: TargetSpec,
     x_limits = padded_limits(shown[sid_metric.column])
     baselines = [(target.baseline, "#7B8794", (0, (5, 3)))] if target.baseline is not None else []
     if target.key == "recall100":
-        baselines.append((SASREC_HISTORY_CONCAT_RECALL, "#0F766E", (0, (2, 2))))
+        baselines.extend([
+            (SASREC_AUDIO_UNIFORM_RECALL, "#334155", "-."),
+            (SASREC_HISTORY_CONCAT_RECALL, "#0F766E", (0, (2, 2))),
+        ])
     baseline_values = [value for value, _, _ in baselines]
     y_values = shown[target.column] if not baseline_values else pd.concat([shown[target.column], pd.Series(baseline_values)])
     y_limits = padded_limits(y_values)
-    draw_panel(axes[0], left, sid_metric.column, target.column, "num_levels", "Varying number of codebooks (C=256)", "L: 2 → 3 → 4", x_limits, y_limits, target.baseline)
+    level_sweep_text = (
+        "L: 2 → 3 → 4 · BPE: 3 → 7"
+        if left.method.eq("BPE (three-way)").any()
+        else "L: 2 → 3 → 4"
+    )
+    draw_panel(axes[0], left, sid_metric.column, target.column, "num_levels", "Varying number of codebooks (C=256)", level_sweep_text, x_limits, y_limits, target.baseline)
     draw_panel(axes[1], right, sid_metric.column, target.column, "codebook_size", "Varying codebook size (L=3)", "C: 128 → 256 → 512 → 1024", x_limits, y_limits, target.baseline)
     if target.key == "recall100":
         for ax in axes:
+            ax.axhline(SASREC_AUDIO_UNIFORM_RECALL, color="#334155", linestyle="-.", linewidth=1.25, zorder=0)
             ax.axhline(SASREC_HISTORY_CONCAT_RECALL, color="#0F766E", linestyle=(0, (2, 2)), linewidth=1.2, zorder=0)
     figure.supxlabel(sid_metric.label, fontsize=12, y=0.16)
     figure.supylabel(target.label, fontsize=12, x=0.016)
@@ -249,13 +268,14 @@ def plot_metric(frame: pd.DataFrame, sid_metric: MetricSpec, target: TargetSpec,
     handles = [Line2D([0], [0], color=METHOD_STYLE[method][0], linewidth=1.1, marker=METHOD_STYLE[method][1], markersize=6, markerfacecolor=METHOD_STYLE[method][0] if METHOD_STYLE[method][2] else "white", markeredgewidth=1.4, label=method) for method in present]
     if target.baseline is not None:
         baseline_label = (
-            "SASRec-Audio-Uniform"
+            "SASRec vanilla (baseline)"
             if target.key == "recall100"
             else f"{target.label.split()[0]} item-only"
         )
         handles.append(Line2D([0], [0], color="#7B8794", linewidth=1.2, linestyle=(0, (5, 3)), label=baseline_label))
     if target.key == "recall100":
-        handles.append(Line2D([0], [0], color="#0F766E", linewidth=1.2, linestyle=(0, (2, 2)), label="SASRec history-concat"))
+        handles.append(Line2D([0], [0], color="#334155", linewidth=1.25, linestyle="-.", label="SASRec + audio init"))
+        handles.append(Line2D([0], [0], color="#0F766E", linewidth=1.2, linestyle=(0, (2, 2)), label="SASRec + audio history-concat"))
     figure.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.01), ncol=4, frameon=False, handlelength=1.8, columnspacing=1.15)
     figure.subplots_adjust(left=0.075, right=0.985, top=0.90, bottom=0.38, wspace=0.06)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -282,6 +302,8 @@ def main() -> None:
     parser.add_argument("--raw-report", type=Path)
     parser.add_argument("--item-logq-report", type=Path)
     parser.add_argument("--pure-sid-logq-report", type=Path)
+    parser.add_argument("--diger-report", type=Path)
+    parser.add_argument("--bpe-report", type=Path)
     parser.add_argument("--poster-extensions-report", type=Path)
     parser.add_argument("--user-aware-report", type=Path)
     parser.add_argument(
@@ -308,6 +330,12 @@ def main() -> None:
     args.pure_sid_logq_report = args.pure_sid_logq_report or first_existing(
         Path("reports/figures/generation/rqvae_pure_sid_logq_recall/matched_logq_rqvae_runs.csv"),
     )
+    args.diger_report = args.diger_report or first_existing(
+        Path("reports/figures/generation/diger_recall_scale_poster/diger_generation_runs.csv"),
+    )
+    args.bpe_report = args.bpe_report or first_existing(
+        Path("reports/figures/generation/bpe_three_way/bpe_generation_runs.csv"),
+    )
     args.poster_extensions_report = args.poster_extensions_report or first_existing(
         Path("reports/figures/generation/poster_plum_balance_recall/matched_generation_runs.csv"),
         Path("reports/figures/generation/poster_raw_sid_with_plum_balance/matched_generation_runs.csv"),
@@ -328,11 +356,13 @@ def main() -> None:
     raw = normalize(read_csv(args.raw_report, "raw_sid"))
     item_logq = normalize(read_csv(args.item_logq_report, "item_logq", required=False), method="RQVAE + item LogQ")
     pure_sid_logq = normalize(read_csv(args.pure_sid_logq_report, "pure_sid_logq", required=False), method="RQVAE + pure SID LogQ")
+    diger = normalize(read_csv(args.diger_report, "diger", required=False), method="DIGER")
+    bpe = normalize(read_csv(args.bpe_report, "bpe", required=False), method="BPE (three-way)")
     extensions = normalize(read_csv(args.poster_extensions_report, "poster_extensions", required=False))
     extensions_33148 = normalize(read_csv(args.poster_extensions_33148_report, "poster_extensions_33148", required=False))
     user_aware = normalize(read_csv(args.user_aware_report, "user_aware", required=False))
     generation = deduplicate(numeric(filter_extensions(pd.concat([
-        raw, item_logq, pure_sid_logq, extensions, extensions_33148, user_aware,
+        raw, item_logq, pure_sid_logq, diger, bpe, extensions, extensions_33148, user_aware,
     ], ignore_index=True))))
     ranking = deduplicate(numeric(filter_extensions(normalize(read_csv(args.ranking_report, "ranking")))))
     transact_ranking = deduplicate(

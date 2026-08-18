@@ -10,6 +10,8 @@ recall100,icr,PLUM,3
 recall100,icr,BalanceRQKMeans,3
 recall100,icr,RQVAE + item LogQ,6
 recall100,icr,RQVAE + pure SID LogQ,2
+recall100,icr,DIGER,1
+recall100,icr,BPE (three-way),4
 recall100,icr,UAQ30 v1 capacity,1
 recall100,icr,UAQ30 v2 capacity,1
 recall100,icr,UAQ30 v1 anchor,1
@@ -25,6 +27,8 @@ recall100,collision_rate,PLUM,3
 recall100,collision_rate,BalanceRQKMeans,3
 recall100,collision_rate,RQVAE + item LogQ,6
 recall100,collision_rate,RQVAE + pure SID LogQ,2
+recall100,collision_rate,DIGER,0
+recall100,collision_rate,BPE (three-way),0
 recall100,collision_rate,UAQ30 v1 capacity,1
 recall100,collision_rate,UAQ30 v2 capacity,1
 recall100,collision_rate,UAQ30 v1 anchor,1
@@ -40,6 +44,8 @@ recall100,p95_collision_group_size,PLUM,3
 recall100,p95_collision_group_size,BalanceRQKMeans,3
 recall100,p95_collision_group_size,RQVAE + item LogQ,6
 recall100,p95_collision_group_size,RQVAE + pure SID LogQ,2
+recall100,p95_collision_group_size,DIGER,0
+recall100,p95_collision_group_size,BPE (three-way),0
 recall100,p95_collision_group_size,UAQ30 v1 capacity,1
 recall100,p95_collision_group_size,UAQ30 v2 capacity,1
 recall100,p95_collision_group_size,UAQ30 v1 anchor,1
@@ -55,6 +61,8 @@ recall100,g_max,PLUM,3
 recall100,g_max,BalanceRQKMeans,3
 recall100,g_max,RQVAE + item LogQ,6
 recall100,g_max,RQVAE + pure SID LogQ,2
+recall100,g_max,DIGER,0
+recall100,g_max,BPE (three-way),0
 recall100,g_max,UAQ30 v1 capacity,1
 recall100,g_max,UAQ30 v2 capacity,1
 recall100,g_max,UAQ30 v1 anchor,1
@@ -70,6 +78,8 @@ recall100,cur_total,PLUM,3
 recall100,cur_total,BalanceRQKMeans,3
 recall100,cur_total,RQVAE + item LogQ,6
 recall100,cur_total,RQVAE + pure SID LogQ,2
+recall100,cur_total,DIGER,0
+recall100,cur_total,BPE (three-way),0
 recall100,cur_total,UAQ30 v1 capacity,1
 recall100,cur_total,UAQ30 v2 capacity,1
 recall100,cur_total,UAQ30 v1 anchor,1
@@ -85,6 +95,8 @@ recall100,code_gini,PLUM,3
 recall100,code_gini,BalanceRQKMeans,3
 recall100,code_gini,RQVAE + item LogQ,6
 recall100,code_gini,RQVAE + pure SID LogQ,2
+recall100,code_gini,DIGER,0
+recall100,code_gini,BPE (three-way),0
 recall100,code_gini,UAQ30 v1 capacity,1
 recall100,code_gini,UAQ30 v2 capacity,1
 recall100,code_gini,UAQ30 v1 anchor,1
@@ -100,6 +112,8 @@ recall100,code_entropy,PLUM,3
 recall100,code_entropy,BalanceRQKMeans,3
 recall100,code_entropy,RQVAE + item LogQ,6
 recall100,code_entropy,RQVAE + pure SID LogQ,2
+recall100,code_entropy,DIGER,0
+recall100,code_entropy,BPE (three-way),0
 recall100,code_entropy,UAQ30 v1 capacity,1
 recall100,code_entropy,UAQ30 v2 capacity,1
 recall100,code_entropy,UAQ30 v1 anchor,1
@@ -115,6 +129,8 @@ recall100,intra_code_similarity,PLUM,0
 recall100,intra_code_similarity,BalanceRQKMeans,1
 recall100,intra_code_similarity,RQVAE + item LogQ,6
 recall100,intra_code_similarity,RQVAE + pure SID LogQ,2
+recall100,intra_code_similarity,DIGER,0
+recall100,intra_code_similarity,BPE (three-way),0
 recall100,intra_code_similarity,UAQ30 v1 capacity,1
 recall100,intra_code_similarity,UAQ30 v2 capacity,1
 recall100,intra_code_similarity,UAQ30 v1 anchor,1
@@ -130,6 +146,8 @@ recall100,prefix_coherence_1,PLUM,3
 recall100,prefix_coherence_1,BalanceRQKMeans,3
 recall100,prefix_coherence_1,RQVAE + item LogQ,6
 recall100,prefix_coherence_1,RQVAE + pure SID LogQ,2
+recall100,prefix_coherence_1,DIGER,0
+recall100,prefix_coherence_1,BPE (three-way),0
 recall100,prefix_coherence_1,UAQ30 v1 capacity,1
 recall100,prefix_coherence_1,UAQ30 v2 capacity,1
 recall100,prefix_coherence_1,UAQ30 v1 anchor,1
@@ -145,6 +163,8 @@ recall100,prefix_coherence_2,PLUM,3
 recall100,prefix_coherence_2,BalanceRQKMeans,2
 recall100,prefix_coherence_2,RQVAE + item LogQ,6
 recall100,prefix_coherence_2,RQVAE + pure SID LogQ,2
+recall100,prefix_coherence_2,DIGER,0
+recall100,prefix_coherence_2,BPE (three-way),0
 recall100,prefix_coherence_2,UAQ30 v1 capacity,1
 recall100,prefix_coherence_2,UAQ30 v2 capacity,1
 recall100,prefix_coherence_2,UAQ30 v1 anchor,1
@@ -160,6 +180,8 @@ recall100,prefix_coherence_3,PLUM,0
 recall100,prefix_coherence_3,BalanceRQKMeans,1
 recall100,prefix_coherence_3,RQVAE + item LogQ,5
 recall100,prefix_coherence_3,RQVAE + pure SID LogQ,1
+recall100,prefix_coherence_3,DIGER,0
+recall100,prefix_coherence_3,BPE (three-way),0
 recall100,prefix_coherence_3,UAQ30 v1 capacity,1
 recall100,prefix_coherence_3,UAQ30 v2 capacity,1
 recall100,prefix_coherence_3,UAQ30 v1 anchor,1
@@ -175,6 +197,8 @@ recall100,valid_sid_rate,PLUM,3
 recall100,valid_sid_rate,BalanceRQKMeans,3
 recall100,valid_sid_rate,RQVAE + item LogQ,6
 recall100,valid_sid_rate,RQVAE + pure SID LogQ,2
+recall100,valid_sid_rate,DIGER,0
+recall100,valid_sid_rate,BPE (three-way),0
 recall100,valid_sid_rate,UAQ30 v1 capacity,1
 recall100,valid_sid_rate,UAQ30 v2 capacity,1
 recall100,valid_sid_rate,UAQ30 v1 anchor,1
@@ -190,6 +214,8 @@ dcnv2,icr,PLUM,3
 dcnv2,icr,BalanceRQKMeans,3
 dcnv2,icr,RQVAE + item LogQ,0
 dcnv2,icr,RQVAE + pure SID LogQ,0
+dcnv2,icr,DIGER,0
+dcnv2,icr,BPE (three-way),0
 dcnv2,icr,UAQ30 v1 capacity,0
 dcnv2,icr,UAQ30 v2 capacity,0
 dcnv2,icr,UAQ30 v1 anchor,0
@@ -205,6 +231,8 @@ dcnv2,collision_rate,PLUM,3
 dcnv2,collision_rate,BalanceRQKMeans,3
 dcnv2,collision_rate,RQVAE + item LogQ,0
 dcnv2,collision_rate,RQVAE + pure SID LogQ,0
+dcnv2,collision_rate,DIGER,0
+dcnv2,collision_rate,BPE (three-way),0
 dcnv2,collision_rate,UAQ30 v1 capacity,0
 dcnv2,collision_rate,UAQ30 v2 capacity,0
 dcnv2,collision_rate,UAQ30 v1 anchor,0
@@ -220,6 +248,8 @@ dcnv2,p95_collision_group_size,PLUM,0
 dcnv2,p95_collision_group_size,BalanceRQKMeans,0
 dcnv2,p95_collision_group_size,RQVAE + item LogQ,0
 dcnv2,p95_collision_group_size,RQVAE + pure SID LogQ,0
+dcnv2,p95_collision_group_size,DIGER,0
+dcnv2,p95_collision_group_size,BPE (three-way),0
 dcnv2,p95_collision_group_size,UAQ30 v1 capacity,0
 dcnv2,p95_collision_group_size,UAQ30 v2 capacity,0
 dcnv2,p95_collision_group_size,UAQ30 v1 anchor,0
@@ -235,6 +265,8 @@ dcnv2,g_max,PLUM,3
 dcnv2,g_max,BalanceRQKMeans,3
 dcnv2,g_max,RQVAE + item LogQ,0
 dcnv2,g_max,RQVAE + pure SID LogQ,0
+dcnv2,g_max,DIGER,0
+dcnv2,g_max,BPE (three-way),0
 dcnv2,g_max,UAQ30 v1 capacity,0
 dcnv2,g_max,UAQ30 v2 capacity,0
 dcnv2,g_max,UAQ30 v1 anchor,0
@@ -250,6 +282,8 @@ dcnv2,cur_total,PLUM,0
 dcnv2,cur_total,BalanceRQKMeans,0
 dcnv2,cur_total,RQVAE + item LogQ,0
 dcnv2,cur_total,RQVAE + pure SID LogQ,0
+dcnv2,cur_total,DIGER,0
+dcnv2,cur_total,BPE (three-way),0
 dcnv2,cur_total,UAQ30 v1 capacity,0
 dcnv2,cur_total,UAQ30 v2 capacity,0
 dcnv2,cur_total,UAQ30 v1 anchor,0
@@ -265,6 +299,8 @@ dcnv2,code_gini,PLUM,0
 dcnv2,code_gini,BalanceRQKMeans,0
 dcnv2,code_gini,RQVAE + item LogQ,0
 dcnv2,code_gini,RQVAE + pure SID LogQ,0
+dcnv2,code_gini,DIGER,0
+dcnv2,code_gini,BPE (three-way),0
 dcnv2,code_gini,UAQ30 v1 capacity,0
 dcnv2,code_gini,UAQ30 v2 capacity,0
 dcnv2,code_gini,UAQ30 v1 anchor,0
@@ -280,6 +316,8 @@ dcnv2,code_entropy,PLUM,0
 dcnv2,code_entropy,BalanceRQKMeans,0
 dcnv2,code_entropy,RQVAE + item LogQ,0
 dcnv2,code_entropy,RQVAE + pure SID LogQ,0
+dcnv2,code_entropy,DIGER,0
+dcnv2,code_entropy,BPE (three-way),0
 dcnv2,code_entropy,UAQ30 v1 capacity,0
 dcnv2,code_entropy,UAQ30 v2 capacity,0
 dcnv2,code_entropy,UAQ30 v1 anchor,0
@@ -295,6 +333,8 @@ dcnv2,intra_code_similarity,PLUM,0
 dcnv2,intra_code_similarity,BalanceRQKMeans,0
 dcnv2,intra_code_similarity,RQVAE + item LogQ,0
 dcnv2,intra_code_similarity,RQVAE + pure SID LogQ,0
+dcnv2,intra_code_similarity,DIGER,0
+dcnv2,intra_code_similarity,BPE (three-way),0
 dcnv2,intra_code_similarity,UAQ30 v1 capacity,0
 dcnv2,intra_code_similarity,UAQ30 v2 capacity,0
 dcnv2,intra_code_similarity,UAQ30 v1 anchor,0
@@ -310,6 +350,8 @@ dcnv2,prefix_coherence_1,PLUM,0
 dcnv2,prefix_coherence_1,BalanceRQKMeans,0
 dcnv2,prefix_coherence_1,RQVAE + item LogQ,0
 dcnv2,prefix_coherence_1,RQVAE + pure SID LogQ,0
+dcnv2,prefix_coherence_1,DIGER,0
+dcnv2,prefix_coherence_1,BPE (three-way),0
 dcnv2,prefix_coherence_1,UAQ30 v1 capacity,0
 dcnv2,prefix_coherence_1,UAQ30 v2 capacity,0
 dcnv2,prefix_coherence_1,UAQ30 v1 anchor,0
@@ -325,6 +367,8 @@ dcnv2,prefix_coherence_2,PLUM,0
 dcnv2,prefix_coherence_2,BalanceRQKMeans,0
 dcnv2,prefix_coherence_2,RQVAE + item LogQ,0
 dcnv2,prefix_coherence_2,RQVAE + pure SID LogQ,0
+dcnv2,prefix_coherence_2,DIGER,0
+dcnv2,prefix_coherence_2,BPE (three-way),0
 dcnv2,prefix_coherence_2,UAQ30 v1 capacity,0
 dcnv2,prefix_coherence_2,UAQ30 v2 capacity,0
 dcnv2,prefix_coherence_2,UAQ30 v1 anchor,0
@@ -340,6 +384,8 @@ dcnv2,prefix_coherence_3,PLUM,0
 dcnv2,prefix_coherence_3,BalanceRQKMeans,0
 dcnv2,prefix_coherence_3,RQVAE + item LogQ,0
 dcnv2,prefix_coherence_3,RQVAE + pure SID LogQ,0
+dcnv2,prefix_coherence_3,DIGER,0
+dcnv2,prefix_coherence_3,BPE (three-way),0
 dcnv2,prefix_coherence_3,UAQ30 v1 capacity,0
 dcnv2,prefix_coherence_3,UAQ30 v2 capacity,0
 dcnv2,prefix_coherence_3,UAQ30 v1 anchor,0
@@ -355,6 +401,8 @@ dcnv2,valid_sid_rate,PLUM,0
 dcnv2,valid_sid_rate,BalanceRQKMeans,0
 dcnv2,valid_sid_rate,RQVAE + item LogQ,0
 dcnv2,valid_sid_rate,RQVAE + pure SID LogQ,0
+dcnv2,valid_sid_rate,DIGER,0
+dcnv2,valid_sid_rate,BPE (three-way),0
 dcnv2,valid_sid_rate,UAQ30 v1 capacity,0
 dcnv2,valid_sid_rate,UAQ30 v2 capacity,0
 dcnv2,valid_sid_rate,UAQ30 v1 anchor,0
@@ -370,6 +418,8 @@ transact,icr,PLUM,3
 transact,icr,BalanceRQKMeans,3
 transact,icr,RQVAE + item LogQ,6
 transact,icr,RQVAE + pure SID LogQ,2
+transact,icr,DIGER,0
+transact,icr,BPE (three-way),0
 transact,icr,UAQ30 v1 capacity,0
 transact,icr,UAQ30 v2 capacity,0
 transact,icr,UAQ30 v1 anchor,0
@@ -385,6 +435,8 @@ transact,collision_rate,PLUM,3
 transact,collision_rate,BalanceRQKMeans,3
 transact,collision_rate,RQVAE + item LogQ,6
 transact,collision_rate,RQVAE + pure SID LogQ,2
+transact,collision_rate,DIGER,0
+transact,collision_rate,BPE (three-way),0
 transact,collision_rate,UAQ30 v1 capacity,0
 transact,collision_rate,UAQ30 v2 capacity,0
 transact,collision_rate,UAQ30 v1 anchor,0
@@ -400,6 +452,8 @@ transact,p95_collision_group_size,PLUM,3
 transact,p95_collision_group_size,BalanceRQKMeans,3
 transact,p95_collision_group_size,RQVAE + item LogQ,6
 transact,p95_collision_group_size,RQVAE + pure SID LogQ,2
+transact,p95_collision_group_size,DIGER,0
+transact,p95_collision_group_size,BPE (three-way),0
 transact,p95_collision_group_size,UAQ30 v1 capacity,0
 transact,p95_collision_group_size,UAQ30 v2 capacity,0
 transact,p95_collision_group_size,UAQ30 v1 anchor,0
@@ -415,6 +469,8 @@ transact,g_max,PLUM,3
 transact,g_max,BalanceRQKMeans,3
 transact,g_max,RQVAE + item LogQ,6
 transact,g_max,RQVAE + pure SID LogQ,2
+transact,g_max,DIGER,0
+transact,g_max,BPE (three-way),0
 transact,g_max,UAQ30 v1 capacity,0
 transact,g_max,UAQ30 v2 capacity,0
 transact,g_max,UAQ30 v1 anchor,0
@@ -430,6 +486,8 @@ transact,cur_total,PLUM,3
 transact,cur_total,BalanceRQKMeans,3
 transact,cur_total,RQVAE + item LogQ,6
 transact,cur_total,RQVAE + pure SID LogQ,2
+transact,cur_total,DIGER,0
+transact,cur_total,BPE (three-way),0
 transact,cur_total,UAQ30 v1 capacity,0
 transact,cur_total,UAQ30 v2 capacity,0
 transact,cur_total,UAQ30 v1 anchor,0
@@ -445,6 +503,8 @@ transact,code_gini,PLUM,3
 transact,code_gini,BalanceRQKMeans,3
 transact,code_gini,RQVAE + item LogQ,6
 transact,code_gini,RQVAE + pure SID LogQ,2
+transact,code_gini,DIGER,0
+transact,code_gini,BPE (three-way),0
 transact,code_gini,UAQ30 v1 capacity,0
 transact,code_gini,UAQ30 v2 capacity,0
 transact,code_gini,UAQ30 v1 anchor,0
@@ -460,6 +520,8 @@ transact,code_entropy,PLUM,3
 transact,code_entropy,BalanceRQKMeans,3
 transact,code_entropy,RQVAE + item LogQ,6
 transact,code_entropy,RQVAE + pure SID LogQ,2
+transact,code_entropy,DIGER,0
+transact,code_entropy,BPE (three-way),0
 transact,code_entropy,UAQ30 v1 capacity,0
 transact,code_entropy,UAQ30 v2 capacity,0
 transact,code_entropy,UAQ30 v1 anchor,0
@@ -475,6 +537,8 @@ transact,intra_code_similarity,PLUM,3
 transact,intra_code_similarity,BalanceRQKMeans,3
 transact,intra_code_similarity,RQVAE + item LogQ,6
 transact,intra_code_similarity,RQVAE + pure SID LogQ,2
+transact,intra_code_similarity,DIGER,0
+transact,intra_code_similarity,BPE (three-way),0
 transact,intra_code_similarity,UAQ30 v1 capacity,0
 transact,intra_code_similarity,UAQ30 v2 capacity,0
 transact,intra_code_similarity,UAQ30 v1 anchor,0
@@ -490,6 +554,8 @@ transact,prefix_coherence_1,PLUM,3
 transact,prefix_coherence_1,BalanceRQKMeans,3
 transact,prefix_coherence_1,RQVAE + item LogQ,6
 transact,prefix_coherence_1,RQVAE + pure SID LogQ,2
+transact,prefix_coherence_1,DIGER,0
+transact,prefix_coherence_1,BPE (three-way),0
 transact,prefix_coherence_1,UAQ30 v1 capacity,0
 transact,prefix_coherence_1,UAQ30 v2 capacity,0
 transact,prefix_coherence_1,UAQ30 v1 anchor,0
@@ -505,6 +571,8 @@ transact,prefix_coherence_2,PLUM,3
 transact,prefix_coherence_2,BalanceRQKMeans,3
 transact,prefix_coherence_2,RQVAE + item LogQ,6
 transact,prefix_coherence_2,RQVAE + pure SID LogQ,2
+transact,prefix_coherence_2,DIGER,0
+transact,prefix_coherence_2,BPE (three-way),0
 transact,prefix_coherence_2,UAQ30 v1 capacity,0
 transact,prefix_coherence_2,UAQ30 v2 capacity,0
 transact,prefix_coherence_2,UAQ30 v1 anchor,0
@@ -520,6 +588,8 @@ transact,prefix_coherence_3,PLUM,3
 transact,prefix_coherence_3,BalanceRQKMeans,3
 transact,prefix_coherence_3,RQVAE + item LogQ,5
 transact,prefix_coherence_3,RQVAE + pure SID LogQ,1
+transact,prefix_coherence_3,DIGER,0
+transact,prefix_coherence_3,BPE (three-way),0
 transact,prefix_coherence_3,UAQ30 v1 capacity,0
 transact,prefix_coherence_3,UAQ30 v2 capacity,0
 transact,prefix_coherence_3,UAQ30 v1 anchor,0
@@ -535,6 +605,8 @@ transact,valid_sid_rate,PLUM,3
 transact,valid_sid_rate,BalanceRQKMeans,3
 transact,valid_sid_rate,RQVAE + item LogQ,6
 transact,valid_sid_rate,RQVAE + pure SID LogQ,2
+transact,valid_sid_rate,DIGER,0
+transact,valid_sid_rate,BPE (three-way),0
 transact,valid_sid_rate,UAQ30 v1 capacity,0
 transact,valid_sid_rate,UAQ30 v2 capacity,0
 transact,valid_sid_rate,UAQ30 v1 anchor,0
