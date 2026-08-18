@@ -41,8 +41,8 @@ PID_GPU2=$!
 
 # GPU 3
 (
-    run_one 3 4 256
-    run_one 3 4 512
+    run_one 3 2 1024
+    run_one 3 3 1024
 ) &
 PID_GPU3=$!
 
