@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, cast
 
 import polars as pl
-
+from .sids.collaborative_embeddings import build_collaborative_embeddings
 from .data import PreparedInteractions, load_fit_user_aware_behavior
 from .data.protocols import (
     POSTER_FULL_33148_CATALOG_SIZE,
@@ -294,7 +294,16 @@ def run_sid_experiment(
                 }
             )
         )
-        sid.train(item_features)
+        if getattr(sid, "requires_collaborative_embeddings", False):
+            collaborative_embeddings = build_collaborative_embeddings(
+                prepared,
+                embedding_dim=sid.config.collaborative_embedding_dim,
+                column=sid.config.collaborative_embedding_column,
+            )
+            sid.train(item_features, collaborative_embeddings=collaborative_embeddings)
+        else:
+            sid.train(item_features)
+
         sid_output = sid.update(item_features)
     sid_columns = _validate_sid_output(item_features, sid_output)
     items_with_sids = item_features.join(

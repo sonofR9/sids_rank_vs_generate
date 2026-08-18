@@ -112,3 +112,49 @@ class UserAwareRQKMeansConfig:
             raise ValueError("user_profile_weight must be non-negative")
         if self.kmeans_batch_size <= 0 or self.predict_batch_size <= 0:
             raise ValueError("batch sizes must be positive")
+
+@dataclass(frozen=True)
+class RQVAELetterConfig:
+    hidden_dim: int = 128
+    latent_dim: int = 128
+    num_levels: int = 3
+    codebook_size: int = 256
+    batch_size: int = 1024
+    num_epochs: int = 20
+    lr: float = 5e-4
+    beta: float = 0.25
+
+    collaborative_embedding_dim: int = 128
+    collaborative_embedding_column: str = "collaborative_embed"
+    collaborative_weight: float = 2e-2
+
+    diversity_clusters: int = 10
+    diversity_weight: float = 1e-4
+
+    pretrain_epochs: int = 3
+    pretrain_lr: float = 5e-3
+    num_workers: int = 4
+    device: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.hidden_dim <= 0 or self.latent_dim <= 0:
+            raise ValueError("hidden_dim and latent_dim must be positive")
+        if self.num_levels <= 0 or self.codebook_size <= 1:
+            raise ValueError("num_levels must be positive and codebook_size must exceed one")
+        if self.batch_size <= 0 or self.num_epochs <= 0 or self.num_workers < 0:
+            raise ValueError("batch_size and num_epochs must be positive; num_workers must be non-negative")
+        if self.lr <= 0 or self.pretrain_lr <= 0:
+            raise ValueError("learning rates must be positive")
+        if self.beta < 0 or self.collaborative_weight < 0 or self.diversity_weight < 0:
+            raise ValueError("loss weights must be non-negative")
+        # Each code needs another code from its cluster as a positive example.
+        if self.diversity_clusters <= 0 or self.codebook_size < 2 * self.diversity_clusters:
+            raise ValueError(
+                "codebook_size must be at least twice diversity_clusters"
+            )
+        if self.collaborative_embedding_dim != self.latent_dim:
+            raise ValueError(
+                "collaborative_embedding_dim must equal latent_dim for the collaborative loss"
+            )
+        if not self.collaborative_embedding_column:
+            raise ValueError("collaborative_embedding_column must not be empty")
