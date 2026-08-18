@@ -20,7 +20,7 @@ run_one() {
   echo "========================================"
   echo "Starting ${run_name}"
   echo "GPU=${gpu}"
-  echo "L=${levels}, C=${codebook}, merges=${merges}"
+  echo "L=${levels}, C=${codebook}, M=${merges}"
   echo "========================================"
 
   CUDA_VISIBLE_DEVICES="${gpu}" \
@@ -40,38 +40,33 @@ run_one() {
 }
 
 case "${RUN_SET}" in
-  l7-c256)
-    run_one 2 7 256 2048
+  l3-c128)
+    run_one 2 3 128 512
     ;;
 
-  l10-c256)
-    run_one 2 10 256 2048
+  l5-c128)
+    run_one 2 5 128 512
     ;;
 
-  l7-c128)
-    run_one 2 7 128 1024
+  l5-c64)
+    run_one 3 5 64 512
     ;;
 
-  l7-c32)
-    run_one 3 7 32 512
-    ;;
-
-  l10-c32)
-    run_one 3 10 32 512
+  l7-c64)
+    run_one 3 7 64 512
     ;;
 
   all)
     (
-      run_one 2 7 256 2048
-      run_one 2 10 256 2048
-      run_one 2 7 128 1024
+      run_one 2 3 128 512
+      run_one 2 5 128 512
     ) &
 
     gpu2_pid=$!
 
     (
-      run_one 3 7 32 512
-      run_one 3 10 32 512
+      run_one 3 5 64 512
+      run_one 3 7 64 512
     ) &
 
     gpu3_pid=$!
@@ -82,7 +77,7 @@ case "${RUN_SET}" in
 
   *)
     echo "Unknown RUN_SET=${RUN_SET}" >&2
-    echo "Use: l7-c256, l10-c256, l7-c128, l7-c32, l10-c32, or all" >&2
+    echo "Use: l3-c128, l5-c128, l5-c64, l7-c64, or all" >&2
     exit 2
     ;;
 esac
