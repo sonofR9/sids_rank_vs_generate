@@ -24,6 +24,7 @@ from matplotlib.ticker import MaxNLocator
 
 LEVEL_SWEEP = (2, 3, 4)
 CODEBOOK_SWEEP = (128, 256, 512, 1024)
+SASREC_VANILLA_UNIFORM_RECALL = 0.12262281969852384
 SASREC_AUDIO_UNIFORM_RECALL = 0.12302921437950205
 SASREC_HISTORY_CONCAT_RECALL = 0.12814152311278762
 
@@ -232,9 +233,12 @@ def plot_metric(frame: pd.DataFrame, sid_metric: MetricSpec, target: TargetSpec,
     plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10.5, "axes.titlesize": 13, "axes.labelsize": 12, "xtick.labelsize": 9.5, "ytick.labelsize": 9.5, "legend.fontsize": 7.7, "axes.linewidth": 0.8, "pdf.fonttype": 42, "ps.fonttype": 42})
     figure, axes = plt.subplots(1, 2, figsize=(12.6, 5.7), sharey=True, facecolor="white")
     x_limits = padded_limits(shown[sid_metric.column])
+    show_vanilla_baseline = target.key == "recall100" and sid_metric.stem == "icr"
     baselines = [(target.baseline, "#7B8794", (0, (5, 3)))] if target.baseline is not None else []
     if target.key == "recall100":
         baselines.append((SASREC_HISTORY_CONCAT_RECALL, "#0F766E", (0, (2, 2))))
+    if show_vanilla_baseline:
+        baselines.append((SASREC_VANILLA_UNIFORM_RECALL, "#111827", "-."))
     baseline_values = [value for value, _, _ in baselines]
     y_values = shown[target.column] if not baseline_values else pd.concat([shown[target.column], pd.Series(baseline_values)])
     y_limits = padded_limits(y_values)
@@ -243,10 +247,15 @@ def plot_metric(frame: pd.DataFrame, sid_metric: MetricSpec, target: TargetSpec,
     if target.key == "recall100":
         for ax in axes:
             ax.axhline(SASREC_HISTORY_CONCAT_RECALL, color="#0F766E", linestyle=(0, (2, 2)), linewidth=1.2, zorder=0)
+    if show_vanilla_baseline:
+        for ax in axes:
+            ax.axhline(SASREC_VANILLA_UNIFORM_RECALL, color="#111827", linestyle="-.", linewidth=1.35, zorder=0)
     figure.supxlabel(sid_metric.label, fontsize=12, y=0.16)
     figure.supylabel(target.label, fontsize=12, x=0.016)
     present = [method for method in METHOD_ORDER if method in set(shown.method)]
     handles = [Line2D([0], [0], color=METHOD_STYLE[method][0], linewidth=1.1, marker=METHOD_STYLE[method][1], markersize=6, markerfacecolor=METHOD_STYLE[method][0] if METHOD_STYLE[method][2] else "white", markeredgewidth=1.4, label=method) for method in present]
+    if show_vanilla_baseline:
+        handles.append(Line2D([0], [0], color="#111827", linewidth=1.35, linestyle="-.", label="SASRec vanilla (ID-only)"))
     if target.baseline is not None:
         baseline_label = (
             "SASRec-Audio-Uniform"
