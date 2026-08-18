@@ -1,0 +1,5 @@
+method,num_levels,codebook_size,merge_count,recall_at_100,icr,catalog_size,data_scope,protocol_id,run_name,run_id,experiment_name,recall_metric,icr_metric,status
+BPE (three-way),3,128,512,0.0637298747763864,0.7268915168335948,33148,full,three-way,bpe-l3-c128-m512,ad580367052b498ca3776e67500a2208,bpe,evaluations.generation.recall_at_100,sid.independent_code_rate,FINISHED
+BPE (three-way),5,64,512,0.07692307692307693,0.9184264510679377,33148,full,three-way,bpe-l5-c64-m512,4bfacce180784e14a1e35eabe1a0ed7f,bpe,evaluations.generation.recall_at_100,sid.independent_code_rate,FINISHED
+BPE (three-way),7,256,2048,0.0907871198568873,0.9851876432967298,33148,full,three-way,bpe-l7-c256-m2048,35e8671dc7394a93aff170d5b110d5b3,bpe,evaluations.generation.recall_at_100,sid.independent_code_rate,FINISHED
+BPE (three-way),3,256,512,0.07535778175313058,0.8707916013032461,33148,full,three-way,bpe-l3-c256-m512,f0c44cd10ccf488aa4c345a505141af0,bpe,evaluations.generation.recall_at_100,sid.independent_code_rate,FINISHED
