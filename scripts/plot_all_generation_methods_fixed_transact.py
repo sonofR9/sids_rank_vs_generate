@@ -66,17 +66,27 @@ TARGETS = (
 POINT_KEY = ["method", "num_levels", "codebook_size"]
 
 BASE_METHOD_ORDER = (
-    "R3VAE (rqkmeans)", "R3VAE (spherical)", "RQKMeans", "RQVAE (ECM)",
+    "R3VAE (rqkmeans)", "R3VAE (spherical)", "RQKMeans",
+    "RQ-KMeans + Pair Alignment", "RQ-VAE + Pair Alignment", "RQVAE (ECM)",
     "RQVAE", "RQVAE (RRS)", "RQVAE-token",
 )
 METHOD_ORDER = (*BASE_METHOD_ORDER, "PLUM", "BalanceRQKMeans", "RQVAE + item LogQ", "RQVAE + pure SID LogQ")
 METHOD_STYLE = {
     "R3VAE (rqkmeans)": ("#72B7B2", "o", False), "R3VAE (spherical)": ("#54A24B", "o", False),
     "RQKMeans": ("#4C78A8", "o", False), "RQVAE (ECM)": ("#B279A2", "o", False),
+    "RQ-KMeans + Pair Alignment": ("#2A9D8F", "P", True),
+    "RQ-VAE + Pair Alignment": ("#E9C46A", "X", True),
     "RQVAE": ("#F58518", "o", False), "RQVAE (RRS)": ("#E45756", "D", False),
     "RQVAE-token": ("#FF9DA6", "s", True), "PLUM": ("#9D755D", "^", False),
     "BalanceRQKMeans": ("#7A5195", "s", False), "RQVAE + item LogQ": ("#8C6D31", "P", False),
     "RQVAE + pure SID LogQ": ("#E15759", "X", False),
+}
+LEGEND_LABELS = {
+    "RQ-KMeans + Pair Alignment": "RQ-KMeans +\nPair Alignment",
+    "RQ-VAE + Pair Alignment": "RQ-VAE +\nPair Alignment",
+    "BalanceRQKMeans": "Balance\nRQKMeans",
+    "RQVAE + item LogQ": "RQVAE +\nitem LogQ",
+    "RQVAE + pure SID LogQ": "RQVAE +\npure SID LogQ",
 }
 EXTENSION_METHODS = {"PLUM", "BalanceRQKMeans"}
 
@@ -279,21 +289,32 @@ def plot_metric(frame: pd.DataFrame, sid_metric: MetricSpec, target: TargetSpec,
     shown = shown.drop_duplicates(["method", "run_name"])
     if shown.empty:
         return False
-    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10.5, "axes.titlesize": 13, "axes.labelsize": 12, "xtick.labelsize": 9.5, "ytick.labelsize": 9.5, "legend.fontsize": 7.7, "axes.linewidth": 0.8, "pdf.fonttype": 42, "ps.fonttype": 42})
-    figure, axes = plt.subplots(1, 2, figsize=(12.6, 5.7), sharey=True, facecolor="white")
+    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10.5, "axes.titlesize": 13, "axes.labelsize": 12, "xtick.labelsize": 9.5, "ytick.labelsize": 9.5, "legend.fontsize": 12.5, "axes.linewidth": 0.8, "pdf.fonttype": 42, "ps.fonttype": 42})
+    figure, axes = plt.subplots(1, 2, figsize=(15.5, 7.4), sharey=True, facecolor="white")
     x_limits = padded_limits(shown[sid_metric.column])
     y_values = shown[target.column] if target.baseline is None else pd.concat([shown[target.column], pd.Series([target.baseline])])
     y_limits = padded_limits(y_values)
     draw_panel(axes[0], left, sid_metric.column, target.column, "num_levels", "Varying number of codebooks (C=256)", "L: 2 → 3 → 4", x_limits, y_limits, target.baseline)
     draw_panel(axes[1], right, sid_metric.column, target.column, "codebook_size", "Varying codebook size (L=3)", "C: 128 → 256 → 512 → 1024", x_limits, y_limits, target.baseline)
-    figure.supxlabel(sid_metric.label, fontsize=12, y=0.16)
+    figure.supxlabel(sid_metric.label, fontsize=12, y=0.30)
     figure.supylabel(target.label, fontsize=12, x=0.016)
     present = [method for method in METHOD_ORDER if method in set(shown.method)]
-    handles = [Line2D([0], [0], color=METHOD_STYLE[method][0], linewidth=1.1, marker=METHOD_STYLE[method][1], markersize=6, markerfacecolor=METHOD_STYLE[method][0] if METHOD_STYLE[method][2] else "white", markeredgewidth=1.4, label=method) for method in present]
+    handles = [Line2D([0], [0], color=METHOD_STYLE[method][0], linewidth=1.1, marker=METHOD_STYLE[method][1], markersize=8, markerfacecolor=METHOD_STYLE[method][0] if METHOD_STYLE[method][2] else "white", markeredgewidth=1.4, label=LEGEND_LABELS.get(method, method)) for method in present]
     if target.baseline is not None:
         handles.append(Line2D([0], [0], color="#7B8794", linewidth=1.2, linestyle=(0, (5, 3)), label="SASRec"))
-    figure.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.01), ncol=4, frameon=False, handlelength=1.8, columnspacing=1.15)
-    figure.subplots_adjust(left=0.075, right=0.985, top=0.90, bottom=0.38, wspace=0.06)
+    figure.legend(
+        handles=handles,
+        loc="lower left",
+        bbox_to_anchor=(0.035, 0.01, 0.93, 0.25),
+        mode="expand",
+        ncol=6,
+        frameon=False,
+        handlelength=1.5,
+        handletextpad=0.55,
+        columnspacing=0.75,
+        labelspacing=0.8,
+    )
+    figure.subplots_adjust(left=0.075, right=0.985, top=0.90, bottom=0.44, wspace=0.06)
     output_dir.mkdir(parents=True, exist_ok=True)
     stem = f"{target.key}_vs_{sid_metric.stem}"
     for extension in ("png", "pdf", "svg"):

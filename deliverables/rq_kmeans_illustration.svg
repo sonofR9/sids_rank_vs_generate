@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="420" viewBox="0 0 1600 420" role="img" aria-labelledby="title desc">
+  <title id="title">RQ-KMeans: building a Semantic ID</title>
+  <desc id="desc">An embedding x selects index k1 from codebook 1. The selected codeword e1[k1] is subtracted to form residual r1. The residual selects index k2 from a different codebook 2. Repeating this process yields the discrete Semantic ID k1, k2, through kL.</desc>
+
+  <defs>
+    <marker id="arrow-green" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path class="marker-green" d="M 1 1 L 11 6 L 1 11"/>
+    </marker>
+    <marker id="arrow-ink" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path class="marker-ink" d="M 1 1 L 11 6 L 1 11"/>
+    </marker>
+    <marker id="arrow-muted" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path class="marker-muted" d="M 1 1 L 11 6 L 1 11"/>
+    </marker>
+    <style>
+      /* Semantic palette classes are used instead of CSS variables because Office SVG import does not resolve var(). */
+      .paper { fill: #F2EFFE; }
+      .display { font-family: Arial, Helvetica, sans-serif; fill: #111116; }
+      .math { font-family: "Cambria Math", Cambria, serif; fill: #111116; }
+      .accent-fill { fill: #087C48; }
+      .muted-fill { fill: #524D61; }
+      .node { fill: #FBFAFF; stroke: #D8D1F5; stroke-width: 4; }
+      .connector {
+        fill: none;
+        stroke: #BEB7DB;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        marker-end: url(#arrow-muted);
+      }
+      .marker-green { fill: none; stroke: #087C48; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+      .marker-ink { fill: none; stroke: #111116; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+      .marker-muted { fill: none; stroke: #BEB7DB; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+      .cell { fill: #F8F7FF; stroke: #BEB7DB; stroke-width: 2.3; }
+      .selected { fill: #2AE881; stroke: #087C48; stroke-width: 3; }
+      .prototype { fill: #BEB7DB; }
+      .prototype-selected { fill: #2AE881; stroke: #087C48; stroke-width: 3; }
+      .token { fill: #FBFAFF; stroke: #087C48; stroke-width: 2.5; }
+      .baseline { fill: none; stroke: #D8D1F5; stroke-width: 3; }
+      .signal-fill { fill: #2AE881; }
+      .selection-ring { fill: none; stroke: #087C48; stroke-width: 3; }
+      .vector-muted { fill: none; stroke: #BEB7DB; stroke-width: 4; stroke-linecap: round; }
+      .vector-ink { fill: none; stroke: #111116; stroke-width: 4; stroke-linecap: round; }
+      .vector-residual { fill: none; stroke: #087C48; stroke-width: 4; stroke-linecap: round; }
+      .codeword-point { fill: #2AE881; stroke: #087C48; stroke-width: 2.5; }
+      .bracket { fill: none; stroke: #111116; stroke-width: 5; stroke-linecap: round; }
+    </style>
+  </defs>
+
+  <rect class="paper" width="1600" height="420" rx="26"/>
+
+  <text x="52" y="60" class="display" font-size="48" font-weight="700">
+    <tspan class="accent-fill">RQ-KMeans:</tspan>
+    <tspan> building a Semantic ID</tspan>
+  </text>
+
+  <!-- Thin neutral connectors keep the sequence legible without dominating it. -->
+  <path class="connector" d="M 216 225 L 318 225"/>
+  <path class="connector" d="M 460 225 L 594 225"/>
+  <path class="connector" d="M 752 225 L 884 225"/>
+  <path class="connector" d="M 1180 225 L 1238 225"/>
+
+  <!-- Input embedding -->
+  <circle cx="150" cy="225" r="56" class="node"/>
+  <rect x="112" y="228" width="12" height="31" rx="6" class="prototype"/>
+  <rect x="132" y="199" width="12" height="60" rx="6" class="accent-fill"/>
+  <rect x="152" y="183" width="12" height="76" rx="6" class="signal-fill"/>
+  <rect x="172" y="211" width="12" height="48" rx="6" class="accent-fill"/>
+  <rect x="192" y="193" width="12" height="66" rx="6" class="prototype"/>
+  <circle cx="118" cy="216" r="6" class="muted-fill"/>
+  <circle cx="198" cy="182" r="6" class="muted-fill"/>
+
+  <!-- Codebook 1: square codewords, selected codeword e1[k1] -->
+  <circle cx="390" cy="225" r="60" class="node"/>
+  <rect x="353" y="188" width="20" height="20" rx="4" class="cell"/>
+  <rect x="380" y="188" width="20" height="20" rx="4" class="cell"/>
+  <rect x="407" y="188" width="20" height="20" rx="4" class="cell"/>
+  <rect x="353" y="215" width="20" height="20" rx="4" class="cell"/>
+  <rect x="380" y="215" width="20" height="20" rx="4" class="selected"/>
+  <rect x="407" y="215" width="20" height="20" rx="4" class="cell"/>
+  <rect x="353" y="242" width="20" height="20" rx="4" class="cell"/>
+  <rect x="380" y="242" width="20" height="20" rx="4" class="cell"/>
+  <rect x="407" y="242" width="20" height="20" rx="4" class="cell"/>
+  <circle cx="390" cy="225" r="16" class="selection-ring"/>
+
+  <!-- Residual geometry: origin→codeword, origin→x, and codeword→x = r1 -->
+  <circle cx="675" cy="225" r="66" class="node"/>
+  <path d="M 638 268 L 699 252" class="vector-muted" marker-end="url(#arrow-muted)"/>
+  <path d="M 638 268 L 716 184" class="vector-ink" marker-end="url(#arrow-ink)"/>
+  <path d="M 703 248 L 716 187" class="vector-residual" marker-end="url(#arrow-green)"/>
+  <circle cx="638" cy="268" r="5" class="muted-fill"/>
+  <circle cx="701" cy="251" r="6.5" class="codeword-point"/>
+  <text x="625" y="289" class="math muted-fill" font-size="16">0</text>
+  <text x="701" y="278" class="math" font-size="17" text-anchor="middle">e₁[k₁]</text>
+  <text x="726" y="181" class="math" font-size="19" font-weight="700">x</text>
+  <text x="719" y="222" class="math accent-fill" font-size="18" font-weight="700">r₁</text>
+
+  <!-- Codebook 2: a visibly different prototype set, queried with r1 -->
+  <circle cx="960" cy="225" r="60" class="node"/>
+  <circle cx="927" cy="202" r="9" class="prototype"/>
+  <circle cx="951" cy="194" r="9" class="prototype"/>
+  <circle cx="977" cy="201" r="9" class="prototype"/>
+  <circle cx="994" cy="220" r="9" class="prototype"/>
+  <circle cx="932" cy="232" r="9" class="prototype"/>
+  <circle cx="953" cy="249" r="9" class="prototype"/>
+  <circle cx="980" cy="246" r="10" class="prototype-selected"/>
+  <circle cx="1000" cy="260" r="9" class="prototype"/>
+  <circle cx="980" cy="246" r="16" class="selection-ring"/>
+
+  <!-- Later residual-quantization stages -->
+  <circle cx="1090" cy="225" r="5.5" class="accent-fill"/>
+  <circle cx="1120" cy="225" r="5.5" class="accent-fill"/>
+  <circle cx="1150" cy="225" r="5.5" class="accent-fill"/>
+
+  <!-- Semantic ID contains discrete indices, never codeword vectors -->
+  <path d="M 1275 181 L 1260 181 L 1260 277 L 1275 277" class="bracket"/>
+  <path d="M 1555 181 L 1570 181 L 1570 277 L 1555 277" class="bracket"/>
+  <rect x="1280" y="194" width="58" height="70" rx="12" class="token"/>
+  <rect x="1352" y="194" width="58" height="70" rx="12" class="token"/>
+  <rect x="1424" y="194" width="58" height="70" rx="12" class="token"/>
+  <rect x="1496" y="194" width="58" height="70" rx="12" class="token"/>
+  <text x="1309" y="241" class="math accent-fill" font-size="34" font-weight="700" text-anchor="middle">k₁</text>
+  <text x="1381" y="241" class="math accent-fill" font-size="34" font-weight="700" text-anchor="middle">k₂</text>
+  <text x="1453" y="237" class="math muted-fill" font-size="36" font-weight="700" text-anchor="middle">…</text>
+  <text x="1525" y="237" class="math accent-fill" font-size="34" font-weight="700" text-anchor="middle">k<tspan font-size="22" baseline-shift="sub">L</tspan></text>
+
+  <!-- Baseline anchors the wide poster illustration. -->
+  <path d="M 52 382 L 1548 382" class="baseline"/>
+  <circle cx="52" cy="382" r="7" class="signal-fill"/>
+</svg>

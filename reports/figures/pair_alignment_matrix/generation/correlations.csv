@@ -1,0 +1,145 @@
+sid_metric,sid_metric_label,downstream_metric,group,pearson_r,spearman_rho,num_points
+icr,Raw independent code rate (ICR),recall_at_100,ALL,0.6805894349460462,0.761733779511806,38
+icr,Raw independent code rate (ICR),recall_at_100,R3VAE (rqkmeans),0.9678590576812347,0.8999999999999998,5
+icr,Raw independent code rate (ICR),recall_at_100,R3VAE (spherical),0.871191181714041,0.8285714285714287,6
+icr,Raw independent code rate (ICR),recall_at_100,RQKMeans,0.9353704738872424,0.8999999999999998,5
+icr,Raw independent code rate (ICR),recall_at_100,RQ-KMeans + Pair Alignment,,,1
+icr,Raw independent code rate (ICR),recall_at_100,RQ-VAE + Pair Alignment,,,1
+icr,Raw independent code rate (ICR),recall_at_100,RQVAE (ECM),,,3
+icr,Raw independent code rate (ICR),recall_at_100,RQVAE,0.9363723240567312,0.8285714285714287,6
+icr,Raw independent code rate (ICR),recall_at_100,RQVAE (RRS),,,3
+icr,Raw independent code rate (ICR),recall_at_100,PLUM,0.9784465705203726,1.0,3
+icr,Raw independent code rate (ICR),recall_at_100,BalanceRQKMeans,0.9867599949232091,1.0,3
+icr,Raw independent code rate (ICR),recall_at_100,RQVAE-token,-1.0,-0.9999999999999999,2
+collision_rate,Collision Rate,recall_at_100,ALL,-0.6805894349460461,-0.761733779511806,38
+collision_rate,Collision Rate,recall_at_100,R3VAE (rqkmeans),-0.9678590576812349,-0.8999999999999998,5
+collision_rate,Collision Rate,recall_at_100,R3VAE (spherical),-0.871191181714041,-0.8285714285714287,6
+collision_rate,Collision Rate,recall_at_100,RQKMeans,-0.9353704738872424,-0.8999999999999998,5
+collision_rate,Collision Rate,recall_at_100,RQ-KMeans + Pair Alignment,,,1
+collision_rate,Collision Rate,recall_at_100,RQ-VAE + Pair Alignment,,,1
+collision_rate,Collision Rate,recall_at_100,RQVAE (ECM),,,3
+collision_rate,Collision Rate,recall_at_100,RQVAE,-0.9363723240567312,-0.8285714285714287,6
+collision_rate,Collision Rate,recall_at_100,RQVAE (RRS),,,3
+collision_rate,Collision Rate,recall_at_100,PLUM,-0.9784465705203728,-1.0,3
+collision_rate,Collision Rate,recall_at_100,BalanceRQKMeans,-0.9867599949232091,-1.0,3
+collision_rate,Collision Rate,recall_at_100,RQVAE-token,1.0,0.9999999999999999,2
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,ALL,,,0
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,R3VAE (rqkmeans),,,0
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,R3VAE (spherical),,,0
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,RQKMeans,,,0
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,RQ-KMeans + Pair Alignment,,,0
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,RQ-VAE + Pair Alignment,,,0
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,RQVAE (ECM),,,0
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,RQVAE,,,0
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,RQVAE (RRS),,,0
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,PLUM,,,0
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,BalanceRQKMeans,,,0
+p95_collision_group_size,p95 Collision Group Size,recall_at_100,RQVAE-token,,,0
+g_max,G_max,recall_at_100,ALL,-0.740987491800943,-0.7323757181416473,38
+g_max,G_max,recall_at_100,R3VAE (rqkmeans),-0.9151168877200972,-0.7999999999999999,5
+g_max,G_max,recall_at_100,R3VAE (spherical),-0.8060359862110417,-0.7714285714285715,6
+g_max,G_max,recall_at_100,RQKMeans,-0.9081955482694182,-0.9746794344808963,5
+g_max,G_max,recall_at_100,RQ-KMeans + Pair Alignment,,,1
+g_max,G_max,recall_at_100,RQ-VAE + Pair Alignment,,,1
+g_max,G_max,recall_at_100,RQVAE (ECM),,,3
+g_max,G_max,recall_at_100,RQVAE,-0.8340327896053752,-0.8804062740424288,6
+g_max,G_max,recall_at_100,RQVAE (RRS),,,3
+g_max,G_max,recall_at_100,PLUM,,,3
+g_max,G_max,recall_at_100,BalanceRQKMeans,-0.9562264612267299,-1.0,3
+g_max,G_max,recall_at_100,RQVAE-token,1.0,0.9999999999999999,2
+cur_total,CUR_Total,recall_at_100,ALL,,,4
+cur_total,CUR_Total,recall_at_100,R3VAE (rqkmeans),,,0
+cur_total,CUR_Total,recall_at_100,R3VAE (spherical),,,0
+cur_total,CUR_Total,recall_at_100,RQKMeans,,,1
+cur_total,CUR_Total,recall_at_100,RQ-KMeans + Pair Alignment,,,1
+cur_total,CUR_Total,recall_at_100,RQ-VAE + Pair Alignment,,,1
+cur_total,CUR_Total,recall_at_100,RQVAE (ECM),,,0
+cur_total,CUR_Total,recall_at_100,RQVAE,,,1
+cur_total,CUR_Total,recall_at_100,RQVAE (RRS),,,0
+cur_total,CUR_Total,recall_at_100,PLUM,,,0
+cur_total,CUR_Total,recall_at_100,BalanceRQKMeans,,,0
+cur_total,CUR_Total,recall_at_100,RQVAE-token,,,0
+code_gini,Code Gini,recall_at_100,ALL,-0.5512684046506093,-0.39999999999999997,4
+code_gini,Code Gini,recall_at_100,R3VAE (rqkmeans),,,0
+code_gini,Code Gini,recall_at_100,R3VAE (spherical),,,0
+code_gini,Code Gini,recall_at_100,RQKMeans,,,1
+code_gini,Code Gini,recall_at_100,RQ-KMeans + Pair Alignment,,,1
+code_gini,Code Gini,recall_at_100,RQ-VAE + Pair Alignment,,,1
+code_gini,Code Gini,recall_at_100,RQVAE (ECM),,,0
+code_gini,Code Gini,recall_at_100,RQVAE,,,1
+code_gini,Code Gini,recall_at_100,RQVAE (RRS),,,0
+code_gini,Code Gini,recall_at_100,PLUM,,,0
+code_gini,Code Gini,recall_at_100,BalanceRQKMeans,,,0
+code_gini,Code Gini,recall_at_100,RQVAE-token,,,0
+code_entropy,Code Entropy,recall_at_100,ALL,0.6066694396034293,0.39999999999999997,4
+code_entropy,Code Entropy,recall_at_100,R3VAE (rqkmeans),,,0
+code_entropy,Code Entropy,recall_at_100,R3VAE (spherical),,,0
+code_entropy,Code Entropy,recall_at_100,RQKMeans,,,1
+code_entropy,Code Entropy,recall_at_100,RQ-KMeans + Pair Alignment,,,1
+code_entropy,Code Entropy,recall_at_100,RQ-VAE + Pair Alignment,,,1
+code_entropy,Code Entropy,recall_at_100,RQVAE (ECM),,,0
+code_entropy,Code Entropy,recall_at_100,RQVAE,,,1
+code_entropy,Code Entropy,recall_at_100,RQVAE (RRS),,,0
+code_entropy,Code Entropy,recall_at_100,PLUM,,,0
+code_entropy,Code Entropy,recall_at_100,BalanceRQKMeans,,,0
+code_entropy,Code Entropy,recall_at_100,RQVAE-token,,,0
+intra_code_similarity,Intra-code Similarity,recall_at_100,ALL,0.36865717074652943,0.39999999999999997,4
+intra_code_similarity,Intra-code Similarity,recall_at_100,R3VAE (rqkmeans),,,0
+intra_code_similarity,Intra-code Similarity,recall_at_100,R3VAE (spherical),,,0
+intra_code_similarity,Intra-code Similarity,recall_at_100,RQKMeans,,,1
+intra_code_similarity,Intra-code Similarity,recall_at_100,RQ-KMeans + Pair Alignment,,,1
+intra_code_similarity,Intra-code Similarity,recall_at_100,RQ-VAE + Pair Alignment,,,1
+intra_code_similarity,Intra-code Similarity,recall_at_100,RQVAE (ECM),,,0
+intra_code_similarity,Intra-code Similarity,recall_at_100,RQVAE,,,1
+intra_code_similarity,Intra-code Similarity,recall_at_100,RQVAE (RRS),,,0
+intra_code_similarity,Intra-code Similarity,recall_at_100,PLUM,,,0
+intra_code_similarity,Intra-code Similarity,recall_at_100,BalanceRQKMeans,,,0
+intra_code_similarity,Intra-code Similarity,recall_at_100,RQVAE-token,,,0
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,ALL,-0.22083119050539748,-0.19999999999999998,4
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,R3VAE (rqkmeans),,,0
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,R3VAE (spherical),,,0
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,RQKMeans,,,1
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,RQ-KMeans + Pair Alignment,,,1
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,RQ-VAE + Pair Alignment,,,1
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,RQVAE (ECM),,,0
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,RQVAE,,,1
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,RQVAE (RRS),,,0
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,PLUM,,,0
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,BalanceRQKMeans,,,0
+prefix_coherence_1,Prefix Coherence@1,recall_at_100,RQVAE-token,,,0
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,ALL,-0.14066718819523388,0.39999999999999997,4
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,R3VAE (rqkmeans),,,0
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,R3VAE (spherical),,,0
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,RQKMeans,,,1
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,RQ-KMeans + Pair Alignment,,,1
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,RQ-VAE + Pair Alignment,,,1
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,RQVAE (ECM),,,0
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,RQVAE,,,1
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,RQVAE (RRS),,,0
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,PLUM,,,0
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,BalanceRQKMeans,,,0
+prefix_coherence_2,Prefix Coherence@2,recall_at_100,RQVAE-token,,,0
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,ALL,0.36865717074652943,0.39999999999999997,4
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,R3VAE (rqkmeans),,,0
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,R3VAE (spherical),,,0
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,RQKMeans,,,1
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,RQ-KMeans + Pair Alignment,,,1
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,RQ-VAE + Pair Alignment,,,1
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,RQVAE (ECM),,,0
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,RQVAE,,,1
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,RQVAE (RRS),,,0
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,PLUM,,,0
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,BalanceRQKMeans,,,0
+prefix_coherence_3,Prefix Coherence@3,recall_at_100,RQVAE-token,,,0
+valid_sid_rate,Valid SID Rate,recall_at_100,ALL,,,4
+valid_sid_rate,Valid SID Rate,recall_at_100,R3VAE (rqkmeans),,,0
+valid_sid_rate,Valid SID Rate,recall_at_100,R3VAE (spherical),,,0
+valid_sid_rate,Valid SID Rate,recall_at_100,RQKMeans,,,1
+valid_sid_rate,Valid SID Rate,recall_at_100,RQ-KMeans + Pair Alignment,,,1
+valid_sid_rate,Valid SID Rate,recall_at_100,RQ-VAE + Pair Alignment,,,1
+valid_sid_rate,Valid SID Rate,recall_at_100,RQVAE (ECM),,,0
+valid_sid_rate,Valid SID Rate,recall_at_100,RQVAE,,,1
+valid_sid_rate,Valid SID Rate,recall_at_100,RQVAE (RRS),,,0
+valid_sid_rate,Valid SID Rate,recall_at_100,PLUM,,,0
+valid_sid_rate,Valid SID Rate,recall_at_100,BalanceRQKMeans,,,0
+valid_sid_rate,Valid SID Rate,recall_at_100,RQVAE-token,,,0

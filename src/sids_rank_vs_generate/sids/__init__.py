@@ -4,15 +4,22 @@ Some SIDs will require a kind-of-hardcoded training pipeline (for example, RQ-KM
 a bit different from regular training).
 """
 
-from .base import ISidPipeline
+from .base import ISidPipeline, SidTrainingData
 from .config import (
+    CollaborativeAlignmentConfig,
+    CollaborativeAwareRQVAEConfig,
+    CollaborativeAwareRQKMeansConfig,
     PlumRQVAEConfig,
     RQKMeansConfig,
     RQVAEConfig,
     RQVAELetterConfig,
     UserAwareRQKMeansConfig,
 )
-
+from .collaborative_rq_kmeans import (
+    CollaborativeAwareRQKMeansPipeline,
+    mine_collaborative_pairs,
+)
+from .collaborative_rq_vae import CollaborativeAwareRQVAEPipeline
 from .plum_rq_vae_pipeline import PlumRQVAEPipeline
 from .rq_kmeans_pipeline import RQKMeansPipeline
 from .rq_vae_pipeline import RQVAEPipeline
@@ -42,6 +49,13 @@ __all__ = [
     "RQVAEPipeline",
     "RQVAELetterConfig",
     "RQVAELetterPipeline",
+    "SidTrainingData",
+    "CollaborativeAlignmentConfig",
+    "CollaborativeAwareRQVAEConfig",
+    "CollaborativeAwareRQVAEPipeline",
+    "CollaborativeAwareRQKMeansConfig",
+    "CollaborativeAwareRQKMeansPipeline",
+    "mine_collaborative_pairs",
     "IUserAwareSidPipeline",
     "IUserSidMapper",
     "FrequencyUserSidMapper",

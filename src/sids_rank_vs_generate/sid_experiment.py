@@ -36,7 +36,7 @@ from .evaluation.stages import (
 from .pipeline import PipelineConfig, run_pipeline
 from .plugins import load_plugin
 from .reproducibility import SID_EXPERIMENT_SEED, seed_everything
-from .sids.base import ISidPipeline
+from .sids.base import ISidPipeline, SidTrainingData
 from .sids.user_aware import (
     IUserAwareSidPipeline,
     UserAwareSidTrainingData,
@@ -302,8 +302,13 @@ def run_sid_experiment(
             )
             sid.train(item_features, collaborative_embeddings=collaborative_embeddings)
         else:
-            sid.train(item_features)
-
+            sid.train_with_context(
+                SidTrainingData(
+                    item_features=item_features,
+                    train_interactions=prepared.train,
+                    train_end_timestamp=prepared.test_start_timestamp,
+                )
+            )
         sid_output = sid.update(item_features)
     sid_columns = _validate_sid_output(item_features, sid_output)
     items_with_sids = item_features.join(

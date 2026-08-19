@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal
 
 
@@ -23,6 +23,62 @@ class RQKMeansConfig:
                 raise ValueError("codebook_sizes must contain positive values")
         elif self.num_levels is None or self.codebook_size is None:
             raise ValueError("num_levels and codebook_size are required")
+
+
+@dataclass(frozen=True)
+class CollaborativeAlignmentConfig:
+    """Pair mining and contrastive alignment settings for OneRec-style SIDs."""
+
+    embedding_column: str = "normalized_embed"
+    history_window: int = 3
+    min_pair_support: int = 2
+    pairs_per_item: int = 20
+    max_pairs: int | None = 1_000_000
+    hidden_dim: int = 512
+    batch_size: int = 1024
+    inference_batch_size: int = 65_536
+    epochs: int = 10
+    learning_rate: float = 1e-3
+    weight_decay: float = 1e-4
+    temperature: float = 0.07
+    content_preservation_weight: float = 0.1
+    device: str | None = None
+    seed: int = 42
+
+    def __post_init__(self) -> None:
+        if not self.embedding_column:
+            raise ValueError("embedding_column must not be empty")
+        positive_integers = {
+            "history_window": self.history_window,
+            "min_pair_support": self.min_pair_support,
+            "pairs_per_item": self.pairs_per_item,
+            "hidden_dim": self.hidden_dim,
+            "batch_size": self.batch_size,
+            "inference_batch_size": self.inference_batch_size,
+            "epochs": self.epochs,
+        }
+        invalid = [name for name, value in positive_integers.items() if value <= 0]
+        if invalid:
+            raise ValueError(f"{', '.join(invalid)} must be positive")
+        if self.max_pairs is not None and self.max_pairs <= 0:
+            raise ValueError("max_pairs must be positive when provided")
+        if self.learning_rate <= 0:
+            raise ValueError("learning_rate must be positive")
+        if self.weight_decay < 0:
+            raise ValueError("weight_decay must be non-negative")
+        if self.temperature <= 0:
+            raise ValueError("temperature must be positive")
+        if self.content_preservation_weight < 0:
+            raise ValueError("content_preservation_weight must be non-negative")
+
+
+@dataclass(frozen=True)
+class CollaborativeAwareRQKMeansConfig(RQKMeansConfig):
+    """RQ-KMeans settings plus collaborative representation alignment."""
+
+    alignment: CollaborativeAlignmentConfig = field(
+        default_factory=CollaborativeAlignmentConfig
+    )
 
 
 @dataclass(frozen=True)
@@ -52,6 +108,15 @@ class RQVAEConfig:
             )
         if self.psi_top_k <= 0 or self.psi_top_k > self.codebook_size:
             raise ValueError("psi_top_k must be positive and fit the codebook")
+
+
+@dataclass(frozen=True)
+class CollaborativeAwareRQVAEConfig(RQVAEConfig):
+    """RQ-VAE settings plus train-only collaborative pair alignment."""
+
+    alignment: CollaborativeAlignmentConfig = field(
+        default_factory=CollaborativeAlignmentConfig
+    )
 
 
 @dataclass(frozen=True)

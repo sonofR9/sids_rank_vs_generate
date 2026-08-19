@@ -83,7 +83,7 @@ TARGETS = (
 
 BASE_METHOD_ORDER = (
     "R3VAE (rqkmeans)", "R3VAE (spherical)", "RQKMeans",
-    "OneRec Pair Alignment", "RQVAE (ECM)",
+    "RQ-KMeans + Pair Alignment", "RQ-VAE + Pair Alignment", "RQVAE (ECM)",
     "RQVAE", "RQVAE (RRS)", "RQVAE-token",
 )
 METHOD_ORDER = (
@@ -103,7 +103,8 @@ METHOD_ORDER = (
 METHOD_STYLE = {
     "R3VAE (rqkmeans)": ("#72B7B2", "o", False), "R3VAE (spherical)": ("#54A24B", "o", False),
     "RQKMeans": ("#4C78A8", "o", False), "RQVAE (ECM)": ("#B279A2", "o", False),
-    "OneRec Pair Alignment": ("#2A9D8F", "P", True),
+    "RQ-KMeans + Pair Alignment": ("#2A9D8F", "P", True),
+    "RQ-VAE + Pair Alignment": ("#E9C46A", "X", True),
     "RQVAE": ("#F58518", "o", False), "RQVAE (RRS)": ("#E45756", "D", False),
     "RQVAE-token": ("#FF9DA6", "s", True), "PLUM": ("#9D755D", "^", False),
     "BalanceRQKMeans": ("#7A5195", "s", False), "RQVAE + item LogQ": ("#8C6D31", "P", False),
@@ -115,6 +116,18 @@ METHOD_STYLE = {
     "UAQ30 v2 capacity": ("#2F4B7C", "v", False),
     "UAQ30 v1 anchor": ("#00A6A6", "<", True),
     "UAQ30 v2 anchor": ("#007C91", "<", False),
+}
+LEGEND_LABELS = {
+    "RQ-KMeans + Pair Alignment": "RQ-KMeans +\nPair Alignment",
+    "RQ-VAE + Pair Alignment": "RQ-VAE +\nPair Alignment",
+    "BalanceRQKMeans": "Balance\nRQKMeans",
+    "RQVAE + item LogQ": "RQVAE +\nitem LogQ",
+    "RQVAE + pure SID LogQ": "RQVAE +\npure SID LogQ",
+    "BPE (three-way)": "BPE\n(three-way)",
+    "UAQ30 v1 capacity": "UAQ30 v1\ncapacity",
+    "UAQ30 v2 capacity": "UAQ30 v2\ncapacity",
+    "UAQ30 v1 anchor": "UAQ30 v1\nanchor",
+    "UAQ30 v2 anchor": "UAQ30 v2\nanchor",
 }
 EXTENSION_METHODS = {"PLUM", "BalanceRQKMeans"}
 
@@ -243,8 +256,8 @@ def plot_metric(frame: pd.DataFrame, sid_metric: MetricSpec, target: TargetSpec,
     shown = shown.drop_duplicates(["method", "run_name"])
     if shown.empty:
         return False
-    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10.5, "axes.titlesize": 13, "axes.labelsize": 12, "xtick.labelsize": 9.5, "ytick.labelsize": 9.5, "legend.fontsize": 7.7, "axes.linewidth": 0.8, "pdf.fonttype": 42, "ps.fonttype": 42})
-    figure, axes = plt.subplots(1, 2, figsize=(12.6, 5.7), sharey=True, facecolor="white")
+    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10.5, "axes.titlesize": 13, "axes.labelsize": 12, "xtick.labelsize": 9.5, "ytick.labelsize": 9.5, "legend.fontsize": 12.5, "axes.linewidth": 0.8, "pdf.fonttype": 42, "ps.fonttype": 42})
+    figure, axes = plt.subplots(1, 2, figsize=(15.5, 7.4), sharey=True, facecolor="white")
     x_limits = padded_limits(shown[sid_metric.column])
     baselines = [(target.baseline, "#7B8794", (0, (5, 3)))] if target.baseline is not None else []
     if target.key == "recall100":
@@ -269,26 +282,37 @@ def plot_metric(frame: pd.DataFrame, sid_metric: MetricSpec, target: TargetSpec,
     is_recall = target.key == "recall100"
     # Recall figures carry three SASRec reference lines and therefore have a
     # taller legend. Keep the shared x-label in the clear gap above that legend.
-    figure.supxlabel(sid_metric.label, fontsize=12, y=0.25 if is_recall else 0.16)
+    figure.supxlabel(sid_metric.label, fontsize=12, y=0.36 if is_recall else 0.30)
     figure.supylabel(target.label, fontsize=12, x=0.016)
     present = [method for method in METHOD_ORDER if method in set(shown.method)]
-    handles = [Line2D([0], [0], color=METHOD_STYLE[method][0], linewidth=1.1, marker=METHOD_STYLE[method][1], markersize=6, markerfacecolor=METHOD_STYLE[method][0] if METHOD_STYLE[method][2] else "white", markeredgewidth=1.4, label=method) for method in present]
+    handles = [Line2D([0], [0], color=METHOD_STYLE[method][0], linewidth=1.1, marker=METHOD_STYLE[method][1], markersize=8, markerfacecolor=METHOD_STYLE[method][0] if METHOD_STYLE[method][2] else "white", markeredgewidth=1.4, label=LEGEND_LABELS.get(method, method)) for method in present]
     if target.baseline is not None:
         baseline_label = (
-            "SASRec vanilla (baseline)"
+            "SASRec vanilla\n(baseline)"
             if target.key == "recall100"
             else f"{target.label.split()[0]} item-only"
         )
         handles.append(Line2D([0], [0], color="#7B8794", linewidth=1.2, linestyle=(0, (5, 3)), label=baseline_label))
     if target.key == "recall100":
-        handles.append(Line2D([0], [0], color="#334155", linewidth=1.25, linestyle="-.", label="SASRec + audio init"))
-        handles.append(Line2D([0], [0], color="#0F766E", linewidth=1.2, linestyle=(0, (2, 2)), label="SASRec + audio history-concat"))
-    figure.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.01), ncol=4, frameon=False, handlelength=1.8, columnspacing=1.15)
+        handles.append(Line2D([0], [0], color="#334155", linewidth=1.25, linestyle="-.", label="SASRec +\naudio init"))
+        handles.append(Line2D([0], [0], color="#0F766E", linewidth=1.2, linestyle=(0, (2, 2)), label="SASRec + audio\nhistory-concat"))
+    figure.legend(
+        handles=handles,
+        loc="lower left",
+        bbox_to_anchor=(0.035, 0.01, 0.93, 0.30),
+        mode="expand",
+        ncol=6,
+        frameon=False,
+        handlelength=1.5,
+        handletextpad=0.55,
+        columnspacing=0.75,
+        labelspacing=0.8,
+    )
     figure.subplots_adjust(
         left=0.075,
         right=0.985,
         top=0.90,
-        bottom=0.42 if is_recall else 0.38,
+        bottom=0.50 if is_recall else 0.44,
         wspace=0.06,
     )
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -313,6 +337,16 @@ def coverage(frames: dict[str, pd.DataFrame]) -> pd.DataFrame:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--raw-report", type=Path)
+    parser.add_argument(
+        "--pair-alignment-generation-report",
+        type=Path,
+        help="MLflow export containing the pair-aligned RQ-KMeans/RQ-VAE points.",
+    )
+    parser.add_argument(
+        "--pair-alignment-ranking-report",
+        type=Path,
+        help="Ranking export containing the pair-aligned RQ-KMeans/RQ-VAE points.",
+    )
     parser.add_argument("--item-logq-report", type=Path)
     parser.add_argument("--pure-sid-logq-report", type=Path)
     parser.add_argument("--diger-report", type=Path)
@@ -336,6 +370,19 @@ def main() -> None:
     args.raw_report = args.raw_report or first_existing(
         Path("reports/figures/generation/raw_sid_recall/matched_runs.csv"),
         Path("reports/figures/generation/poster_raw_sid/matched_runs.csv"),
+    )
+    args.pair_alignment_generation_report = (
+        args.pair_alignment_generation_report
+        or Path(
+            "reports/figures/pair_alignment_matrix/generation/"
+            "matched_generation_runs.csv"
+        )
+    )
+    args.pair_alignment_ranking_report = (
+        args.pair_alignment_ranking_report
+        or Path(
+            "reports/figures/pair_alignment_matrix/ranking/matched_runs.csv"
+        )
     )
     args.item_logq_report = args.item_logq_report or first_existing(
         Path("reports/figures/generation/rqvae_item_logq_recall/matched_logq_rqvae_runs.csv"),
@@ -371,6 +418,13 @@ def main() -> None:
         Path("reports/figures/ranking/transact_sid_token_history/matched_runs.csv"),
     )
     raw = normalize(read_csv(args.raw_report, "raw_sid"))
+    pair_alignment_generation = normalize(
+        read_csv(
+            args.pair_alignment_generation_report,
+            "pair_alignment",
+            required=False,
+        )
+    )
     item_logq = normalize(read_csv(args.item_logq_report, "item_logq", required=False), method="RQVAE + item LogQ")
     pure_sid_logq = normalize(read_csv(args.pure_sid_logq_report, "pure_sid_logq", required=False), method="RQVAE + pure SID LogQ")
     diger = normalize(read_csv(args.diger_report, "diger", required=False), method="DIGER")
@@ -380,13 +434,45 @@ def main() -> None:
     extensions_33148 = normalize(read_csv(args.poster_extensions_33148_report, "poster_extensions_33148", required=False))
     user_aware = normalize(read_csv(args.user_aware_report, "user_aware", required=False))
     generation = deduplicate(numeric(filter_extensions(pd.concat([
-        raw, item_logq, pure_sid_logq, diger, letter, bpe, extensions, extensions_33148, user_aware,
+        raw, pair_alignment_generation, item_logq, pure_sid_logq, diger,
+        letter, bpe, extensions, extensions_33148, user_aware,
     ], ignore_index=True))))
-    ranking = deduplicate(numeric(filter_extensions(normalize(read_csv(args.ranking_report, "ranking")))))
+    pair_alignment_ranking = normalize(
+        read_csv(
+            args.pair_alignment_ranking_report,
+            "pair_alignment_ranking",
+            required=False,
+        )
+    )
+    ranking = deduplicate(
+        numeric(
+            filter_extensions(
+                pd.concat(
+                    [
+                        normalize(read_csv(args.ranking_report, "ranking")),
+                        pair_alignment_ranking,
+                    ],
+                    ignore_index=True,
+                )
+            )
+        )
+    )
     transact_ranking = deduplicate(
         numeric(
             filter_extensions(
-                normalize(read_csv(args.transact_report, "ranking_transact", required=False))
+                pd.concat(
+                    [
+                        normalize(
+                            read_csv(
+                                args.transact_report,
+                                "ranking_transact",
+                                required=False,
+                            )
+                        ),
+                        pair_alignment_ranking,
+                    ],
+                    ignore_index=True,
+                )
             )
         )
     )
