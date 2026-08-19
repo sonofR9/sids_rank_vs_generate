@@ -227,3 +227,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local Codex skills
+.agents/skills/hallmark/
+skills-lock.json
