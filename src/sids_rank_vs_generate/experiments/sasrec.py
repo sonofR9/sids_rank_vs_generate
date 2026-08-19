@@ -26,7 +26,7 @@ from ..reproducibility import seed_everything
 
 
 TRAINING_OBJECTIVES = ("sampled-uniform", "in-batch", "in-batch-logq")
-PRETRAINED_EMBEDDING_MODES = ("initialize", "history-concat")
+PRETRAINED_EMBEDDING_MODES = ("none", "initialize", "history-concat")
 
 
 @dataclass(frozen=True)
@@ -265,7 +265,7 @@ class SASRecModel(nn.Module):
                     initial_item_embeddings,
                     freeze=config.freeze_item_embeddings,
                 )
-            else:
+            elif config.pretrained_embedding_mode == "history-concat":
                 self.initialize_history_content_embeddings(
                     initial_item_embeddings,
                 )
@@ -961,6 +961,7 @@ def build_parser() -> argparse.ArgumentParser:
         choices=PRETRAINED_EMBEDDING_MODES,
         default="initialize",
         help=(
+            "none: use randomly initialized item embeddings; "
             "initialize: copy pretrained vectors into the item table; "
             "history-concat: concatenate frozen pretrained vectors with "
             "learned item embeddings at every history position."
@@ -1026,10 +1027,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         num_workers=args.num_workers,
         device=args.device,
     )
+    model_initial_item_embeddings = (
+        None
+        if args.pretrained_embedding_mode == "none"
+        else initial_item_embeddings
+    )
     _, result = run_sasrec(
         prepared,
         config,
-        initial_item_embeddings=initial_item_embeddings,
+        initial_item_embeddings=model_initial_item_embeddings,
     )
     payload = result.as_dict(prepared, config)
     payload["dataset"] = {

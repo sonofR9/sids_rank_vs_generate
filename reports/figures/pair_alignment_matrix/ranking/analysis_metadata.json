@@ -1,0 +1,327 @@
+{
+  "tracking_uri": "http://51.250.47.231:5000",
+  "experiments": {
+    "sid-comparison": "1"
+  },
+  "quality_experiments": [
+    "sid-comparison"
+  ],
+  "ranking_experiments": [
+    "sid-comparison"
+  ],
+  "metric_mappings": {
+    "sid": {
+      "icr": "metrics.sid.independent_code_rate",
+      "collision_rate": "metrics.sid.collision_rate",
+      "p95_collision_group_size": null,
+      "g_max": "metrics.sid.max_collision",
+      "cur_total": "metrics.sid.codebook_quality.codebook_utilization_rate_total",
+      "code_gini": "metrics.sid.code_gini",
+      "code_entropy": "metrics.sid.code_entropy",
+      "intra_code_similarity": "metrics.sid.intra_code_similarity",
+      "prefix_coherence_1": "metrics.sid.prefix_coherence_at_1",
+      "prefix_coherence_2": "metrics.sid.prefix_coherence_at_2",
+      "prefix_coherence_3": "metrics.sid.prefix_coherence_at_3",
+      "valid_sid_rate": "metrics.sid.valid_sid_rate"
+    },
+    "ranking": {
+      "dcnv2_pairwise_accuracy": "metrics.evaluations.ranking.dcnv2.test.pairwise_accuracy",
+      "dcnv2_roc_auc": "metrics.evaluations.ranking.dcnv2.test.roc_auc",
+      "transact_pairwise_accuracy": "metrics.evaluations.ranking.transact.test.pairwise_accuracy",
+      "transact_roc_auc": "metrics.evaluations.ranking.transact.test.roc_auc"
+    }
+  },
+  "ranking_baselines": {
+    "dcnv2_pairwise_accuracy": 0.549144446849823,
+    "dcnv2_roc_auc": 0.8093270063400269,
+    "transact_pairwise_accuracy": 0.7616394758224487,
+    "transact_roc_auc": 0.9367052912712097
+  },
+  "filters": {
+    "parent_only": true,
+    "status": "FINISHED",
+    "ranking_metric_required": true,
+    "include_token": false,
+    "artifact_backfill": true
+  },
+  "candidate_quality_runs": 66,
+  "candidate_ranking_runs": 32,
+  "ranking_child_metric_rows": 168,
+  "ranking_parents_enriched_from_children": 43,
+  "matched_runs": 30,
+  "unmatched_sid_quality_runs": 6,
+  "unmatched_ranking_runs": 0,
+  "method_counts": {
+    "R3VAE (spherical)": 6,
+    "RQVAE": 6,
+    "R3VAE (rqkmeans)": 5,
+    "RQKMeans": 5,
+    "RQVAE (RRS)": 3,
+    "RQVAE (ECM)": 3,
+    "RQ-VAE + Pair Alignment": 1,
+    "RQ-KMeans + Pair Alignment": 1
+  },
+  "selected_runs": [
+    {
+      "method": "RQVAE (RRS)",
+      "num_levels": 3,
+      "codebook_size": 256,
+      "sid_quality_run_id": "32e50ca865524bcdbf27af08803123b3",
+      "ranking_run_id": "32e50ca865524bcdbf27af08803123b3"
+    },
+    {
+      "method": "RQVAE (ECM)",
+      "num_levels": 3,
+      "codebook_size": 256,
+      "sid_quality_run_id": "c8b21f65195748f1aa89f02cfd1f4516",
+      "ranking_run_id": "c8b21f65195748f1aa89f02cfd1f4516"
+    },
+    {
+      "method": "R3VAE (spherical)",
+      "num_levels": 3,
+      "codebook_size": 256,
+      "sid_quality_run_id": "b7eccc9def31451c9ad1512bf24370b1",
+      "ranking_run_id": "b7eccc9def31451c9ad1512bf24370b1"
+    },
+    {
+      "method": "R3VAE (rqkmeans)",
+      "num_levels": 3,
+      "codebook_size": 256,
+      "sid_quality_run_id": "f004d330df3a4bedb4db516f6ccc0e71",
+      "ranking_run_id": "f004d330df3a4bedb4db516f6ccc0e71"
+    },
+    {
+      "method": "RQKMeans",
+      "num_levels": 2,
+      "codebook_size": 256,
+      "sid_quality_run_id": "7e698676f50c427180a34f4eff3d0fa4",
+      "ranking_run_id": "7e698676f50c427180a34f4eff3d0fa4"
+    },
+    {
+      "method": "RQVAE",
+      "num_levels": 2,
+      "codebook_size": 256,
+      "sid_quality_run_id": "3cf9877b5a014d67b90e5d45a6f143ca",
+      "ranking_run_id": "3cf9877b5a014d67b90e5d45a6f143ca"
+    },
+    {
+      "method": "R3VAE (spherical)",
+      "num_levels": 2,
+      "codebook_size": 256,
+      "sid_quality_run_id": "8d9a6f316af6473bace5404f132d3b09",
+      "ranking_run_id": "8d9a6f316af6473bace5404f132d3b09"
+    },
+    {
+      "method": "R3VAE (rqkmeans)",
+      "num_levels": 2,
+      "codebook_size": 256,
+      "sid_quality_run_id": "14a2381e329242328ac2daebb31d58aa",
+      "ranking_run_id": "14a2381e329242328ac2daebb31d58aa"
+    },
+    {
+      "method": "RQKMeans",
+      "num_levels": 4,
+      "codebook_size": 256,
+      "sid_quality_run_id": "5fc0503637e74fb68419c865f282d478",
+      "ranking_run_id": "5fc0503637e74fb68419c865f282d478"
+    },
+    {
+      "method": "RQVAE",
+      "num_levels": 4,
+      "codebook_size": 256,
+      "sid_quality_run_id": "1420d8e1514140078bba631f4a83f99e",
+      "ranking_run_id": "1420d8e1514140078bba631f4a83f99e"
+    },
+    {
+      "method": "R3VAE (spherical)",
+      "num_levels": 4,
+      "codebook_size": 256,
+      "sid_quality_run_id": "104704663898486dac6a57918317c4be",
+      "ranking_run_id": "104704663898486dac6a57918317c4be"
+    },
+    {
+      "method": "R3VAE (rqkmeans)",
+      "num_levels": 4,
+      "codebook_size": 256,
+      "sid_quality_run_id": "6a318779806f4b6aa3d91abc32b62659",
+      "ranking_run_id": "6a318779806f4b6aa3d91abc32b62659"
+    },
+    {
+      "method": "RQKMeans",
+      "num_levels": 3,
+      "codebook_size": 128,
+      "sid_quality_run_id": "fcd964442df24360ba760a332642c92c",
+      "ranking_run_id": "fcd964442df24360ba760a332642c92c"
+    },
+    {
+      "method": "RQVAE",
+      "num_levels": 3,
+      "codebook_size": 128,
+      "sid_quality_run_id": "8fe327fb31fe4d96877ffff6671ce351",
+      "ranking_run_id": "8fe327fb31fe4d96877ffff6671ce351"
+    },
+    {
+      "method": "R3VAE (spherical)",
+      "num_levels": 3,
+      "codebook_size": 128,
+      "sid_quality_run_id": "ae55f338963747fc896538ab8731cd2d",
+      "ranking_run_id": "ae55f338963747fc896538ab8731cd2d"
+    },
+    {
+      "method": "R3VAE (rqkmeans)",
+      "num_levels": 3,
+      "codebook_size": 128,
+      "sid_quality_run_id": "20fa280ea69544fe9091a2809bcc0c94",
+      "ranking_run_id": "20fa280ea69544fe9091a2809bcc0c94"
+    },
+    {
+      "method": "RQKMeans",
+      "num_levels": 3,
+      "codebook_size": 512,
+      "sid_quality_run_id": "eb594fbfc8f9424887431763eb0c945c",
+      "ranking_run_id": "eb594fbfc8f9424887431763eb0c945c"
+    },
+    {
+      "method": "RQVAE",
+      "num_levels": 3,
+      "codebook_size": 512,
+      "sid_quality_run_id": "b9695521316a4833af17a02dfbe9c49c",
+      "ranking_run_id": "b9695521316a4833af17a02dfbe9c49c"
+    },
+    {
+      "method": "R3VAE (spherical)",
+      "num_levels": 3,
+      "codebook_size": 512,
+      "sid_quality_run_id": "af891fce09cc44b0b50805ee10b831f2",
+      "ranking_run_id": "af891fce09cc44b0b50805ee10b831f2"
+    },
+    {
+      "method": "R3VAE (rqkmeans)",
+      "num_levels": 3,
+      "codebook_size": 512,
+      "sid_quality_run_id": "d7001d7d91c6495ab41bdaf986468abf",
+      "ranking_run_id": "d7001d7d91c6495ab41bdaf986468abf"
+    },
+    {
+      "method": "RQVAE (RRS)",
+      "num_levels": 3,
+      "codebook_size": 128,
+      "sid_quality_run_id": "5a65cbadb38b4fe48a2766960669b030",
+      "ranking_run_id": "5a65cbadb38b4fe48a2766960669b030"
+    },
+    {
+      "method": "RQVAE (ECM)",
+      "num_levels": 3,
+      "codebook_size": 128,
+      "sid_quality_run_id": "bebf01ca59894f76a5c0c3ac4cb7a692",
+      "ranking_run_id": "bebf01ca59894f76a5c0c3ac4cb7a692"
+    },
+    {
+      "method": "RQVAE (RRS)",
+      "num_levels": 3,
+      "codebook_size": 512,
+      "sid_quality_run_id": "9e51ac28e0db4a299458fa11f1584d36",
+      "ranking_run_id": "9e51ac28e0db4a299458fa11f1584d36"
+    },
+    {
+      "method": "RQVAE (ECM)",
+      "num_levels": 3,
+      "codebook_size": 512,
+      "sid_quality_run_id": "33cac03cccb84e358704fa01aca46b63",
+      "ranking_run_id": "33cac03cccb84e358704fa01aca46b63"
+    },
+    {
+      "method": "RQVAE",
+      "num_levels": 3,
+      "codebook_size": 1024,
+      "sid_quality_run_id": "8e1c68db9ea44683a3a474bb1cc086a2",
+      "ranking_run_id": "8e1c68db9ea44683a3a474bb1cc086a2"
+    },
+    {
+      "method": "R3VAE (spherical)",
+      "num_levels": 3,
+      "codebook_size": 1024,
+      "sid_quality_run_id": "4ec68a2001c64b9992f8e4f20b10043e",
+      "ranking_run_id": "4ec68a2001c64b9992f8e4f20b10043e"
+    },
+    {
+      "method": "RQKMeans",
+      "num_levels": 3,
+      "codebook_size": 256,
+      "sid_quality_run_id": "e02b28ae1372471e819774e1a41ab02d",
+      "ranking_run_id": "e02b28ae1372471e819774e1a41ab02d"
+    },
+    {
+      "method": "RQVAE",
+      "num_levels": 3,
+      "codebook_size": 256,
+      "sid_quality_run_id": "0eafeecb81a748c38cdc50769f39d6ec",
+      "ranking_run_id": "0eafeecb81a748c38cdc50769f39d6ec"
+    },
+    {
+      "method": "RQ-VAE + Pair Alignment",
+      "num_levels": 3,
+      "codebook_size": 256,
+      "sid_quality_run_id": "497274959a4d4659a6e14cf38b52675e",
+      "ranking_run_id": "497274959a4d4659a6e14cf38b52675e"
+    },
+    {
+      "method": "RQ-KMeans + Pair Alignment",
+      "num_levels": 3,
+      "codebook_size": 256,
+      "sid_quality_run_id": "36a07919a4d64860ae09d86c1ef93736",
+      "ranking_run_id": "36a07919a4d64860ae09d86c1ef93736"
+    }
+  ],
+  "plotted_combinations": [
+    "dcnv2_pairwise_accuracy:icr",
+    "dcnv2_pairwise_accuracy:collision_rate",
+    "dcnv2_pairwise_accuracy:g_max",
+    "dcnv2_pairwise_accuracy:cur_total",
+    "dcnv2_pairwise_accuracy:code_gini",
+    "dcnv2_pairwise_accuracy:code_entropy",
+    "dcnv2_pairwise_accuracy:intra_code_similarity",
+    "dcnv2_pairwise_accuracy:prefix_coherence_1",
+    "dcnv2_pairwise_accuracy:prefix_coherence_2",
+    "dcnv2_pairwise_accuracy:prefix_coherence_3",
+    "dcnv2_pairwise_accuracy:valid_sid_rate",
+    "dcnv2_roc_auc:icr",
+    "dcnv2_roc_auc:collision_rate",
+    "dcnv2_roc_auc:g_max",
+    "dcnv2_roc_auc:cur_total",
+    "dcnv2_roc_auc:code_gini",
+    "dcnv2_roc_auc:code_entropy",
+    "dcnv2_roc_auc:intra_code_similarity",
+    "dcnv2_roc_auc:prefix_coherence_1",
+    "dcnv2_roc_auc:prefix_coherence_2",
+    "dcnv2_roc_auc:prefix_coherence_3",
+    "dcnv2_roc_auc:valid_sid_rate",
+    "transact_pairwise_accuracy:icr",
+    "transact_pairwise_accuracy:collision_rate",
+    "transact_pairwise_accuracy:g_max",
+    "transact_pairwise_accuracy:cur_total",
+    "transact_pairwise_accuracy:code_gini",
+    "transact_pairwise_accuracy:code_entropy",
+    "transact_pairwise_accuracy:intra_code_similarity",
+    "transact_pairwise_accuracy:prefix_coherence_1",
+    "transact_pairwise_accuracy:prefix_coherence_2",
+    "transact_pairwise_accuracy:prefix_coherence_3",
+    "transact_pairwise_accuracy:valid_sid_rate",
+    "transact_roc_auc:icr",
+    "transact_roc_auc:collision_rate",
+    "transact_roc_auc:g_max",
+    "transact_roc_auc:cur_total",
+    "transact_roc_auc:code_gini",
+    "transact_roc_auc:code_entropy",
+    "transact_roc_auc:intra_code_similarity",
+    "transact_roc_auc:prefix_coherence_1",
+    "transact_roc_auc:prefix_coherence_2",
+    "transact_roc_auc:prefix_coherence_3",
+    "transact_roc_auc:valid_sid_rate"
+  ],
+  "expected_output_figures_per_format": 44,
+  "timestamp": "2026-08-19T11:45:24.295073+00:00",
+  "git_commit": "9065ec80088e6e983da0fd6f139067572726d877",
+  "git_branch": "main",
+  "logq": "not_requested_for_ranking"
+}

@@ -91,6 +91,67 @@ python run.py experiments/rqkmeans_full.py --skip-generation
 python run.py experiments/rqkmeans_full.py --skip-ranking
 ```
 
+### Collaborative-aware RQ-KMeans (OneRec)
+
+`CollaborativeAwareRQKMeansPipeline` mines recent co-interaction pairs only
+from the temporal train split, aligns content embeddings with a symmetric
+in-batch contrastive objective, and sends the aligned vectors to RQ-KMeans.
+This follows the collaborative-aware representation stage in
+[OneRec, Section 2.1.1](https://arxiv.org/abs/2506.13695).
+Pair-mining and alignment parameters are declared in
+`CollaborativeAlignmentConfig`; the shared runner records the temporal cutoff,
+pair statistics, losses, and before/after cosine diagnostics.
+
+Run the aligned experiment and the content-only control with the same fixed
+ranking and generation stages:
+
+```bash
+python run.py experiments/collaborative_rqkmeans_full.py
+python run.py experiments/rqkmeans_full.py
+```
+
+The resulting `metrics.json` files contain directly comparable `ranking` and
+`generation` sections. Use `--sid-only` for pair/alignment/RQ-KMeans smoke
+checks without downstream training.
+
+For the poster-compatible 33,148-item comparison, use two GPUs to run the
+aligned method and its content-only control concurrently. Each process uses one
+GPU and writes a complete parent run with nested SID, DCNv2, TransAct, and
+generation runs to MLflow:
+
+```bash
+tmux new -s onerec-pairs
+PYTHON_BIN=.venv/bin/python \
+ALIGNED_GPU=0 BASELINE_GPU=1 \
+MLFLOW_TRACKING_URI=http://51.250.47.231:5000 \
+bash scripts/run_collaborative_rqkmeans_pair.sh \
+  2>&1 | tee onerec-pair-comparison.log
+```
+
+`RUN_SET=aligned` or `RUN_SET=baseline` runs only one side. The launcher first
+prepares the shared Yambda cache, avoiding concurrent dataset downloads.
+
+After both parent runs finish, export the new MLflow point and rebuild the
+combined figures:
+
+```bash
+python scripts/analyze_generation_sid_quality.py \
+  --tracking-uri http://51.250.47.231:5000 \
+  --generation-experiments sid-comparison \
+  --output-dir reports/figures/generation/one_rec_pair_alignment
+
+python scripts/analyze_ranking_sid_quality.py \
+  --tracking-uri http://51.250.47.231:5000 \
+  --quality-experiments sid-comparison \
+  --ranking-experiments sid-comparison \
+  --output-dir reports/figures/ranking/one_rec_pair_alignment
+
+python scripts/plot_all_generation_methods.py \
+  --raw-report reports/figures/generation/one_rec_pair_alignment/matched_generation_runs.csv \
+  --ranking-report reports/figures/ranking/one_rec_pair_alignment/matched_runs.csv \
+  --transact-report reports/figures/ranking/one_rec_pair_alignment/matched_runs.csv
+```
+
 ### Metrics for precomputed SIDs
 
 To measure SID assignments that have already been generated, place their

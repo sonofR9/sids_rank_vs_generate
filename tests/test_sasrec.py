@@ -334,6 +334,74 @@ class SASRecSmokeTest(unittest.TestCase):
             )
             self.assertTrue(payload["content_features_used"])
 
+    def test_command_supports_random_item_embeddings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            parquet_path = Path(tmpdir) / "interactions.parquet"
+            embeddings_path = Path(tmpdir) / "embeddings.parquet"
+            metrics_path = Path(tmpdir) / "sasrec_vanilla.json"
+            in_batch_interactions().write_parquet(parquet_path)
+            pl.DataFrame(
+                {
+                    "item_id": [10, 20, 30, 40, 50, 60, 70, 80],
+                    "normalized_embed": [
+                        [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+                        [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+                        [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+                        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+                        [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+                    ],
+                }
+            ).write_parquet(embeddings_path)
+            exit_code = main(
+                [
+                    "--interactions",
+                    str(parquet_path),
+                    "--embeddings",
+                    str(embeddings_path),
+                    "--core-min-interactions",
+                    "1",
+                    "--test-days",
+                    "1",
+                    "--timestamp-unit-seconds",
+                    "1",
+                    "--embedding-dim",
+                    "8",
+                    "--max-seq-len",
+                    "4",
+                    "--num-layers",
+                    "1",
+                    "--num-heads",
+                    "2",
+                    "--dropout",
+                    "0",
+                    "--batch-size",
+                    "4",
+                    "--epochs",
+                    "1",
+                    "--pretrained-embedding-mode",
+                    "none",
+                    "--topk",
+                    "2",
+                    "--seed",
+                    "7",
+                    "--device",
+                    "cpu",
+                    "--metrics-json",
+                    str(metrics_path),
+                ]
+            )
+            self.assertEqual(exit_code, 0)
+            payload = json.loads(metrics_path.read_text(encoding="utf-8"))
+            self.assertEqual(
+                payload["config"]["pretrained_embedding_mode"],
+                "none",
+            )
+            self.assertFalse(payload["content_initialized"])
+            self.assertFalse(payload["content_features_used"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -117,6 +117,8 @@ METHOD_ORDER = (
     "R3VAE (rqkmeans)",
     "R3VAE (spherical)",
     "RQKMeans",
+    "RQ-KMeans + Pair Alignment",
+    "RQ-VAE + Pair Alignment",
     "RQVAE (ECM)",
     "RQVAE",
     "RQVAE (RRS)",
@@ -128,6 +130,8 @@ METHOD_STYLE = {
     "R3VAE (rqkmeans)": ("#72B7B2", "o", False),
     "R3VAE (spherical)": ("#54A24B", "o", False),
     "RQKMeans": ("#4C78A8", "o", False),
+    "RQ-KMeans + Pair Alignment": ("#2A9D8F", "P", True),
+    "RQ-VAE + Pair Alignment": ("#E9C46A", "X", True),
     "RQVAE (ECM)": ("#B279A2", "o", False),
     "RQVAE": ("#F58518", "o", False),
     "RQVAE (RRS)": ("#E45756", "D", False),
@@ -195,7 +199,17 @@ def parse_run_config(row: pd.Series) -> dict[str, Any]:
     name = text(first(row, "tags.mlflow.runName", "run_name"))
     lower_name = name.lower()
     family = text(first(row, "tags.sid_model", "params.sid_model")).lower()
-    if "plum" in lower_name or family == "plum":
+    if (
+        "onerec-pair-rqvae" in lower_name
+        or family == "collaborative_rqvae"
+    ):
+        family = "onerec_pair_rqvae"
+    elif (
+        "onerec-pair" in lower_name
+        or family in {"collaborative_rqkmeans", "onerec_pair"}
+    ):
+        family = "onerec_pair"
+    elif "plum" in lower_name or family == "plum":
         family = "plum"
     elif "balance" in lower_name or family in {"balance", "balance_rqkmeans", "balancerqkmeans"}:
         family = "balance"
@@ -223,7 +237,11 @@ def parse_run_config(row: pd.Series) -> dict[str, Any]:
         assignment = assignment or match.group("assignment")
         collision = match.group("collision") or collision
 
-    if family == "plum":
+    if family == "onerec_pair_rqvae":
+        model, init, assignment = "collaborative_rqvae", "rqkmeans", "nearest"
+    elif family == "onerec_pair":
+        model, init, assignment = "collaborative_rqkmeans", "rqkmeans", "nearest"
+    elif family == "plum":
         model, init, assignment = "plum", "plum", "nearest"
     elif family == "balance":
         model, init, assignment = "balance", "rqkmeans", "nearest"
@@ -248,7 +266,11 @@ def parse_run_config(row: pd.Series) -> dict[str, Any]:
         dataset = f"{dataset}m"
     scope = text(first(row, "tags.data_scope", "params.data_scope"), "full").lower()
 
-    if family == "plum":
+    if family == "onerec_pair_rqvae":
+        method = "RQ-VAE + Pair Alignment"
+    elif family == "onerec_pair":
+        method = "RQ-KMeans + Pair Alignment"
+    elif family == "plum":
         method = "PLUM"
     elif family == "balance":
         method = "BalanceRQKMeans"
@@ -724,7 +746,7 @@ def plot_metric(frame: pd.DataFrame, spec: MetricSpec, output_dir: Path, baselin
     plt.rcParams.update({
         "font.family": "DejaVu Sans", "font.size": 10.5, "axes.titlesize": 13,
         "axes.labelsize": 12, "xtick.labelsize": 9.5, "ytick.labelsize": 9.5,
-        "legend.fontsize": 8.5, "axes.linewidth": 0.8, "pdf.fonttype": 42,
+        "legend.fontsize": 14.0, "axes.linewidth": 0.8, "pdf.fonttype": 42,
         "ps.fonttype": 42,
     })
     figure, axes = plt.subplots(1, 2, figsize=(12, 5.4), sharey=True, facecolor="white")
@@ -745,15 +767,15 @@ def plot_metric(frame: pd.DataFrame, spec: MetricSpec, output_dir: Path, baselin
     handles = []
     for method in present_methods:
         color, marker, filled = METHOD_STYLE[method]
-        handles.append(Line2D([0], [0], color=color, linewidth=1.1, marker=marker, markersize=6,
+        handles.append(Line2D([0], [0], color=color, linewidth=1.1, marker=marker, markersize=8,
                               markerfacecolor=color if filled else "white", markeredgewidth=1.4,
                               label=method))
     if baseline is not None:
         handles.append(Line2D([0], [0], color="#7B8794", linewidth=1.2,
                               linestyle=(0, (5, 3)), label="SASRec baseline"))
     figure.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 0.012),
-                  ncol=min(4, max(1, len(handles))), frameon=False, handlelength=1.8,
-                  columnspacing=1.35)
+                  ncol=min(6, max(1, len(handles))), frameon=False, handlelength=1.6,
+                  columnspacing=1.0)
     figure.subplots_adjust(left=0.075, right=0.985, top=0.90, bottom=0.34, wspace=0.06)
     output_dir.mkdir(parents=True, exist_ok=True)
     for extension in ("png", "pdf", "svg"):
