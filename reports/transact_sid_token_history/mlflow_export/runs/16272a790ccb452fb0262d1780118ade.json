@@ -1,0 +1,728 @@
+{
+  "local_run_directory": "reports/transact_sid_token_history/runs/50m/CachedSidPipeline/20260812T192344337162Z",
+  "metric_histories": {
+    "data.catalog_size": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 33148.0
+      }
+    ],
+    "data.interactions": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 634642.0
+      }
+    ],
+    "data.test_interactions": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 4547.0
+      }
+    ],
+    "data.train_interactions": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 630095.0
+      }
+    ],
+    "data.users": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 8032.0
+      }
+    ],
+    "evaluations.ranking.transact.test.logloss": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.06752628833055496
+      }
+    ],
+    "evaluations.ranking.transact.test.pairwise_accuracy": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.6170336008071899
+      }
+    ],
+    "evaluations.ranking.transact.test.pairwise_accuracy_ci95_high": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.6451120972633362
+      }
+    ],
+    "evaluations.ranking.transact.test.pairwise_accuracy_ci95_low": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.5889551043510437
+      }
+    ],
+    "evaluations.ranking.transact.test.pairwise_accuracy_std_error": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.014325751923024654
+      }
+    ],
+    "evaluations.ranking.transact.test.pairwise_comparisons": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1726.0
+      }
+    ],
+    "evaluations.ranking.transact.test.pairwise_users": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 524.0
+      }
+    ],
+    "evaluations.ranking.transact.test.pr_auc": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.4340912103652954
+      }
+    ],
+    "evaluations.ranking.transact.test.roc_auc": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.9295673966407776
+      }
+    ],
+    "evaluations.ranking.transact.trained_epochs": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.0
+      }
+    ],
+    "sid.adjusted_semantic_variance_explained_at_1": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.6748088654398401
+      }
+    ],
+    "sid.adjusted_semantic_variance_explained_at_2": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.8405243928699212
+      }
+    ],
+    "sid.adjusted_semantic_variance_explained_at_3": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.9224031738858296
+      }
+    ],
+    "sid.code_entropy": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 10.136452734825458
+      }
+    ],
+    "sid.code_gini": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.1479619122904734
+      }
+    ],
+    "sid.codebook_quality.codebook_coverage_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.0
+      }
+    ],
+    "sid.codebook_quality.codebook_coverage_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.3585205078125
+      }
+    ],
+    "sid.codebook_quality.codebook_coverage_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.013221263885498047
+      }
+    ],
+    "sid.codebook_quality.codebook_utilization_rate_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.0
+      }
+    ],
+    "sid.codebook_quality.codebook_utilization_rate_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.0
+      }
+    ],
+    "sid.codebook_quality.codebook_utilization_rate_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.0
+      }
+    ],
+    "sid.codebook_quality.codebook_utilization_rate_total": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.0
+      }
+    ],
+    "sid.codebook_quality.load_balance_p25_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.7568480752986606
+      }
+    ],
+    "sid.codebook_quality.load_balance_p25_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.791601303246048
+      }
+    ],
+    "sid.codebook_quality.load_balance_p25_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.7626402799565585
+      }
+    ],
+    "sid.codebook_quality.load_balance_p25_mean": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.7703632195004224
+      }
+    ],
+    "sid.codebook_quality.load_balance_p75_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.189332689755038
+      }
+    ],
+    "sid.codebook_quality.load_balance_p75_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.1005188850006034
+      }
+    ],
+    "sid.codebook_quality.load_balance_p75_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.1777482804392423
+      }
+    ],
+    "sid.codebook_quality.load_balance_p75_mean": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.1558666183982946
+      }
+    ],
+    "sid.codebook_quality.load_balance_p90_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.4287438156148184
+      }
+    ],
+    "sid.codebook_quality.load_balance_p90_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.3090382526849282
+      }
+    ],
+    "sid.codebook_quality.load_balance_p90_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.392059852781465
+      }
+    ],
+    "sid.codebook_quality.load_balance_p90_mean": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.376613973693737
+      }
+    ],
+    "sid.collision_item_rate": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.2734704959575238
+      }
+    ],
+    "sid.collision_percentiles.p90": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 3.0
+      }
+    ],
+    "sid.collision_percentiles.p99": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 8.0
+      }
+    ],
+    "sid.collision_percentiles.p999": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 15.0
+      }
+    ],
+    "sid.collision_rate": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.16353927838783633
+      }
+    ],
+    "sid.cur_total": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.0
+      }
+    ],
+    "sid.independent_code_rate": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.8364607216121637
+      }
+    ],
+    "sid.intra_code_similarity": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.9328793964061939
+      }
+    ],
+    "sid.intra_code_similarity_v2": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.5372798596994766
+      }
+    ],
+    "sid.item_count": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 33148.0
+      }
+    ],
+    "sid.levels.sid_0.max_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 255.0
+      }
+    ],
+    "sid.levels.sid_0.max_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 328.0
+      }
+    ],
+    "sid.levels.sid_0.mean_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 129.484375
+      }
+    ],
+    "sid.levels.sid_0.min_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.0
+      }
+    ],
+    "sid.levels.sid_0.min_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 28.0
+      }
+    ],
+    "sid.levels.sid_0.used_codes": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 256.0
+      }
+    ],
+    "sid.levels.sid_1.max_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 127.0
+      }
+    ],
+    "sid.levels.sid_1.max_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1003.0
+      }
+    ],
+    "sid.levels.sid_1.mean_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 258.96875
+      }
+    ],
+    "sid.levels.sid_1.min_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.0
+      }
+    ],
+    "sid.levels.sid_1.min_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 76.0
+      }
+    ],
+    "sid.levels.sid_1.used_codes": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 128.0
+      }
+    ],
+    "sid.levels.sid_2.max_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 63.0
+      }
+    ],
+    "sid.levels.sid_2.max_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 998.0
+      }
+    ],
+    "sid.levels.sid_2.mean_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 517.9375
+      }
+    ],
+    "sid.levels.sid_2.min_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.0
+      }
+    ],
+    "sid.levels.sid_2.min_items_per_code": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 291.0
+      }
+    ],
+    "sid.levels.sid_2.used_codes": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 64.0
+      }
+    ],
+    "sid.max_collision": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 21.0
+      }
+    ],
+    "sid.mean_active_branch_fraction_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.0
+      }
+    ],
+    "sid.mean_active_branch_fraction_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.3585205078125
+      }
+    ],
+    "sid.mean_active_branch_fraction_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.036877287623425264
+      }
+    ],
+    "sid.normalized_conditional_entropy_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.9891171497796615
+      }
+    ],
+    "sid.normalized_conditional_entropy_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.7234805525278319
+      }
+    ],
+    "sid.normalized_conditional_entropy_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.27441817113432393
+      }
+    ],
+    "sid.p95_collision_group_size": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 4.0
+      }
+    ],
+    "sid.pair_collision_probability": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.7616273933518368e-05
+      }
+    ],
+    "sid.pair_refinement_rate_at_1_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.9956371453701441
+      }
+    ],
+    "sid.pair_refinement_rate_at_2_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.9644655628326751
+      }
+    ],
+    "sid.pair_refinement_rate_at_3_layer": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.8863697737492808
+      }
+    ],
+    "sid.path_average_similarity": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.9328793964061939
+      }
+    ],
+    "sid.prefix_coherence_at_1": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.7146701952932438
+      }
+    ],
+    "sid.prefix_coherence_at_2": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.8517611737665038
+      }
+    ],
+    "sid.prefix_coherence_at_3": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.9328793964061939
+      }
+    ],
+    "sid.singleton_count": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 24083.0
+      }
+    ],
+    "sid.singleton_rate": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 0.7265295040424762
+      }
+    ],
+    "sid.unique_paths": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 27727.0
+      }
+    ],
+    "sid.valid_sid_rate": [
+      {
+        "step": 0,
+        "timestamp": 1786562736527,
+        "value": 1.0
+      }
+    ]
+  },
+  "mlflow_artifacts": [],
+  "params": {
+    "dataset.album_mapping_path": "null",
+    "dataset.artist_mapping_path": "null",
+    "dataset.core_min_interactions_per_item": "5",
+    "dataset.embeddings_path": "null",
+    "dataset.history_days": "null",
+    "dataset.interactions_path": "null",
+    "dataset.ranking_interactions_path": "null",
+    "dataset.size": "50m",
+    "dataset.source_embeddings_path": "null",
+    "dataset.test_days": "7.0",
+    "dataset.timestamp_unit_seconds": "5.0",
+    "enabled_stages": "[\"ranking\"]",
+    "max_rows": "null",
+    "training.generation.auxiliary_item_loss_weight": "0.0",
+    "training.generation.batch_size": "1024",
+    "training.generation.batch_size_val": "64",
+    "training.generation.checkpoint_path": "best_model.pt",
+    "training.generation.codebook_size": "0",
+    "training.generation.constrain_to_catalog": "True",
+    "training.generation.d_ff": "512",
+    "training.generation.d_model": "128",
+    "training.generation.device": "auto",
+    "training.generation.dropout": "0.1",
+    "training.generation.early_stopping_min_delta": "0.0001",
+    "training.generation.early_stopping_patience": "3",
+    "training.generation.gather_distributed_negatives": "False",
+    "training.generation.grad_clip": "1.0",
+    "training.generation.logq_debug": "False",
+    "training.generation.logq_eps": "1e-12",
+    "training.generation.logq_mode": "none",
+    "training.generation.lr": "0.001",
+    "training.generation.max_epochs": "30",
+    "training.generation.max_history_len": "16",
+    "training.generation.max_train_examples": "null",
+    "training.generation.max_validation_examples": "50000",
+    "training.generation.min_history_len": "5",
+    "training.generation.num_beams": "150",
+    "training.generation.num_heads": "4",
+    "training.generation.num_layers": "4",
+    "training.generation.num_levels": "0",
+    "training.generation.num_workers": "2",
+    "training.generation.ranking_temperature": "0.07",
+    "training.generation.recall_k": "100",
+    "training.generation.resolve_collisions": "True",
+    "training.generation.rq_num_levels": "0",
+    "training.generation.semantic_history_weight": "0.0",
+    "training.generation.sid_logq_beta": "1.0",
+    "training.generation.sid_logq_mode": "none",
+    "training.generation.use_bf16": "True",
+    "training.generation.weight_decay": "0.01",
+    "training.ranking.dcn_cross_layers": "3",
+    "training.ranking.dcn_deep_units": "[256, 128, 64]",
+    "training.ranking.dcn_low_rank": "32",
+    "training.ranking.dcn_num_experts": "4",
+    "training.ranking.dcnv2_training.batch_size": "32768",
+    "training.ranking.dcnv2_training.epochs": "2",
+    "training.ranking.dcnv2_training.learning_rate": "0.002",
+    "training.ranking.dense_bins": "32",
+    "training.ranking.dense_train_rows": "1000000",
+    "training.ranking.device": "auto",
+    "training.ranking.dropout": "0.2",
+    "training.ranking.embedding_dim": "32",
+    "training.ranking.enabled_models": "[\"transact\"]",
+    "training.ranking.grad_clip": "1.0",
+    "training.ranking.hidden_dim": "128",
+    "training.ranking.hyperparameter_tuning": "False",
+    "training.ranking.max_history_len": "50",
+    "training.ranking.min_history_len": "2",
+    "training.ranking.num_workers": "0",
+    "training.ranking.show_progress": "True",
+    "training.ranking.train_days": "270.0",
+    "training.ranking.transact_d_model": "64",
+    "training.ranking.transact_ff_dim": "256",
+    "training.ranking.transact_heads": "4",
+    "training.ranking.transact_layers": "1",
+    "training.ranking.transact_training.batch_size": "8192",
+    "training.ranking.transact_training.epochs": "1",
+    "training.ranking.transact_training.learning_rate": "0.0005",
+    "training.ranking.validation_days": "7.0",
+    "training.ranking.weight_decay": "0.0001"
+  },
+  "run": {
+    "end_time": 1786562736770,
+    "lifecycle_stage": "active",
+    "name": "transact-sid-tokens-plum-l3-c128-full-seed42",
+    "parent_source_run_id": null,
+    "start_time": 1786562380470,
+    "status": "FINISHED"
+  },
+  "schema_version": 1,
+  "source": {
+    "experiment_id": "1",
+    "experiment_name": "transact-sid-token-history-20260812",
+    "run_id": "16272a790ccb452fb0262d1780118ade",
+    "tracking_uri": "http://127.0.0.1:5000"
+  },
+  "tags": {
+    "codebook_size": "128",
+    "data_scope": "full",
+    "dataset": "50m",
+    "evaluation": "transact_sid_level_tokens",
+    "method": "PLUM",
+    "method_key": "plum",
+    "mlflow.runName": "transact-sid-tokens-plum-l3-c128-full-seed42",
+    "mlflow.source.git.commit": "a806b4c08918e1f7501d9b71791b0328cf596843",
+    "mlflow.source.name": "run.py",
+    "mlflow.source.type": "LOCAL",
+    "mlflow.user": "sashanovak",
+    "num_levels": "3",
+    "pipeline": "CachedSidPipeline",
+    "seed": "42"
+  }
+}

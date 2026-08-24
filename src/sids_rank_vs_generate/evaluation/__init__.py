@@ -2,7 +2,20 @@
 
 from .metrics import evaluate_ranking, get_ranking_metrics
 from .generation_stage import GenerationConfig, GenerationStage
+from .precomputed_sid_metrics import (
+    PrecomputedSidMetricsConfig,
+    calculate_all_sid_metrics,
+    run_precomputed_sid_metrics,
+)
 from .ranking_stage import RankingConfig, RankingStage, RankingTrainingSchedule
+from .sid_quality import (
+    SID_QUALITY_SCHEMA_VERSION,
+    UserCatalogQualityConfig,
+    calculate_sid_quality,
+    calculate_user_catalog_sid_quality,
+    calculate_user_catalog_sid_quality_from_frame,
+    select_stable_quality_users,
+)
 from .stages import (
     DEFAULT_STAGE_FACTORIES,
     EvaluationContext,
@@ -16,10 +29,19 @@ __all__ = [
     "GenerationConfig",
     "GenerationStage",
     "IEvaluationStage",
+    "PrecomputedSidMetricsConfig",
     "RankingConfig",
     "RankingStage",
     "RankingTrainingSchedule",
+    "SID_QUALITY_SCHEMA_VERSION",
+    "UserCatalogQualityConfig",
+    "calculate_sid_quality",
+    "calculate_user_catalog_sid_quality",
+    "calculate_user_catalog_sid_quality_from_frame",
     "create_evaluation_stage",
+    "calculate_all_sid_metrics",
     "evaluate_ranking",
     "get_ranking_metrics",
+    "select_stable_quality_users",
+    "run_precomputed_sid_metrics",
 ]

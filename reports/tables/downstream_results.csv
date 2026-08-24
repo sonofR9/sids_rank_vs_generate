@@ -1,0 +1,10 @@
+task,method,configuration,metric,value,baseline_value,relative_change_percent,source
+ranking,DCNv2 item-only,baseline,pairwise_accuracy,0.549144446849823,0.549144446849823,0.0,reports/figures/all_methods_sid_quality/ranking_points.csv
+ranking,DCNv2 RQVAE (ECM),L=3; C=256,pairwise_accuracy,0.5360032320022583,0.549144446849823,-2.393034277765993,reports/figures/all_methods_sid_quality/ranking_points.csv
+ranking,TransAct item-only,baseline,pairwise_accuracy,0.7616394758224487,0.7616394758224487,0.0,reports/figures/all_methods_sid_quality/transact_ranking_points.csv
+ranking,TransAct PLUM,L=3; C=256,pairwise_accuracy,0.637601375579834,0.7616394758224487,-16.285671131826962,reports/figures/all_methods_sid_quality/transact_ranking_points.csv
+generation,SASRec-Audio-Uniform,baseline,recall_at_100,0.12302921437950205,0.12302921437950205,0.0,reports/experiments/sasrec/metrics/sasrec_yambda_50m_audio_uniform_seed42.json
+generation,SASRec history-concat,pretrained item embeddings concatenated with learned history item embeddings,recall_at_100,0.12814152311278762,0.12302921437950205,4.155361601770249,reports/experiments/sasrec/metrics/sasrec_yambda_50m_audio_history_concat_seed42.json
+generation,RQVAE-token,L=2; C=256,recall_at_100,0.1277876895628902,0.12302921437950205,3.8677603586981357,reports/figures/all_methods_sid_quality/generation_points.csv
+generation,RQVAE + item LogQ,L=2; C=256,recall_at_100,0.1413813459268004,0.12302921437950205,14.916889163161251,reports/figures/all_methods_sid_quality/generation_points.csv
+generation,UAQ30 v1 capacity,L=4; C=256,recall_at_100,0.06645851917930419,0.12302921437950205,-45.98151380996083,reports/figures/generation/user_aware_recall/user_aware_generation_runs.csv

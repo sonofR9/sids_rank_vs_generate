@@ -1,0 +1,577 @@
+ranking_model,ranking_metric,sid_metric,sid_metric_label,group,pearson_r,spearman_rho,num_points
+dcnv2,pairwise_accuracy,icr,ICR,R3VAE (rqkmeans),0.8850143959869599,0.20519567041703082,5
+dcnv2,pairwise_accuracy,icr,ICR,R3VAE (spherical),-0.14785172955804776,-0.3142857142857143,6
+dcnv2,pairwise_accuracy,icr,ICR,RQKMeans,0.05387865512011525,-0.3,5
+dcnv2,pairwise_accuracy,icr,ICR,RQ-KMeans + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,icr,ICR,RQ-VAE + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,icr,ICR,RQVAE (ECM),,,3
+dcnv2,pairwise_accuracy,icr,ICR,RQVAE,0.7992611386504342,0.3714285714285715,6
+dcnv2,pairwise_accuracy,icr,ICR,RQVAE (RRS),,,3
+dcnv2,pairwise_accuracy,icr,ICR,PLUM,,,0
+dcnv2,pairwise_accuracy,icr,ICR,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,icr,ICR,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,icr,ICR,ALL,0.4427066090972936,0.2472884575053104,30
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,R3VAE (rqkmeans),-0.8850143959869599,-0.20519567041703082,5
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,R3VAE (spherical),0.14785172955804773,0.3142857142857143,6
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,RQKMeans,-0.053878655120115276,0.3,5
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,RQ-KMeans + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,RQ-VAE + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,RQVAE (ECM),,,3
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,RQVAE,-0.7992611386504341,-0.3714285714285715,6
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,RQVAE (RRS),,,3
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,PLUM,,,0
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,ALL,-0.44270660909729365,-0.2472884575053104,30
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,R3VAE (rqkmeans),,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,R3VAE (spherical),,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQKMeans,,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQ-KMeans + Pair Alignment,,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQ-VAE + Pair Alignment,,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE (ECM),,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE,,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE (RRS),,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,PLUM,,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,ALL,,,0
+dcnv2,pairwise_accuracy,g_max,G_max,R3VAE (rqkmeans),-0.5883603072693814,-0.20519567041703082,5
+dcnv2,pairwise_accuracy,g_max,G_max,R3VAE (spherical),0.20156129177321663,0.4638168285219587,6
+dcnv2,pairwise_accuracy,g_max,G_max,RQKMeans,0.43649565290492576,0.5642880936468347,5
+dcnv2,pairwise_accuracy,g_max,G_max,RQ-KMeans + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,g_max,G_max,RQ-VAE + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,g_max,G_max,RQVAE (ECM),,,3
+dcnv2,pairwise_accuracy,g_max,G_max,RQVAE,-0.41248993289095237,-0.3714285714285715,6
+dcnv2,pairwise_accuracy,g_max,G_max,RQVAE (RRS),,,3
+dcnv2,pairwise_accuracy,g_max,G_max,PLUM,,,0
+dcnv2,pairwise_accuracy,g_max,G_max,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,g_max,G_max,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,g_max,G_max,ALL,-0.1808364742882846,-0.09314148752141274,30
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,R3VAE (rqkmeans),,,0
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,R3VAE (spherical),,,0
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,RQKMeans,,,1
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,RQ-KMeans + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,RQ-VAE + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,RQVAE (ECM),,,0
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,RQVAE,,,1
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,RQVAE (RRS),,,0
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,PLUM,,,0
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,ALL,,,4
+dcnv2,pairwise_accuracy,code_gini,Code Gini,R3VAE (rqkmeans),,,0
+dcnv2,pairwise_accuracy,code_gini,Code Gini,R3VAE (spherical),,,0
+dcnv2,pairwise_accuracy,code_gini,Code Gini,RQKMeans,,,1
+dcnv2,pairwise_accuracy,code_gini,Code Gini,RQ-KMeans + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,code_gini,Code Gini,RQ-VAE + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,code_gini,Code Gini,RQVAE (ECM),,,0
+dcnv2,pairwise_accuracy,code_gini,Code Gini,RQVAE,,,1
+dcnv2,pairwise_accuracy,code_gini,Code Gini,RQVAE (RRS),,,0
+dcnv2,pairwise_accuracy,code_gini,Code Gini,PLUM,,,0
+dcnv2,pairwise_accuracy,code_gini,Code Gini,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,code_gini,Code Gini,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,code_gini,Code Gini,ALL,-0.5006935855751192,-0.6000000000000001,4
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,R3VAE (rqkmeans),,,0
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,R3VAE (spherical),,,0
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,RQKMeans,,,1
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,RQ-KMeans + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,RQ-VAE + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,RQVAE (ECM),,,0
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,RQVAE,,,1
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,RQVAE (RRS),,,0
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,PLUM,,,0
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,ALL,0.5041755707300236,0.6000000000000001,4
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,R3VAE (rqkmeans),,,0
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,R3VAE (spherical),,,0
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQKMeans,,,1
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQ-KMeans + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQ-VAE + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE (ECM),,,0
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE,,,1
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE (RRS),,,0
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,PLUM,,,0
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,ALL,0.6094982467872622,0.6000000000000001,4
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,R3VAE (rqkmeans),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,R3VAE (spherical),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQKMeans,,,1
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQ-KMeans + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQ-VAE + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE (ECM),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE,,,1
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE (RRS),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,PLUM,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,ALL,-0.3257525244094156,0.0,4
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,R3VAE (rqkmeans),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,R3VAE (spherical),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQKMeans,,,1
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQ-KMeans + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQ-VAE + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE (ECM),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE,,,1
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE (RRS),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,PLUM,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,ALL,0.29926222317432527,0.39999999999999997,4
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,R3VAE (rqkmeans),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,R3VAE (spherical),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQKMeans,,,1
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQ-KMeans + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQ-VAE + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE (ECM),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE,,,1
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE (RRS),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,PLUM,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,ALL,0.6094982467872622,0.6000000000000001,4
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,R3VAE (rqkmeans),,,0
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,R3VAE (spherical),,,0
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQKMeans,,,1
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQ-KMeans + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQ-VAE + Pair Alignment,,,1
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE (ECM),,,0
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE,,,1
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE (RRS),,,0
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,PLUM,,,0
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,ALL,,,4
+dcnv2,roc_auc,icr,ICR,R3VAE (rqkmeans),0.11923674937300416,0.09999999999999999,5
+dcnv2,roc_auc,icr,ICR,R3VAE (spherical),-0.022361357665887663,-0.2571428571428572,6
+dcnv2,roc_auc,icr,ICR,RQKMeans,0.15503680192574656,0.09999999999999999,5
+dcnv2,roc_auc,icr,ICR,RQ-KMeans + Pair Alignment,,,1
+dcnv2,roc_auc,icr,ICR,RQ-VAE + Pair Alignment,,,1
+dcnv2,roc_auc,icr,ICR,RQVAE (ECM),,,3
+dcnv2,roc_auc,icr,ICR,RQVAE,-0.0018315210682663119,-0.3142857142857143,6
+dcnv2,roc_auc,icr,ICR,RQVAE (RRS),,,3
+dcnv2,roc_auc,icr,ICR,PLUM,,,0
+dcnv2,roc_auc,icr,ICR,BalanceRQKMeans,,,0
+dcnv2,roc_auc,icr,ICR,RQVAE-token,,,0
+dcnv2,roc_auc,icr,ICR,ALL,-0.07982736115736012,-0.44020436728221596,30
+dcnv2,roc_auc,collision_rate,Collision Rate,R3VAE (rqkmeans),-0.11923674937300416,-0.09999999999999999,5
+dcnv2,roc_auc,collision_rate,Collision Rate,R3VAE (spherical),0.02236135766588765,0.2571428571428572,6
+dcnv2,roc_auc,collision_rate,Collision Rate,RQKMeans,-0.15503680192574662,-0.09999999999999999,5
+dcnv2,roc_auc,collision_rate,Collision Rate,RQ-KMeans + Pair Alignment,,,1
+dcnv2,roc_auc,collision_rate,Collision Rate,RQ-VAE + Pair Alignment,,,1
+dcnv2,roc_auc,collision_rate,Collision Rate,RQVAE (ECM),,,3
+dcnv2,roc_auc,collision_rate,Collision Rate,RQVAE,0.0018315210682663154,0.3142857142857143,6
+dcnv2,roc_auc,collision_rate,Collision Rate,RQVAE (RRS),,,3
+dcnv2,roc_auc,collision_rate,Collision Rate,PLUM,,,0
+dcnv2,roc_auc,collision_rate,Collision Rate,BalanceRQKMeans,,,0
+dcnv2,roc_auc,collision_rate,Collision Rate,RQVAE-token,,,0
+dcnv2,roc_auc,collision_rate,Collision Rate,ALL,0.07982736115736015,0.44020436728221596,30
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,R3VAE (rqkmeans),,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,R3VAE (spherical),,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQKMeans,,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQ-KMeans + Pair Alignment,,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQ-VAE + Pair Alignment,,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE (ECM),,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE,,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE (RRS),,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,PLUM,,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,BalanceRQKMeans,,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE-token,,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,ALL,,,0
+dcnv2,roc_auc,g_max,G_max,R3VAE (rqkmeans),-0.3238946307241781,-0.09999999999999999,5
+dcnv2,roc_auc,g_max,G_max,R3VAE (spherical),0.09410826934239533,0.5797710356524485,6
+dcnv2,roc_auc,g_max,G_max,RQKMeans,0.37922668472968235,0.30779350562554625,5
+dcnv2,roc_auc,g_max,G_max,RQ-KMeans + Pair Alignment,,,1
+dcnv2,roc_auc,g_max,G_max,RQ-VAE + Pair Alignment,,,1
+dcnv2,roc_auc,g_max,G_max,RQVAE (ECM),,,3
+dcnv2,roc_auc,g_max,G_max,RQVAE,0.5119118926384982,0.7142857142857143,6
+dcnv2,roc_auc,g_max,G_max,RQVAE (RRS),,,3
+dcnv2,roc_auc,g_max,G_max,PLUM,,,0
+dcnv2,roc_auc,g_max,G_max,BalanceRQKMeans,,,0
+dcnv2,roc_auc,g_max,G_max,RQVAE-token,,,0
+dcnv2,roc_auc,g_max,G_max,ALL,0.5211219302512509,0.581478835619823,30
+dcnv2,roc_auc,cur_total,CUR_Total,R3VAE (rqkmeans),,,0
+dcnv2,roc_auc,cur_total,CUR_Total,R3VAE (spherical),,,0
+dcnv2,roc_auc,cur_total,CUR_Total,RQKMeans,,,1
+dcnv2,roc_auc,cur_total,CUR_Total,RQ-KMeans + Pair Alignment,,,1
+dcnv2,roc_auc,cur_total,CUR_Total,RQ-VAE + Pair Alignment,,,1
+dcnv2,roc_auc,cur_total,CUR_Total,RQVAE (ECM),,,0
+dcnv2,roc_auc,cur_total,CUR_Total,RQVAE,,,1
+dcnv2,roc_auc,cur_total,CUR_Total,RQVAE (RRS),,,0
+dcnv2,roc_auc,cur_total,CUR_Total,PLUM,,,0
+dcnv2,roc_auc,cur_total,CUR_Total,BalanceRQKMeans,,,0
+dcnv2,roc_auc,cur_total,CUR_Total,RQVAE-token,,,0
+dcnv2,roc_auc,cur_total,CUR_Total,ALL,,,4
+dcnv2,roc_auc,code_gini,Code Gini,R3VAE (rqkmeans),,,0
+dcnv2,roc_auc,code_gini,Code Gini,R3VAE (spherical),,,0
+dcnv2,roc_auc,code_gini,Code Gini,RQKMeans,,,1
+dcnv2,roc_auc,code_gini,Code Gini,RQ-KMeans + Pair Alignment,,,1
+dcnv2,roc_auc,code_gini,Code Gini,RQ-VAE + Pair Alignment,,,1
+dcnv2,roc_auc,code_gini,Code Gini,RQVAE (ECM),,,0
+dcnv2,roc_auc,code_gini,Code Gini,RQVAE,,,1
+dcnv2,roc_auc,code_gini,Code Gini,RQVAE (RRS),,,0
+dcnv2,roc_auc,code_gini,Code Gini,PLUM,,,0
+dcnv2,roc_auc,code_gini,Code Gini,BalanceRQKMeans,,,0
+dcnv2,roc_auc,code_gini,Code Gini,RQVAE-token,,,0
+dcnv2,roc_auc,code_gini,Code Gini,ALL,-0.8904266897626327,-0.7999999999999999,4
+dcnv2,roc_auc,code_entropy,Code Entropy,R3VAE (rqkmeans),,,0
+dcnv2,roc_auc,code_entropy,Code Entropy,R3VAE (spherical),,,0
+dcnv2,roc_auc,code_entropy,Code Entropy,RQKMeans,,,1
+dcnv2,roc_auc,code_entropy,Code Entropy,RQ-KMeans + Pair Alignment,,,1
+dcnv2,roc_auc,code_entropy,Code Entropy,RQ-VAE + Pair Alignment,,,1
+dcnv2,roc_auc,code_entropy,Code Entropy,RQVAE (ECM),,,0
+dcnv2,roc_auc,code_entropy,Code Entropy,RQVAE,,,1
+dcnv2,roc_auc,code_entropy,Code Entropy,RQVAE (RRS),,,0
+dcnv2,roc_auc,code_entropy,Code Entropy,PLUM,,,0
+dcnv2,roc_auc,code_entropy,Code Entropy,BalanceRQKMeans,,,0
+dcnv2,roc_auc,code_entropy,Code Entropy,RQVAE-token,,,0
+dcnv2,roc_auc,code_entropy,Code Entropy,ALL,0.8604531667229786,0.7999999999999999,4
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,R3VAE (rqkmeans),,,0
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,R3VAE (spherical),,,0
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,RQKMeans,,,1
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,RQ-KMeans + Pair Alignment,,,1
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,RQ-VAE + Pair Alignment,,,1
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE (ECM),,,0
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE,,,1
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE (RRS),,,0
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,PLUM,,,0
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,BalanceRQKMeans,,,0
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE-token,,,0
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,ALL,0.903327999498479,0.7999999999999999,4
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,R3VAE (rqkmeans),,,0
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,R3VAE (spherical),,,0
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQKMeans,,,1
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQ-KMeans + Pair Alignment,,,1
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQ-VAE + Pair Alignment,,,1
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE (ECM),,,0
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE,,,1
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE (RRS),,,0
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,PLUM,,,0
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,BalanceRQKMeans,,,0
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE-token,,,0
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,ALL,-0.992061423652177,-1.0,4
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,R3VAE (rqkmeans),,,0
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,R3VAE (spherical),,,0
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQKMeans,,,1
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQ-KMeans + Pair Alignment,,,1
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQ-VAE + Pair Alignment,,,1
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE (ECM),,,0
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE,,,1
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE (RRS),,,0
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,PLUM,,,0
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,BalanceRQKMeans,,,0
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE-token,,,0
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,ALL,-0.7987025307793234,-0.7999999999999999,4
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,R3VAE (rqkmeans),,,0
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,R3VAE (spherical),,,0
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQKMeans,,,1
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQ-KMeans + Pair Alignment,,,1
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQ-VAE + Pair Alignment,,,1
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE (ECM),,,0
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE,,,1
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE (RRS),,,0
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,PLUM,,,0
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,BalanceRQKMeans,,,0
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE-token,,,0
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,ALL,0.903327999498479,0.7999999999999999,4
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,R3VAE (rqkmeans),,,0
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,R3VAE (spherical),,,0
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,RQKMeans,,,1
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,RQ-KMeans + Pair Alignment,,,1
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,RQ-VAE + Pair Alignment,,,1
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE (ECM),,,0
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE,,,1
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE (RRS),,,0
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,PLUM,,,0
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,BalanceRQKMeans,,,0
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE-token,,,0
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,ALL,,,4
+transact,pairwise_accuracy,icr,ICR,R3VAE (rqkmeans),0.6289588698578378,0.6,5
+transact,pairwise_accuracy,icr,ICR,R3VAE (spherical),0.06426568847399038,-0.2,6
+transact,pairwise_accuracy,icr,ICR,RQKMeans,0.12070730269199587,0.3,5
+transact,pairwise_accuracy,icr,ICR,RQ-KMeans + Pair Alignment,,,1
+transact,pairwise_accuracy,icr,ICR,RQ-VAE + Pair Alignment,,,1
+transact,pairwise_accuracy,icr,ICR,RQVAE (ECM),,,3
+transact,pairwise_accuracy,icr,ICR,RQVAE,-0.7736344139830071,-0.7142857142857143,6
+transact,pairwise_accuracy,icr,ICR,RQVAE (RRS),,,3
+transact,pairwise_accuracy,icr,ICR,PLUM,,,0
+transact,pairwise_accuracy,icr,ICR,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,icr,ICR,RQVAE-token,,,0
+transact,pairwise_accuracy,icr,ICR,ALL,-0.10129543228771105,-0.09204705814892616,30
+transact,pairwise_accuracy,collision_rate,Collision Rate,R3VAE (rqkmeans),-0.6289588698578378,-0.6,5
+transact,pairwise_accuracy,collision_rate,Collision Rate,R3VAE (spherical),-0.06426568847399042,0.2,6
+transact,pairwise_accuracy,collision_rate,Collision Rate,RQKMeans,-0.12070730269199592,-0.3,5
+transact,pairwise_accuracy,collision_rate,Collision Rate,RQ-KMeans + Pair Alignment,,,1
+transact,pairwise_accuracy,collision_rate,Collision Rate,RQ-VAE + Pair Alignment,,,1
+transact,pairwise_accuracy,collision_rate,Collision Rate,RQVAE (ECM),,,3
+transact,pairwise_accuracy,collision_rate,Collision Rate,RQVAE,0.7736344139830069,0.7142857142857143,6
+transact,pairwise_accuracy,collision_rate,Collision Rate,RQVAE (RRS),,,3
+transact,pairwise_accuracy,collision_rate,Collision Rate,PLUM,,,0
+transact,pairwise_accuracy,collision_rate,Collision Rate,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,collision_rate,Collision Rate,RQVAE-token,,,0
+transact,pairwise_accuracy,collision_rate,Collision Rate,ALL,0.10129543228771105,0.09204705814892616,30
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,R3VAE (rqkmeans),,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,R3VAE (spherical),,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQKMeans,,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQ-KMeans + Pair Alignment,,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQ-VAE + Pair Alignment,,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE (ECM),,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE,,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE (RRS),,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,PLUM,,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE-token,,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,ALL,,,0
+transact,pairwise_accuracy,g_max,G_max,R3VAE (rqkmeans),-0.7764719446562645,-0.6,5
+transact,pairwise_accuracy,g_max,G_max,R3VAE (spherical),-0.16519424949922895,0.05797710356524484,6
+transact,pairwise_accuracy,g_max,G_max,RQKMeans,0.3781828072155276,0.20519567041703085,5
+transact,pairwise_accuracy,g_max,G_max,RQ-KMeans + Pair Alignment,,,1
+transact,pairwise_accuracy,g_max,G_max,RQ-VAE + Pair Alignment,,,1
+transact,pairwise_accuracy,g_max,G_max,RQVAE (ECM),,,3
+transact,pairwise_accuracy,g_max,G_max,RQVAE,0.7734371543487112,0.6571428571428573,6
+transact,pairwise_accuracy,g_max,G_max,RQVAE (RRS),,,3
+transact,pairwise_accuracy,g_max,G_max,PLUM,,,0
+transact,pairwise_accuracy,g_max,G_max,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,g_max,G_max,RQVAE-token,,,0
+transact,pairwise_accuracy,g_max,G_max,ALL,0.20007953078943946,0.08978093258199758,30
+transact,pairwise_accuracy,cur_total,CUR_Total,R3VAE (rqkmeans),,,0
+transact,pairwise_accuracy,cur_total,CUR_Total,R3VAE (spherical),,,0
+transact,pairwise_accuracy,cur_total,CUR_Total,RQKMeans,,,1
+transact,pairwise_accuracy,cur_total,CUR_Total,RQ-KMeans + Pair Alignment,,,1
+transact,pairwise_accuracy,cur_total,CUR_Total,RQ-VAE + Pair Alignment,,,1
+transact,pairwise_accuracy,cur_total,CUR_Total,RQVAE (ECM),,,0
+transact,pairwise_accuracy,cur_total,CUR_Total,RQVAE,,,1
+transact,pairwise_accuracy,cur_total,CUR_Total,RQVAE (RRS),,,0
+transact,pairwise_accuracy,cur_total,CUR_Total,PLUM,,,0
+transact,pairwise_accuracy,cur_total,CUR_Total,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,cur_total,CUR_Total,RQVAE-token,,,0
+transact,pairwise_accuracy,cur_total,CUR_Total,ALL,,,4
+transact,pairwise_accuracy,code_gini,Code Gini,R3VAE (rqkmeans),,,0
+transact,pairwise_accuracy,code_gini,Code Gini,R3VAE (spherical),,,0
+transact,pairwise_accuracy,code_gini,Code Gini,RQKMeans,,,1
+transact,pairwise_accuracy,code_gini,Code Gini,RQ-KMeans + Pair Alignment,,,1
+transact,pairwise_accuracy,code_gini,Code Gini,RQ-VAE + Pair Alignment,,,1
+transact,pairwise_accuracy,code_gini,Code Gini,RQVAE (ECM),,,0
+transact,pairwise_accuracy,code_gini,Code Gini,RQVAE,,,1
+transact,pairwise_accuracy,code_gini,Code Gini,RQVAE (RRS),,,0
+transact,pairwise_accuracy,code_gini,Code Gini,PLUM,,,0
+transact,pairwise_accuracy,code_gini,Code Gini,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,code_gini,Code Gini,RQVAE-token,,,0
+transact,pairwise_accuracy,code_gini,Code Gini,ALL,0.6308088077145402,0.7999999999999999,4
+transact,pairwise_accuracy,code_entropy,Code Entropy,R3VAE (rqkmeans),,,0
+transact,pairwise_accuracy,code_entropy,Code Entropy,R3VAE (spherical),,,0
+transact,pairwise_accuracy,code_entropy,Code Entropy,RQKMeans,,,1
+transact,pairwise_accuracy,code_entropy,Code Entropy,RQ-KMeans + Pair Alignment,,,1
+transact,pairwise_accuracy,code_entropy,Code Entropy,RQ-VAE + Pair Alignment,,,1
+transact,pairwise_accuracy,code_entropy,Code Entropy,RQVAE (ECM),,,0
+transact,pairwise_accuracy,code_entropy,Code Entropy,RQVAE,,,1
+transact,pairwise_accuracy,code_entropy,Code Entropy,RQVAE (RRS),,,0
+transact,pairwise_accuracy,code_entropy,Code Entropy,PLUM,,,0
+transact,pairwise_accuracy,code_entropy,Code Entropy,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,code_entropy,Code Entropy,RQVAE-token,,,0
+transact,pairwise_accuracy,code_entropy,Code Entropy,ALL,-0.5991449260643593,-0.7999999999999999,4
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,R3VAE (rqkmeans),,,0
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,R3VAE (spherical),,,0
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQKMeans,,,1
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQ-KMeans + Pair Alignment,,,1
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQ-VAE + Pair Alignment,,,1
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE (ECM),,,0
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE,,,1
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE (RRS),,,0
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,PLUM,,,0
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE-token,,,0
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,ALL,-0.8201314367963957,-0.7999999999999999,4
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,R3VAE (rqkmeans),,,0
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,R3VAE (spherical),,,0
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQKMeans,,,1
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQ-KMeans + Pair Alignment,,,1
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQ-VAE + Pair Alignment,,,1
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE (ECM),,,0
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE,,,1
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE (RRS),,,0
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,PLUM,,,0
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE-token,,,0
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,ALL,0.6348813922312619,0.39999999999999997,4
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,R3VAE (rqkmeans),,,0
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,R3VAE (spherical),,,0
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQKMeans,,,1
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQ-KMeans + Pair Alignment,,,1
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQ-VAE + Pair Alignment,,,1
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE (ECM),,,0
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE,,,1
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE (RRS),,,0
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,PLUM,,,0
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE-token,,,0
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,ALL,-0.03259659632134054,0.19999999999999998,4
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,R3VAE (rqkmeans),,,0
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,R3VAE (spherical),,,0
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQKMeans,,,1
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQ-KMeans + Pair Alignment,,,1
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQ-VAE + Pair Alignment,,,1
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE (ECM),,,0
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE,,,1
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE (RRS),,,0
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,PLUM,,,0
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE-token,,,0
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,ALL,-0.8201314367963957,-0.7999999999999999,4
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,R3VAE (rqkmeans),,,0
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,R3VAE (spherical),,,0
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQKMeans,,,1
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQ-KMeans + Pair Alignment,,,1
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQ-VAE + Pair Alignment,,,1
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE (ECM),,,0
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE,,,1
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE (RRS),,,0
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,PLUM,,,0
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE-token,,,0
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,ALL,,,4
+transact,roc_auc,icr,ICR,R3VAE (rqkmeans),0.922463372390374,0.09999999999999999,5
+transact,roc_auc,icr,ICR,R3VAE (spherical),-0.48341240518493384,-0.2571428571428572,6
+transact,roc_auc,icr,ICR,RQKMeans,-0.4009478593777055,-0.09999999999999999,5
+transact,roc_auc,icr,ICR,RQ-KMeans + Pair Alignment,,,1
+transact,roc_auc,icr,ICR,RQ-VAE + Pair Alignment,,,1
+transact,roc_auc,icr,ICR,RQVAE (ECM),,,3
+transact,roc_auc,icr,ICR,RQVAE,-0.41691168513447474,-0.6571428571428573,6
+transact,roc_auc,icr,ICR,RQVAE (RRS),,,3
+transact,roc_auc,icr,ICR,PLUM,,,0
+transact,roc_auc,icr,ICR,BalanceRQKMeans,,,0
+transact,roc_auc,icr,ICR,RQVAE-token,,,0
+transact,roc_auc,icr,ICR,ALL,0.2958464283833917,-0.39866301146562944,30
+transact,roc_auc,collision_rate,Collision Rate,R3VAE (rqkmeans),-0.922463372390374,-0.09999999999999999,5
+transact,roc_auc,collision_rate,Collision Rate,R3VAE (spherical),0.4834124051849339,0.2571428571428572,6
+transact,roc_auc,collision_rate,Collision Rate,RQKMeans,0.4009478593777056,0.09999999999999999,5
+transact,roc_auc,collision_rate,Collision Rate,RQ-KMeans + Pair Alignment,,,1
+transact,roc_auc,collision_rate,Collision Rate,RQ-VAE + Pair Alignment,,,1
+transact,roc_auc,collision_rate,Collision Rate,RQVAE (ECM),,,3
+transact,roc_auc,collision_rate,Collision Rate,RQVAE,0.41691168513447463,0.6571428571428573,6
+transact,roc_auc,collision_rate,Collision Rate,RQVAE (RRS),,,3
+transact,roc_auc,collision_rate,Collision Rate,PLUM,,,0
+transact,roc_auc,collision_rate,Collision Rate,BalanceRQKMeans,,,0
+transact,roc_auc,collision_rate,Collision Rate,RQVAE-token,,,0
+transact,roc_auc,collision_rate,Collision Rate,ALL,-0.29584642838339176,0.39866301146562944,30
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,R3VAE (rqkmeans),,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,R3VAE (spherical),,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQKMeans,,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQ-KMeans + Pair Alignment,,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQ-VAE + Pair Alignment,,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE (ECM),,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE,,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE (RRS),,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,PLUM,,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,BalanceRQKMeans,,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE-token,,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,ALL,,,0
+transact,roc_auc,g_max,G_max,R3VAE (rqkmeans),-0.6557502634968342,-0.09999999999999999,5
+transact,roc_auc,g_max,G_max,R3VAE (spherical),0.3729180948521541,0.05797710356524484,6
+transact,roc_auc,g_max,G_max,RQKMeans,0.7671123589628498,0.5642880936468347,5
+transact,roc_auc,g_max,G_max,RQ-KMeans + Pair Alignment,,,1
+transact,roc_auc,g_max,G_max,RQ-VAE + Pair Alignment,,,1
+transact,roc_auc,g_max,G_max,RQVAE (ECM),,,3
+transact,roc_auc,g_max,G_max,RQVAE,0.6046176605307619,0.6571428571428573,6
+transact,roc_auc,g_max,G_max,RQVAE (RRS),,,3
+transact,roc_auc,g_max,G_max,PLUM,,,0
+transact,roc_auc,g_max,G_max,BalanceRQKMeans,,,0
+transact,roc_auc,g_max,G_max,RQVAE-token,,,0
+transact,roc_auc,g_max,G_max,ALL,0.04070117520146742,0.5367152608992823,30
+transact,roc_auc,cur_total,CUR_Total,R3VAE (rqkmeans),,,0
+transact,roc_auc,cur_total,CUR_Total,R3VAE (spherical),,,0
+transact,roc_auc,cur_total,CUR_Total,RQKMeans,,,1
+transact,roc_auc,cur_total,CUR_Total,RQ-KMeans + Pair Alignment,,,1
+transact,roc_auc,cur_total,CUR_Total,RQ-VAE + Pair Alignment,,,1
+transact,roc_auc,cur_total,CUR_Total,RQVAE (ECM),,,0
+transact,roc_auc,cur_total,CUR_Total,RQVAE,,,1
+transact,roc_auc,cur_total,CUR_Total,RQVAE (RRS),,,0
+transact,roc_auc,cur_total,CUR_Total,PLUM,,,0
+transact,roc_auc,cur_total,CUR_Total,BalanceRQKMeans,,,0
+transact,roc_auc,cur_total,CUR_Total,RQVAE-token,,,0
+transact,roc_auc,cur_total,CUR_Total,ALL,,,4
+transact,roc_auc,code_gini,Code Gini,R3VAE (rqkmeans),,,0
+transact,roc_auc,code_gini,Code Gini,R3VAE (spherical),,,0
+transact,roc_auc,code_gini,Code Gini,RQKMeans,,,1
+transact,roc_auc,code_gini,Code Gini,RQ-KMeans + Pair Alignment,,,1
+transact,roc_auc,code_gini,Code Gini,RQ-VAE + Pair Alignment,,,1
+transact,roc_auc,code_gini,Code Gini,RQVAE (ECM),,,0
+transact,roc_auc,code_gini,Code Gini,RQVAE,,,1
+transact,roc_auc,code_gini,Code Gini,RQVAE (RRS),,,0
+transact,roc_auc,code_gini,Code Gini,PLUM,,,0
+transact,roc_auc,code_gini,Code Gini,BalanceRQKMeans,,,0
+transact,roc_auc,code_gini,Code Gini,RQVAE-token,,,0
+transact,roc_auc,code_gini,Code Gini,ALL,-0.9078735268645688,-1.0,4
+transact,roc_auc,code_entropy,Code Entropy,R3VAE (rqkmeans),,,0
+transact,roc_auc,code_entropy,Code Entropy,R3VAE (spherical),,,0
+transact,roc_auc,code_entropy,Code Entropy,RQKMeans,,,1
+transact,roc_auc,code_entropy,Code Entropy,RQ-KMeans + Pair Alignment,,,1
+transact,roc_auc,code_entropy,Code Entropy,RQ-VAE + Pair Alignment,,,1
+transact,roc_auc,code_entropy,Code Entropy,RQVAE (ECM),,,0
+transact,roc_auc,code_entropy,Code Entropy,RQVAE,,,1
+transact,roc_auc,code_entropy,Code Entropy,RQVAE (RRS),,,0
+transact,roc_auc,code_entropy,Code Entropy,PLUM,,,0
+transact,roc_auc,code_entropy,Code Entropy,BalanceRQKMeans,,,0
+transact,roc_auc,code_entropy,Code Entropy,RQVAE-token,,,0
+transact,roc_auc,code_entropy,Code Entropy,ALL,0.8776699311673495,1.0,4
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,R3VAE (rqkmeans),,,0
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,R3VAE (spherical),,,0
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,RQKMeans,,,1
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,RQ-KMeans + Pair Alignment,,,1
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,RQ-VAE + Pair Alignment,,,1
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE (ECM),,,0
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE,,,1
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE (RRS),,,0
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,PLUM,,,0
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,BalanceRQKMeans,,,0
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE-token,,,0
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,ALL,0.9898724985342676,1.0,4
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,R3VAE (rqkmeans),,,0
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,R3VAE (spherical),,,0
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQKMeans,,,1
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQ-KMeans + Pair Alignment,,,1
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQ-VAE + Pair Alignment,,,1
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE (ECM),,,0
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE,,,1
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE (RRS),,,0
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,PLUM,,,0
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,BalanceRQKMeans,,,0
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE-token,,,0
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,ALL,-0.9534426586808047,-0.7999999999999999,4
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,R3VAE (rqkmeans),,,0
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,R3VAE (spherical),,,0
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQKMeans,,,1
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQ-KMeans + Pair Alignment,,,1
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQ-VAE + Pair Alignment,,,1
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE (ECM),,,0
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE,,,1
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE (RRS),,,0
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,PLUM,,,0
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,BalanceRQKMeans,,,0
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE-token,,,0
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,ALL,-0.5176070521749162,-0.39999999999999997,4
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,R3VAE (rqkmeans),,,0
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,R3VAE (spherical),,,0
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQKMeans,,,1
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQ-KMeans + Pair Alignment,,,1
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQ-VAE + Pair Alignment,,,1
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE (ECM),,,0
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE,,,1
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE (RRS),,,0
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,PLUM,,,0
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,BalanceRQKMeans,,,0
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE-token,,,0
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,ALL,0.9898724985342676,1.0,4
+transact,roc_auc,valid_sid_rate,Valid SID Rate,R3VAE (rqkmeans),,,0
+transact,roc_auc,valid_sid_rate,Valid SID Rate,R3VAE (spherical),,,0
+transact,roc_auc,valid_sid_rate,Valid SID Rate,RQKMeans,,,1
+transact,roc_auc,valid_sid_rate,Valid SID Rate,RQ-KMeans + Pair Alignment,,,1
+transact,roc_auc,valid_sid_rate,Valid SID Rate,RQ-VAE + Pair Alignment,,,1
+transact,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE (ECM),,,0
+transact,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE,,,1
+transact,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE (RRS),,,0
+transact,roc_auc,valid_sid_rate,Valid SID Rate,PLUM,,,0
+transact,roc_auc,valid_sid_rate,Valid SID Rate,BalanceRQKMeans,,,0
+transact,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE-token,,,0
+transact,roc_auc,valid_sid_rate,Valid SID Rate,ALL,,,4

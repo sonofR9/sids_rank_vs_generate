@@ -481,6 +481,7 @@ class CandidateTokenTransformer(nn.Module):
 
         pad_item_idx=0,
         pad_event_idx=0,
+        sid_cardinalities=None,
     ):
         super().__init__()
 
@@ -495,11 +496,17 @@ class CandidateTokenTransformer(nn.Module):
             user_emb_dim,
         )
 
-        # Общая таблица для candidate и history items
+        # Full-SID-path embedding for the candidate token. History SID levels
+        # use their independent tables below.
         self.item_emb = nn.Embedding(
             num_items,
             item_emb_dim,
             padding_idx=pad_item_idx,
+        )
+
+        self.sid_embeddings = nn.ModuleList(
+            nn.Embedding(cardinality, item_emb_dim)
+            for cardinality in (sid_cardinalities or ())
         )
 
         self.event_emb = nn.Embedding(
@@ -514,6 +521,9 @@ class CandidateTokenTransformer(nn.Module):
             self.item_emb,
             padding_idx=pad_item_idx,
         )
+
+        for embedding in self.sid_embeddings:
+            init_embedding(embedding)
 
         init_embedding(
             self.event_emb,
@@ -625,6 +635,28 @@ class CandidateTokenTransformer(nn.Module):
             nn.Linear(hidden_dim // 2, 1),
         )
 
+    def embed_history_sids(self, values, levels):
+        """Embed flattened SID tokens with an independent table per SID level."""
+        if not self.sid_embeddings:
+            raise ValueError("SID cardinalities are required for SID history tokens")
+        if values.shape != levels.shape:
+            raise ValueError("history SID values and levels must have the same shape")
+
+        vectors = self.item_emb.weight.new_zeros(
+            values.numel(), self.item_emb.embedding_dim
+        )
+        for level, embedding in enumerate(self.sid_embeddings):
+            positions = torch.nonzero(levels == level, as_tuple=False).flatten()
+            if positions.numel():
+                vectors = vectors.index_copy(
+                    0,
+                    positions,
+                    embedding(values.index_select(0, positions)),
+                )
+        if not torch.all((levels >= 0) & (levels < len(self.sid_embeddings))):
+            raise ValueError("history SID level is out of range")
+        return vectors
+
     def forward(
         self,
         user_idx,
@@ -646,6 +678,9 @@ class CandidateTokenTransformer(nn.Module):
         history_time_delta_z_flat,
 
         history_lengths,
+
+        history_sid_values_flat=None,
+        history_sid_levels_flat=None,
 
         return_features=False,
 
@@ -700,9 +735,17 @@ class CandidateTokenTransformer(nn.Module):
 
         # 3 Rich history tokens
 
-        history_item_vec = self.item_emb(
-            history_item_idxs_flat
-        )
+        if history_sid_values_flat is None:
+            history_item_vec = self.item_emb(
+                history_item_idxs_flat
+            )
+        else:
+            if history_sid_levels_flat is None:
+                raise ValueError("history SID levels are required with SID values")
+            history_item_vec = self.embed_history_sids(
+                history_sid_values_flat,
+                history_sid_levels_flat,
+            )
         # [total_tokens, item_emb_dim]
 
         history_event_vec = self.event_emb(

@@ -1,0 +1,14 @@
+metric,requested_keys,resolved_key,num_logq_runs,finite_values,missing_values
+icr,analysis.raw_independent_code_rate;sid.independent_code_rate;assignment.base_icr,sid.independent_code_rate,2,2,0
+collision_rate,sid.collision_rate,sid.collision_rate,2,2,0
+p95_collision_group_size,sid.collision_percentiles.p95,sid.collision_percentiles.p95,2,2,0
+g_max,sid.max_collision,sid.max_collision,2,2,0
+cur_total,sid.codebook_quality.codebook_utilization_rate_total,sid.codebook_quality.codebook_utilization_rate_total,2,2,0
+code_gini,sid.code_gini,sid.code_gini,2,2,0
+code_entropy,sid.code_entropy,sid.code_entropy,2,2,0
+intra_code_similarity,sid.intra_code_similarity,sid.intra_code_similarity,2,2,0
+prefix_coherence_1,sid.prefix_coherence_at_1,sid.prefix_coherence_at_1,2,2,0
+prefix_coherence_2,sid.prefix_coherence_at_2,sid.prefix_coherence_at_2,2,2,0
+prefix_coherence_3,sid.prefix_coherence_at_3,sid.prefix_coherence_at_3,2,1,1
+valid_sid_rate,sid.valid_sid_rate,sid.valid_sid_rate,2,2,0
+recall_at_100,evaluations.generation.recall_at_100;evaluations.generation.recall@100;generation.recall_at_100;generation.recall@100,evaluations.generation.recall_at_100,2,2,0

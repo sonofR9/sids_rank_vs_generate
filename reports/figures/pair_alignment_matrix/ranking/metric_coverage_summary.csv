@@ -1,0 +1,145 @@
+source,metric,requested_key,resolved_key,method,matched_runs,finite_values,missing_values,status
+sid_quality,icr,sid.independent_code_rate,sid.independent_code_rate,ALL,30,30,0,resolved
+sid_quality,icr,sid.independent_code_rate,sid.independent_code_rate,R3VAE (rqkmeans),5,5,0,resolved
+sid_quality,icr,sid.independent_code_rate,sid.independent_code_rate,R3VAE (spherical),6,6,0,resolved
+sid_quality,icr,sid.independent_code_rate,sid.independent_code_rate,RQKMeans,5,5,0,resolved
+sid_quality,icr,sid.independent_code_rate,sid.independent_code_rate,RQ-KMeans + Pair Alignment,1,1,0,resolved
+sid_quality,icr,sid.independent_code_rate,sid.independent_code_rate,RQ-VAE + Pair Alignment,1,1,0,resolved
+sid_quality,icr,sid.independent_code_rate,sid.independent_code_rate,RQVAE (ECM),3,3,0,resolved
+sid_quality,icr,sid.independent_code_rate,sid.independent_code_rate,RQVAE,6,6,0,resolved
+sid_quality,icr,sid.independent_code_rate,sid.independent_code_rate,RQVAE (RRS),3,3,0,resolved
+sid_quality,collision_rate,sid.collision_rate,sid.collision_rate,ALL,30,30,0,resolved
+sid_quality,collision_rate,sid.collision_rate,sid.collision_rate,R3VAE (rqkmeans),5,5,0,resolved
+sid_quality,collision_rate,sid.collision_rate,sid.collision_rate,R3VAE (spherical),6,6,0,resolved
+sid_quality,collision_rate,sid.collision_rate,sid.collision_rate,RQKMeans,5,5,0,resolved
+sid_quality,collision_rate,sid.collision_rate,sid.collision_rate,RQ-KMeans + Pair Alignment,1,1,0,resolved
+sid_quality,collision_rate,sid.collision_rate,sid.collision_rate,RQ-VAE + Pair Alignment,1,1,0,resolved
+sid_quality,collision_rate,sid.collision_rate,sid.collision_rate,RQVAE (ECM),3,3,0,resolved
+sid_quality,collision_rate,sid.collision_rate,sid.collision_rate,RQVAE,6,6,0,resolved
+sid_quality,collision_rate,sid.collision_rate,sid.collision_rate,RQVAE (RRS),3,3,0,resolved
+sid_quality,p95_collision_group_size,sid.collision_percentiles.p95,,ALL,30,0,30,missing
+sid_quality,p95_collision_group_size,sid.collision_percentiles.p95,,R3VAE (rqkmeans),5,0,5,missing
+sid_quality,p95_collision_group_size,sid.collision_percentiles.p95,,R3VAE (spherical),6,0,6,missing
+sid_quality,p95_collision_group_size,sid.collision_percentiles.p95,,RQKMeans,5,0,5,missing
+sid_quality,p95_collision_group_size,sid.collision_percentiles.p95,,RQ-KMeans + Pair Alignment,1,0,1,missing
+sid_quality,p95_collision_group_size,sid.collision_percentiles.p95,,RQ-VAE + Pair Alignment,1,0,1,missing
+sid_quality,p95_collision_group_size,sid.collision_percentiles.p95,,RQVAE (ECM),3,0,3,missing
+sid_quality,p95_collision_group_size,sid.collision_percentiles.p95,,RQVAE,6,0,6,missing
+sid_quality,p95_collision_group_size,sid.collision_percentiles.p95,,RQVAE (RRS),3,0,3,missing
+sid_quality,g_max,sid.max_collision,sid.max_collision,ALL,30,30,0,resolved
+sid_quality,g_max,sid.max_collision,sid.max_collision,R3VAE (rqkmeans),5,5,0,resolved
+sid_quality,g_max,sid.max_collision,sid.max_collision,R3VAE (spherical),6,6,0,resolved
+sid_quality,g_max,sid.max_collision,sid.max_collision,RQKMeans,5,5,0,resolved
+sid_quality,g_max,sid.max_collision,sid.max_collision,RQ-KMeans + Pair Alignment,1,1,0,resolved
+sid_quality,g_max,sid.max_collision,sid.max_collision,RQ-VAE + Pair Alignment,1,1,0,resolved
+sid_quality,g_max,sid.max_collision,sid.max_collision,RQVAE (ECM),3,3,0,resolved
+sid_quality,g_max,sid.max_collision,sid.max_collision,RQVAE,6,6,0,resolved
+sid_quality,g_max,sid.max_collision,sid.max_collision,RQVAE (RRS),3,3,0,resolved
+sid_quality,cur_total,sid.codebook_quality.codebook_utilization_rate_total,sid.codebook_quality.codebook_utilization_rate_total,ALL,30,4,26,resolved
+sid_quality,cur_total,sid.codebook_quality.codebook_utilization_rate_total,sid.codebook_quality.codebook_utilization_rate_total,R3VAE (rqkmeans),5,0,5,resolved
+sid_quality,cur_total,sid.codebook_quality.codebook_utilization_rate_total,sid.codebook_quality.codebook_utilization_rate_total,R3VAE (spherical),6,0,6,resolved
+sid_quality,cur_total,sid.codebook_quality.codebook_utilization_rate_total,sid.codebook_quality.codebook_utilization_rate_total,RQKMeans,5,1,4,resolved
+sid_quality,cur_total,sid.codebook_quality.codebook_utilization_rate_total,sid.codebook_quality.codebook_utilization_rate_total,RQ-KMeans + Pair Alignment,1,1,0,resolved
+sid_quality,cur_total,sid.codebook_quality.codebook_utilization_rate_total,sid.codebook_quality.codebook_utilization_rate_total,RQ-VAE + Pair Alignment,1,1,0,resolved
+sid_quality,cur_total,sid.codebook_quality.codebook_utilization_rate_total,sid.codebook_quality.codebook_utilization_rate_total,RQVAE (ECM),3,0,3,resolved
+sid_quality,cur_total,sid.codebook_quality.codebook_utilization_rate_total,sid.codebook_quality.codebook_utilization_rate_total,RQVAE,6,1,5,resolved
+sid_quality,cur_total,sid.codebook_quality.codebook_utilization_rate_total,sid.codebook_quality.codebook_utilization_rate_total,RQVAE (RRS),3,0,3,resolved
+sid_quality,code_gini,sid.code_gini,sid.code_gini,ALL,30,4,26,resolved
+sid_quality,code_gini,sid.code_gini,sid.code_gini,R3VAE (rqkmeans),5,0,5,resolved
+sid_quality,code_gini,sid.code_gini,sid.code_gini,R3VAE (spherical),6,0,6,resolved
+sid_quality,code_gini,sid.code_gini,sid.code_gini,RQKMeans,5,1,4,resolved
+sid_quality,code_gini,sid.code_gini,sid.code_gini,RQ-KMeans + Pair Alignment,1,1,0,resolved
+sid_quality,code_gini,sid.code_gini,sid.code_gini,RQ-VAE + Pair Alignment,1,1,0,resolved
+sid_quality,code_gini,sid.code_gini,sid.code_gini,RQVAE (ECM),3,0,3,resolved
+sid_quality,code_gini,sid.code_gini,sid.code_gini,RQVAE,6,1,5,resolved
+sid_quality,code_gini,sid.code_gini,sid.code_gini,RQVAE (RRS),3,0,3,resolved
+sid_quality,code_entropy,sid.code_entropy,sid.code_entropy,ALL,30,4,26,resolved
+sid_quality,code_entropy,sid.code_entropy,sid.code_entropy,R3VAE (rqkmeans),5,0,5,resolved
+sid_quality,code_entropy,sid.code_entropy,sid.code_entropy,R3VAE (spherical),6,0,6,resolved
+sid_quality,code_entropy,sid.code_entropy,sid.code_entropy,RQKMeans,5,1,4,resolved
+sid_quality,code_entropy,sid.code_entropy,sid.code_entropy,RQ-KMeans + Pair Alignment,1,1,0,resolved
+sid_quality,code_entropy,sid.code_entropy,sid.code_entropy,RQ-VAE + Pair Alignment,1,1,0,resolved
+sid_quality,code_entropy,sid.code_entropy,sid.code_entropy,RQVAE (ECM),3,0,3,resolved
+sid_quality,code_entropy,sid.code_entropy,sid.code_entropy,RQVAE,6,1,5,resolved
+sid_quality,code_entropy,sid.code_entropy,sid.code_entropy,RQVAE (RRS),3,0,3,resolved
+sid_quality,intra_code_similarity,sid.intra_code_similarity,sid.intra_code_similarity,ALL,30,4,26,resolved
+sid_quality,intra_code_similarity,sid.intra_code_similarity,sid.intra_code_similarity,R3VAE (rqkmeans),5,0,5,resolved
+sid_quality,intra_code_similarity,sid.intra_code_similarity,sid.intra_code_similarity,R3VAE (spherical),6,0,6,resolved
+sid_quality,intra_code_similarity,sid.intra_code_similarity,sid.intra_code_similarity,RQKMeans,5,1,4,resolved
+sid_quality,intra_code_similarity,sid.intra_code_similarity,sid.intra_code_similarity,RQ-KMeans + Pair Alignment,1,1,0,resolved
+sid_quality,intra_code_similarity,sid.intra_code_similarity,sid.intra_code_similarity,RQ-VAE + Pair Alignment,1,1,0,resolved
+sid_quality,intra_code_similarity,sid.intra_code_similarity,sid.intra_code_similarity,RQVAE (ECM),3,0,3,resolved
+sid_quality,intra_code_similarity,sid.intra_code_similarity,sid.intra_code_similarity,RQVAE,6,1,5,resolved
+sid_quality,intra_code_similarity,sid.intra_code_similarity,sid.intra_code_similarity,RQVAE (RRS),3,0,3,resolved
+sid_quality,prefix_coherence_1,sid.prefix_coherence_at_1,sid.prefix_coherence_at_1,ALL,30,4,26,resolved
+sid_quality,prefix_coherence_1,sid.prefix_coherence_at_1,sid.prefix_coherence_at_1,R3VAE (rqkmeans),5,0,5,resolved
+sid_quality,prefix_coherence_1,sid.prefix_coherence_at_1,sid.prefix_coherence_at_1,R3VAE (spherical),6,0,6,resolved
+sid_quality,prefix_coherence_1,sid.prefix_coherence_at_1,sid.prefix_coherence_at_1,RQKMeans,5,1,4,resolved
+sid_quality,prefix_coherence_1,sid.prefix_coherence_at_1,sid.prefix_coherence_at_1,RQ-KMeans + Pair Alignment,1,1,0,resolved
+sid_quality,prefix_coherence_1,sid.prefix_coherence_at_1,sid.prefix_coherence_at_1,RQ-VAE + Pair Alignment,1,1,0,resolved
+sid_quality,prefix_coherence_1,sid.prefix_coherence_at_1,sid.prefix_coherence_at_1,RQVAE (ECM),3,0,3,resolved
+sid_quality,prefix_coherence_1,sid.prefix_coherence_at_1,sid.prefix_coherence_at_1,RQVAE,6,1,5,resolved
+sid_quality,prefix_coherence_1,sid.prefix_coherence_at_1,sid.prefix_coherence_at_1,RQVAE (RRS),3,0,3,resolved
+sid_quality,prefix_coherence_2,sid.prefix_coherence_at_2,sid.prefix_coherence_at_2,ALL,30,4,26,resolved
+sid_quality,prefix_coherence_2,sid.prefix_coherence_at_2,sid.prefix_coherence_at_2,R3VAE (rqkmeans),5,0,5,resolved
+sid_quality,prefix_coherence_2,sid.prefix_coherence_at_2,sid.prefix_coherence_at_2,R3VAE (spherical),6,0,6,resolved
+sid_quality,prefix_coherence_2,sid.prefix_coherence_at_2,sid.prefix_coherence_at_2,RQKMeans,5,1,4,resolved
+sid_quality,prefix_coherence_2,sid.prefix_coherence_at_2,sid.prefix_coherence_at_2,RQ-KMeans + Pair Alignment,1,1,0,resolved
+sid_quality,prefix_coherence_2,sid.prefix_coherence_at_2,sid.prefix_coherence_at_2,RQ-VAE + Pair Alignment,1,1,0,resolved
+sid_quality,prefix_coherence_2,sid.prefix_coherence_at_2,sid.prefix_coherence_at_2,RQVAE (ECM),3,0,3,resolved
+sid_quality,prefix_coherence_2,sid.prefix_coherence_at_2,sid.prefix_coherence_at_2,RQVAE,6,1,5,resolved
+sid_quality,prefix_coherence_2,sid.prefix_coherence_at_2,sid.prefix_coherence_at_2,RQVAE (RRS),3,0,3,resolved
+sid_quality,prefix_coherence_3,sid.prefix_coherence_at_3,sid.prefix_coherence_at_3,ALL,30,4,26,resolved
+sid_quality,prefix_coherence_3,sid.prefix_coherence_at_3,sid.prefix_coherence_at_3,R3VAE (rqkmeans),5,0,5,resolved
+sid_quality,prefix_coherence_3,sid.prefix_coherence_at_3,sid.prefix_coherence_at_3,R3VAE (spherical),6,0,6,resolved
+sid_quality,prefix_coherence_3,sid.prefix_coherence_at_3,sid.prefix_coherence_at_3,RQKMeans,5,1,4,resolved
+sid_quality,prefix_coherence_3,sid.prefix_coherence_at_3,sid.prefix_coherence_at_3,RQ-KMeans + Pair Alignment,1,1,0,resolved
+sid_quality,prefix_coherence_3,sid.prefix_coherence_at_3,sid.prefix_coherence_at_3,RQ-VAE + Pair Alignment,1,1,0,resolved
+sid_quality,prefix_coherence_3,sid.prefix_coherence_at_3,sid.prefix_coherence_at_3,RQVAE (ECM),3,0,3,resolved
+sid_quality,prefix_coherence_3,sid.prefix_coherence_at_3,sid.prefix_coherence_at_3,RQVAE,6,1,5,resolved
+sid_quality,prefix_coherence_3,sid.prefix_coherence_at_3,sid.prefix_coherence_at_3,RQVAE (RRS),3,0,3,resolved
+sid_quality,valid_sid_rate,sid.valid_sid_rate,sid.valid_sid_rate,ALL,30,4,26,resolved
+sid_quality,valid_sid_rate,sid.valid_sid_rate,sid.valid_sid_rate,R3VAE (rqkmeans),5,0,5,resolved
+sid_quality,valid_sid_rate,sid.valid_sid_rate,sid.valid_sid_rate,R3VAE (spherical),6,0,6,resolved
+sid_quality,valid_sid_rate,sid.valid_sid_rate,sid.valid_sid_rate,RQKMeans,5,1,4,resolved
+sid_quality,valid_sid_rate,sid.valid_sid_rate,sid.valid_sid_rate,RQ-KMeans + Pair Alignment,1,1,0,resolved
+sid_quality,valid_sid_rate,sid.valid_sid_rate,sid.valid_sid_rate,RQ-VAE + Pair Alignment,1,1,0,resolved
+sid_quality,valid_sid_rate,sid.valid_sid_rate,sid.valid_sid_rate,RQVAE (ECM),3,0,3,resolved
+sid_quality,valid_sid_rate,sid.valid_sid_rate,sid.valid_sid_rate,RQVAE,6,1,5,resolved
+sid_quality,valid_sid_rate,sid.valid_sid_rate,sid.valid_sid_rate,RQVAE (RRS),3,0,3,resolved
+ranking,dcnv2_pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,ALL,30,30,0,resolved
+ranking,dcnv2_pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,R3VAE (rqkmeans),5,5,0,resolved
+ranking,dcnv2_pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,R3VAE (spherical),6,6,0,resolved
+ranking,dcnv2_pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,RQKMeans,5,5,0,resolved
+ranking,dcnv2_pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,RQ-KMeans + Pair Alignment,1,1,0,resolved
+ranking,dcnv2_pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,RQ-VAE + Pair Alignment,1,1,0,resolved
+ranking,dcnv2_pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,RQVAE (ECM),3,3,0,resolved
+ranking,dcnv2_pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,RQVAE,6,6,0,resolved
+ranking,dcnv2_pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,evaluations.ranking.dcnv2.test.pairwise_accuracy,RQVAE (RRS),3,3,0,resolved
+ranking,dcnv2_roc_auc,evaluations.ranking.dcnv2.test.roc_auc,evaluations.ranking.dcnv2.test.roc_auc,ALL,30,30,0,resolved
+ranking,dcnv2_roc_auc,evaluations.ranking.dcnv2.test.roc_auc,evaluations.ranking.dcnv2.test.roc_auc,R3VAE (rqkmeans),5,5,0,resolved
+ranking,dcnv2_roc_auc,evaluations.ranking.dcnv2.test.roc_auc,evaluations.ranking.dcnv2.test.roc_auc,R3VAE (spherical),6,6,0,resolved
+ranking,dcnv2_roc_auc,evaluations.ranking.dcnv2.test.roc_auc,evaluations.ranking.dcnv2.test.roc_auc,RQKMeans,5,5,0,resolved
+ranking,dcnv2_roc_auc,evaluations.ranking.dcnv2.test.roc_auc,evaluations.ranking.dcnv2.test.roc_auc,RQ-KMeans + Pair Alignment,1,1,0,resolved
+ranking,dcnv2_roc_auc,evaluations.ranking.dcnv2.test.roc_auc,evaluations.ranking.dcnv2.test.roc_auc,RQ-VAE + Pair Alignment,1,1,0,resolved
+ranking,dcnv2_roc_auc,evaluations.ranking.dcnv2.test.roc_auc,evaluations.ranking.dcnv2.test.roc_auc,RQVAE (ECM),3,3,0,resolved
+ranking,dcnv2_roc_auc,evaluations.ranking.dcnv2.test.roc_auc,evaluations.ranking.dcnv2.test.roc_auc,RQVAE,6,6,0,resolved
+ranking,dcnv2_roc_auc,evaluations.ranking.dcnv2.test.roc_auc,evaluations.ranking.dcnv2.test.roc_auc,RQVAE (RRS),3,3,0,resolved
+ranking,transact_pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,ALL,30,30,0,resolved
+ranking,transact_pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,R3VAE (rqkmeans),5,5,0,resolved
+ranking,transact_pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,R3VAE (spherical),6,6,0,resolved
+ranking,transact_pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,RQKMeans,5,5,0,resolved
+ranking,transact_pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,RQ-KMeans + Pair Alignment,1,1,0,resolved
+ranking,transact_pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,RQ-VAE + Pair Alignment,1,1,0,resolved
+ranking,transact_pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,RQVAE (ECM),3,3,0,resolved
+ranking,transact_pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,RQVAE,6,6,0,resolved
+ranking,transact_pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,evaluations.ranking.transact.test.pairwise_accuracy,RQVAE (RRS),3,3,0,resolved
+ranking,transact_roc_auc,evaluations.ranking.transact.test.roc_auc,evaluations.ranking.transact.test.roc_auc,ALL,30,30,0,resolved
+ranking,transact_roc_auc,evaluations.ranking.transact.test.roc_auc,evaluations.ranking.transact.test.roc_auc,R3VAE (rqkmeans),5,5,0,resolved
+ranking,transact_roc_auc,evaluations.ranking.transact.test.roc_auc,evaluations.ranking.transact.test.roc_auc,R3VAE (spherical),6,6,0,resolved
+ranking,transact_roc_auc,evaluations.ranking.transact.test.roc_auc,evaluations.ranking.transact.test.roc_auc,RQKMeans,5,5,0,resolved
+ranking,transact_roc_auc,evaluations.ranking.transact.test.roc_auc,evaluations.ranking.transact.test.roc_auc,RQ-KMeans + Pair Alignment,1,1,0,resolved
+ranking,transact_roc_auc,evaluations.ranking.transact.test.roc_auc,evaluations.ranking.transact.test.roc_auc,RQ-VAE + Pair Alignment,1,1,0,resolved
+ranking,transact_roc_auc,evaluations.ranking.transact.test.roc_auc,evaluations.ranking.transact.test.roc_auc,RQVAE (ECM),3,3,0,resolved
+ranking,transact_roc_auc,evaluations.ranking.transact.test.roc_auc,evaluations.ranking.transact.test.roc_auc,RQVAE,6,6,0,resolved
+ranking,transact_roc_auc,evaluations.ranking.transact.test.roc_auc,evaluations.ranking.transact.test.roc_auc,RQVAE (RRS),3,3,0,resolved

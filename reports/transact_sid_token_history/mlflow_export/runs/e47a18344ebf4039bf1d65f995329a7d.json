@@ -1,0 +1,460 @@
+{
+  "local_run_directory": null,
+  "metric_histories": {
+    "train.loss": [
+      {
+        "step": 1,
+        "timestamp": 1786563117872,
+        "value": 0.4420307913842989
+      },
+      {
+        "step": 2,
+        "timestamp": 1786563118934,
+        "value": 0.11943812249267692
+      },
+      {
+        "step": 3,
+        "timestamp": 1786563120070,
+        "value": 0.04240541672216072
+      },
+      {
+        "step": 4,
+        "timestamp": 1786563121409,
+        "value": 0.014539540546736182
+      },
+      {
+        "step": 5,
+        "timestamp": 1786563122619,
+        "value": 0.0013060579994583039
+      },
+      {
+        "step": 6,
+        "timestamp": 1786563123842,
+        "value": -0.006221669941288263
+      },
+      {
+        "step": 7,
+        "timestamp": 1786563125116,
+        "value": -0.010965154395793077
+      },
+      {
+        "step": 8,
+        "timestamp": 1786563126117,
+        "value": -0.0142329748271745
+      },
+      {
+        "step": 9,
+        "timestamp": 1786563127283,
+        "value": -0.01671989708941075
+      },
+      {
+        "step": 10,
+        "timestamp": 1786563128272,
+        "value": -0.01864988224845435
+      },
+      {
+        "step": 11,
+        "timestamp": 1786563129339,
+        "value": -0.02022043082521896
+      },
+      {
+        "step": 12,
+        "timestamp": 1786563130674,
+        "value": -0.021478163009423807
+      },
+      {
+        "step": 13,
+        "timestamp": 1786563131455,
+        "value": -0.02262846407624052
+      },
+      {
+        "step": 14,
+        "timestamp": 1786563132195,
+        "value": -0.023566816656202836
+      },
+      {
+        "step": 15,
+        "timestamp": 1786563132963,
+        "value": -0.02441415046126503
+      },
+      {
+        "step": 16,
+        "timestamp": 1786563133737,
+        "value": -0.025211710570494948
+      },
+      {
+        "step": 17,
+        "timestamp": 1786563134527,
+        "value": -0.025966508301201754
+      },
+      {
+        "step": 18,
+        "timestamp": 1786563135299,
+        "value": -0.026632234653748175
+      },
+      {
+        "step": 19,
+        "timestamp": 1786563136149,
+        "value": -0.027254009396610983
+      },
+      {
+        "step": 20,
+        "timestamp": 1786563136936,
+        "value": -0.02784021266898934
+      }
+    ],
+    "train.preference_discrimination_loss": [
+      {
+        "step": 1,
+        "timestamp": 1786563117872,
+        "value": -1.8444626725480973
+      },
+      {
+        "step": 2,
+        "timestamp": 1786563118934,
+        "value": -1.854552047739159
+      },
+      {
+        "step": 3,
+        "timestamp": 1786563120070,
+        "value": -1.8647005362664315
+      },
+      {
+        "step": 4,
+        "timestamp": 1786563121409,
+        "value": -1.8731379367710526
+      },
+      {
+        "step": 5,
+        "timestamp": 1786563122619,
+        "value": -1.8795343596181207
+      },
+      {
+        "step": 6,
+        "timestamp": 1786563123842,
+        "value": -1.884330379699674
+      },
+      {
+        "step": 7,
+        "timestamp": 1786563125116,
+        "value": -1.8880459178813163
+      },
+      {
+        "step": 8,
+        "timestamp": 1786563126117,
+        "value": -1.8911282189637224
+      },
+      {
+        "step": 9,
+        "timestamp": 1786563127283,
+        "value": -1.8938650957447953
+      },
+      {
+        "step": 10,
+        "timestamp": 1786563128272,
+        "value": -1.8963690924388414
+      },
+      {
+        "step": 11,
+        "timestamp": 1786563129339,
+        "value": -1.8986903695587198
+      },
+      {
+        "step": 12,
+        "timestamp": 1786563130674,
+        "value": -1.9009013098284837
+      },
+      {
+        "step": 13,
+        "timestamp": 1786563131455,
+        "value": -1.902983610026149
+      },
+      {
+        "step": 14,
+        "timestamp": 1786563132195,
+        "value": -1.9049317076077605
+      },
+      {
+        "step": 15,
+        "timestamp": 1786563132963,
+        "value": -1.9067559407101733
+      },
+      {
+        "step": 16,
+        "timestamp": 1786563133737,
+        "value": -1.9084427978731517
+      },
+      {
+        "step": 17,
+        "timestamp": 1786563134527,
+        "value": -1.9099865054083025
+      },
+      {
+        "step": 18,
+        "timestamp": 1786563135299,
+        "value": -1.9114130910176255
+      },
+      {
+        "step": 19,
+        "timestamp": 1786563136149,
+        "value": -1.9127356340906165
+      },
+      {
+        "step": 20,
+        "timestamp": 1786563136936,
+        "value": -1.913939775683501
+      }
+    ],
+    "train.reconstruction_loss": [
+      {
+        "step": 1,
+        "timestamp": 1786563117872,
+        "value": 0.5211096943625929
+      },
+      {
+        "step": 2,
+        "timestamp": 1786563118934,
+        "value": 0.1987025313258272
+      },
+      {
+        "step": 3,
+        "timestamp": 1786563120070,
+        "value": 0.12170891051443751
+      },
+      {
+        "step": 4,
+        "timestamp": 1786563121409,
+        "value": 0.09375834613193343
+      },
+      {
+        "step": 5,
+        "timestamp": 1786563122619,
+        "value": 0.08039665978824012
+      },
+      {
+        "step": 6,
+        "timestamp": 1786563123842,
+        "value": 0.0727554479798434
+      },
+      {
+        "step": 7,
+        "timestamp": 1786563125116,
+        "value": 0.06793232812544284
+      },
+      {
+        "step": 8,
+        "timestamp": 1786563126117,
+        "value": 0.06462345045467648
+      },
+      {
+        "step": 9,
+        "timestamp": 1786563127283,
+        "value": 0.06214386046371515
+      },
+      {
+        "step": 10,
+        "timestamp": 1786563128272,
+        "value": 0.06025608231510086
+      },
+      {
+        "step": 11,
+        "timestamp": 1786563129339,
+        "value": 0.05875465661175823
+      },
+      {
+        "step": 12,
+        "timestamp": 1786563130674,
+        "value": 0.05758195220740811
+      },
+      {
+        "step": 13,
+        "timestamp": 1786563131455,
+        "value": 0.0565302405927586
+      },
+      {
+        "step": 14,
+        "timestamp": 1786563132195,
+        "value": 0.05569574162426941
+      },
+      {
+        "step": 15,
+        "timestamp": 1786563132963,
+        "value": 0.05495796665950263
+      },
+      {
+        "step": 16,
+        "timestamp": 1786563133737,
+        "value": 0.05426728322650665
+      },
+      {
+        "step": 17,
+        "timestamp": 1786563134527,
+        "value": 0.05362286277252903
+      },
+      {
+        "step": 18,
+        "timestamp": 1786563135299,
+        "value": 0.053064513755992596
+      },
+      {
+        "step": 19,
+        "timestamp": 1786563136149,
+        "value": 0.05254919210762861
+      },
+      {
+        "step": 20,
+        "timestamp": 1786563136936,
+        "value": 0.05206192892682672
+      }
+    ],
+    "train.semantic_cohesion_loss": [
+      {
+        "step": 1,
+        "timestamp": 1786563117872,
+        "value": 0.13144237553956814
+      },
+      {
+        "step": 2,
+        "timestamp": 1786563118934,
+        "value": 0.13463197270556843
+      },
+      {
+        "step": 3,
+        "timestamp": 1786563120070,
+        "value": 0.13931535465971645
+      },
+      {
+        "step": 4,
+        "timestamp": 1786563121409,
+        "value": 0.1443809251330997
+      },
+      {
+        "step": 5,
+        "timestamp": 1786563122619,
+        "value": 0.14886117578308014
+      },
+      {
+        "step": 6,
+        "timestamp": 1786563123842,
+        "value": 0.1523940234088892
+      },
+      {
+        "step": 7,
+        "timestamp": 1786563125116,
+        "value": 0.1550481482878142
+      },
+      {
+        "step": 8,
+        "timestamp": 1786563126117,
+        "value": 0.15699985724235166
+      },
+      {
+        "step": 9,
+        "timestamp": 1786563127283,
+        "value": 0.1582949822974231
+      },
+      {
+        "step": 10,
+        "timestamp": 1786563128272,
+        "value": 0.15912491082965327
+      },
+      {
+        "step": 11,
+        "timestamp": 1786563129339,
+        "value": 0.15959431622296488
+      },
+      {
+        "step": 12,
+        "timestamp": 1786563130674,
+        "value": 0.15984951103173797
+      },
+      {
+        "step": 13,
+        "timestamp": 1786563131455,
+        "value": 0.159904762584668
+      },
+      {
+        "step": 14,
+        "timestamp": 1786563132195,
+        "value": 0.1598402761148575
+      },
+      {
+        "step": 15,
+        "timestamp": 1786563132963,
+        "value": 0.15965680932666362
+      },
+      {
+        "step": 16,
+        "timestamp": 1786563133737,
+        "value": 0.1594314727641366
+      },
+      {
+        "step": 17,
+        "timestamp": 1786563134527,
+        "value": 0.159099552435597
+      },
+      {
+        "step": 18,
+        "timestamp": 1786563135299,
+        "value": 0.1587390696972202
+      },
+      {
+        "step": 19,
+        "timestamp": 1786563136149,
+        "value": 0.1583358167332505
+      },
+      {
+        "step": 20,
+        "timestamp": 1786563136936,
+        "value": 0.15794847280423605
+      }
+    ]
+  },
+  "mlflow_artifacts": [],
+  "params": {
+    "catalog_items": "33148",
+    "config.batch_size": "1024",
+    "config.codebook_sizes": "[256, 256, 256, 256]",
+    "config.device": "cuda",
+    "config.epochs": "20",
+    "config.feature_column": "null",
+    "config.kmeans_init": "True",
+    "config.kmeans_init_method": "spherical",
+    "config.kmeans_iterations": "20",
+    "config.learning_rate": "0.0005",
+    "config.pd_chunk_size": "2048",
+    "config.pd_temperature": "2.0",
+    "config.preference_discrimination_loss_weight": "0.05",
+    "config.reconstruction_loss_weight": "1.0",
+    "config.seed": "42",
+    "config.semantic_cohesion_loss_weight": "0.1",
+    "config.top_k": "1",
+    "config.weight_decay": "1e-05",
+    "pipeline": "sids_experiment_7881596394377250993:CachedSidPipeline"
+  },
+  "run": {
+    "end_time": 1786563137577,
+    "lifecycle_stage": "active",
+    "name": "sid",
+    "parent_source_run_id": "edc9642cfd9d43cf8c365f8657a7db15",
+    "start_time": 1786563113201,
+    "status": "FINISHED"
+  },
+  "schema_version": 1,
+  "source": {
+    "experiment_id": "1",
+    "experiment_name": "transact-sid-token-history-20260812",
+    "run_id": "e47a18344ebf4039bf1d65f995329a7d",
+    "tracking_uri": "http://127.0.0.1:5000"
+  },
+  "tags": {
+    "mlflow.parentRunId": "edc9642cfd9d43cf8c365f8657a7db15",
+    "mlflow.runName": "sid",
+    "mlflow.source.git.commit": "74e7759bc3074f7c105433d95e263a81291f1527",
+    "mlflow.source.name": "run.py",
+    "mlflow.source.type": "LOCAL",
+    "mlflow.user": "sashanovak",
+    "pipeline": "CachedSidPipeline",
+    "stage": "sid"
+  }
+}

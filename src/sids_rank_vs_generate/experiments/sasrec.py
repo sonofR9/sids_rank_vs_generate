@@ -26,6 +26,7 @@ from ..reproducibility import seed_everything
 
 
 TRAINING_OBJECTIVES = ("sampled-uniform", "in-batch", "in-batch-logq")
+PRETRAINED_EMBEDDING_MODES = ("none", "initialize", "history-concat")
 
 
 @dataclass(frozen=True)
@@ -43,6 +44,7 @@ class SASRecConfig:
     training_negatives: int = 100
     eval_item_chunk_size: int = 20_000
     freeze_item_embeddings: bool = False
+    pretrained_embedding_mode: str = "initialize"
     topk: int = 100
     seed: int = 42
     num_workers: int = 0
@@ -76,6 +78,11 @@ class SASRecConfig:
                 "training_objective must be one of "
                 f"{', '.join(TRAINING_OBJECTIVES)}"
             )
+        if self.pretrained_embedding_mode not in PRETRAINED_EMBEDDING_MODES:
+            raise ValueError(
+                "pretrained_embedding_mode must be one of "
+                f"{', '.join(PRETRAINED_EMBEDDING_MODES)}"
+            )
         if self.num_workers < 0:
             raise ValueError("num_workers must be non-negative")
 
@@ -88,6 +95,7 @@ class SASRecResult:
     train_examples: int
     eval_users: int
     content_initialized: bool
+    content_features_used: bool
 
     def as_dict(
         self,
@@ -102,6 +110,7 @@ class SASRecResult:
             "train_examples": self.train_examples,
             "eval_users": self.eval_users,
             "content_initialized": self.content_initialized,
+            "content_features_used": self.content_features_used,
             "train_losses": self.train_losses,
             "metrics": self.metrics,
         }
@@ -221,11 +230,14 @@ class SASRecModel(nn.Module):
         self.num_items = num_items
         self.padding_item_id = num_items
         self.max_seq_len = config.max_seq_len
+        self.pretrained_embedding_mode = config.pretrained_embedding_mode
         self.item_embeddings = nn.Embedding(
             num_items + 1,
             config.embedding_dim,
             padding_idx=self.padding_item_id,
         )
+        self.pretrained_item_embeddings: nn.Embedding | None = None
+        self.history_input_projection: nn.Linear | None = None
         self.position_embeddings = nn.Embedding(
             config.max_seq_len,
             config.embedding_dim,
@@ -248,9 +260,21 @@ class SASRecModel(nn.Module):
         self.input_dropout = nn.Dropout(config.dropout)
         self.reset_parameters()
         if initial_item_embeddings is not None:
-            self.initialize_item_embeddings(
-                initial_item_embeddings,
-                freeze=config.freeze_item_embeddings,
+            if config.pretrained_embedding_mode == "initialize":
+                self.initialize_item_embeddings(
+                    initial_item_embeddings,
+                    freeze=config.freeze_item_embeddings,
+                )
+            elif config.pretrained_embedding_mode == "history-concat":
+                self.initialize_history_content_embeddings(
+                    initial_item_embeddings,
+                )
+                self.item_embeddings.weight.requires_grad_(
+                    not config.freeze_item_embeddings
+                )
+        elif config.pretrained_embedding_mode == "history-concat":
+            raise ValueError(
+                "history-concat requires pretrained item embeddings"
             )
 
     @torch.no_grad()
@@ -283,6 +307,49 @@ class SASRecModel(nn.Module):
         self.item_embeddings.weight[self.padding_item_id].zero_()
         self.item_embeddings.weight.requires_grad_(not freeze)
 
+    def initialize_history_content_embeddings(
+        self,
+        embeddings: torch.Tensor,
+    ) -> None:
+        """Attach frozen content vectors to history tokens via concatenation."""
+
+        if embeddings.ndim != 2 or embeddings.shape[0] != self.num_items:
+            raise ValueError(
+                "pretrained history embeddings must have shape "
+                f"({self.num_items}, content_dim); got {tuple(embeddings.shape)}"
+            )
+        if embeddings.shape[1] <= 0:
+            raise ValueError("pretrained history embeddings must not be empty")
+        if not torch.isfinite(embeddings).all():
+            raise ValueError(
+                "pretrained history embeddings contain non-finite values"
+            )
+
+        padded = embeddings.detach().to(dtype=self.item_embeddings.weight.dtype)
+        padded = F.pad(padded, (0, 0, 0, 1))
+        self.pretrained_item_embeddings = nn.Embedding.from_pretrained(
+            padded,
+            freeze=True,
+            padding_idx=self.padding_item_id,
+        )
+        self.history_input_projection = nn.Linear(
+            self.item_embeddings.embedding_dim + embeddings.shape[1],
+            self.item_embeddings.embedding_dim,
+            bias=False,
+        )
+        nn.init.xavier_uniform_(self.history_input_projection.weight)
+
+    def history_embeddings(self, history: torch.Tensor) -> torch.Tensor:
+        item_vectors = self.item_embeddings(history)
+        if self.pretrained_item_embeddings is None:
+            return item_vectors
+        if self.history_input_projection is None:
+            raise RuntimeError("history content projection is not initialized")
+        content_vectors = self.pretrained_item_embeddings(history)
+        return self.history_input_projection(
+            torch.cat((item_vectors, content_vectors), dim=-1)
+        )
+
     def encode(
         self,
         history: torch.Tensor,
@@ -300,7 +367,7 @@ class SASRecModel(nn.Module):
         ).triu(diagonal=1)
         encoded = self.encoder(
             self.input_dropout(
-                self.item_embeddings(history)
+                self.history_embeddings(history)
                 + self.position_embeddings(positions).unsqueeze(0)
             ),
             mask=causal_mask,
@@ -821,7 +888,14 @@ def run_sasrec(
         device=str(device),
         train_examples=len(train_dataset),
         eval_users=len(eval_dataset),
-        content_initialized=initial_item_embeddings is not None,
+        content_initialized=(
+            initial_item_embeddings is not None
+            and config.pretrained_embedding_mode == "initialize"
+        ),
+        content_features_used=(
+            initial_item_embeddings is not None
+            and config.pretrained_embedding_mode == "history-concat"
+        ),
     )
     return model, result
 
@@ -830,7 +904,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Train and evaluate SASRec on official Yambda-50M likes, "
-            "initialized with normalized audio embeddings."
+            "using normalized audio embeddings for initialization or as "
+            "concatenated history features."
         )
     )
     parser.add_argument(
@@ -881,6 +956,17 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--training-negatives", type=int, default=100)
     parser.add_argument("--eval-item-chunk-size", type=int, default=20_000)
     parser.add_argument("--freeze-item-embeddings", action="store_true")
+    parser.add_argument(
+        "--pretrained-embedding-mode",
+        choices=PRETRAINED_EMBEDDING_MODES,
+        default="initialize",
+        help=(
+            "none: use randomly initialized item embeddings; "
+            "initialize: copy pretrained vectors into the item table; "
+            "history-concat: concatenate frozen pretrained vectors with "
+            "learned item embeddings at every history position."
+        ),
+    )
     parser.add_argument("--topk", type=int, default=100)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--num-workers", type=int, default=0)
@@ -935,15 +1021,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         training_negatives=args.training_negatives,
         eval_item_chunk_size=args.eval_item_chunk_size,
         freeze_item_embeddings=args.freeze_item_embeddings,
+        pretrained_embedding_mode=args.pretrained_embedding_mode,
         topk=args.topk,
         seed=args.seed,
         num_workers=args.num_workers,
         device=args.device,
     )
+    model_initial_item_embeddings = (
+        None
+        if args.pretrained_embedding_mode == "none"
+        else initial_item_embeddings
+    )
     _, result = run_sasrec(
         prepared,
         config,
-        initial_item_embeddings=initial_item_embeddings,
+        initial_item_embeddings=model_initial_item_embeddings,
     )
     payload = result.as_dict(prepared, config)
     payload["dataset"] = {

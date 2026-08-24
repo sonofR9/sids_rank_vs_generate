@@ -1,0 +1,26 @@
+{
+  "tracking_uri": "http://51.250.47.231:5000",
+  "quality_experiment": "sid-quality-only-full-v2",
+  "recall_experiment": "sid-comparison",
+  "recall_metric": "evaluations.generation.recall_at_100",
+  "quality_parent_runs": 28,
+  "recall_parent_runs": 30,
+  "matched_runs": 30,
+  "unmatched_quality_runs": 0,
+  "unmatched_recall_runs": 0,
+  "plotted_metrics": [
+    "analysis.raw_independent_code_rate",
+    "sid.collision_rate",
+    "sid.collision_percentiles.p95",
+    "sid.max_collision",
+    "sid.codebook_quality.codebook_utilization_rate_total",
+    "sid.code_gini",
+    "sid.code_entropy",
+    "sid.intra_code_similarity",
+    "sid.prefix_coherence_at_1",
+    "sid.prefix_coherence_at_2",
+    "sid.prefix_coherence_at_3",
+    "sid.valid_sid_rate"
+  ],
+  "baseline_recall": 0.113
+}
