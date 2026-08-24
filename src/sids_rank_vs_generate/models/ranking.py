@@ -80,7 +80,8 @@ class TransActDcnV2Ranker(nn.Module):
             ff_dim=config.transact_ff_dim,
             hidden_dim=config.hidden_dim,
             dropout=config.dropout,
-            max_history_len=config.max_history_len,
+            max_history_len=config.max_history_len * len(data.sid_columns),
+            sid_cardinalities=data.sid_cardinalities,
         )
         self.history_encoder.mlp = nn.Identity()
         self.ranker = _base_dcn(
@@ -96,7 +97,9 @@ class TransActDcnV2Ranker(nn.Module):
             candidate_is_organic=batch["candidate_is_organic"],
             candidate_track_length_z=batch["candidate_track_length_z"],
             candidate_has_track_length=batch["candidate_has_track_length"],
-            history_item_idxs_flat=batch["history_item_idxs_flat"],
+            history_item_idxs_flat=None,
+            history_sid_values_flat=batch["history_sid_values_flat"],
+            history_sid_levels_flat=batch["history_sid_levels_flat"],
             history_event_type_idxs_flat=batch["history_event_type_idxs_flat"],
             history_is_organic_flat=batch["history_is_organic_flat"],
             history_played_ratio_flat=batch["history_played_ratio_flat"],

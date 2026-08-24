@@ -1,0 +1,314 @@
+\documentclass{article}
+
+\usepackage[paperwidth=118.9cm,paperheight=84.1cm,margin=0mm]{geometry}
+
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\setdefaultlanguage{russian}
+\setotherlanguage{english}
+
+\setmainfont{DejaVu Sans}
+\setsansfont{DejaVu Sans}
+\setmonofont{DejaVu Sans Mono}
+\newfontfamily\cyrillicfont{DejaVu Sans}
+\newfontfamily\cyrillicfontsf{DejaVu Sans}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+
+% Colors
+\definecolor{ink}{HTML}{182840}
+\definecolor{headerred}{HTML}{D72645}
+\definecolor{blue}{HTML}{1E6D93}
+\definecolor{teal}{HTML}{2B938A}
+\definecolor{orange}{HTML}{FF8A1B}
+\definecolor{green}{HTML}{55A842}
+\definecolor{purple}{HTML}{B06A9A}
+\definecolor{red}{HTML}{EF4B4D}
+\definecolor{gray}{HTML}{627086}
+
+\definecolor{fillpink}{HTML}{FDEEF1}
+\definecolor{fillblue}{HTML}{EAF2FA}
+\definecolor{fillgray}{HTML}{F2F4F9}
+\definecolor{fillteal}{HTML}{E8F5F1}
+\definecolor{fillorange}{HTML}{FFF2E5}
+\definecolor{fillgreen}{HTML}{EEF8EC}
+\definecolor{fillpurple}{HTML}{F2EEF9}
+
+% x,y,w,h are in cm; (0,0) = top-left of page.
+\newcommand{\posterbox}[7]{%
+  \draw[line width=1.4mm, draw=#5, fill=#6]
+    ([xshift=#1cm,yshift=-#2cm]current page.north west)
+    rectangle ++(#3cm,-#4cm);
+  \node[anchor=north west, text=ink, inner sep=0pt,
+        font=\bfseries\fontsize{34}{40}\selectfont,
+        text width=\dimexpr#3cm-1.6cm\relax]
+    at ([xshift=#1cm+0.8cm,yshift=-#2cm-0.8cm]current page.north west) {#7};
+}
+
+\newcommand{\smallplot}{%
+\begin{tikzpicture}[x=0.48cm,y=0.48cm]
+  \draw[gray!55,line width=.35mm] (0,0) rectangle (15,7);
+  \draw[gray!35,line width=.2mm] (1.5,1) -- (1.5,6.2);
+  \draw[gray!35,line width=.2mm] (1.5,1) -- (14,1);
+  \draw[blue,line width=.55mm] (2,1.4)--(5,2.4)--(8,3.5)--(11,4.7)--(13.4,5.7);
+  \draw[green,line width=.55mm] (2,1.2)--(5,2.0)--(8,3.0)--(11,4.0)--(13.4,5.0);
+  \draw[orange,line width=.55mm] (2,1.6)--(5,2.5)--(8,3.8)--(11,5.0)--(13.4,6.0);
+  \foreach \x/\y in {2/1.6,5/2.5,8/3.8,11/5.0,13.4/6.0}{\fill[orange] (\x,\y) circle (1.2mm);}
+\end{tikzpicture}%
+}
+
+\begin{document}
+\begin{tikzpicture}[remember picture,overlay]
+
+% page border
+\draw[line width=0.8mm, draw=ink!80]
+  ([xshift=0.6cm,yshift=-0.6cm]current page.north west)
+  rectangle
+  ([xshift=-0.6cm,yshift=0.6cm]current page.south east);
+
+% Header
+\posterbox{2.0}{1.6}{115.0}{7.6}{headerred}{fillpink}{}
+\fill[headerred] ([xshift=2.0cm,yshift=-1.6cm]current page.north west) rectangle ++(0.8cm,-7.6cm);
+
+\node[
+    anchor=north west,
+    text=ink,
+    inner sep=0pt,
+    font=\bfseries\fontsize{52}{60}\selectfont
+] at ([xshift=4.0cm,yshift=-2.1cm]current page.north west)
+  {Влияние качества Semantic ID на финальные метрики};
+
+\node[
+    anchor=north west,
+    text=ink,
+    inner sep=0pt,
+    font=\fontsize{26}{32}\selectfont
+] at ([xshift=4.0cm,yshift=-5.3cm]current page.north west)
+  {Константин Рядинский \enspace\textbullet\enspace
+   Лев Клюев \enspace\textbullet\enspace
+   Ростислав Головков \enspace\textbullet\enspace
+   Глеб Шевченко \enspace\textbullet\enspace
+   \textcolor{gray}{Ментор: Александр Новак}};
+
+% Left column
+
+\posterbox
+  {2.0}{10.4}
+  {37.3}{17.4}
+  {blue}{fillblue}
+  {Введение}
+
+\node[
+    anchor=north west,
+    text width=35.5cm,
+    align=left
+] at ([xshift=2.8cm,yshift=-12.8cm]current page.north west)
+{
+    {\fontsize{30}{37}\selectfont
+
+Semantic IDs (SIDs) используются для дискретного представления объектов в генеративных рекомендательных системах.
+При этом качество SID часто оценивается через свойства самого представления, которые не обязательно коррелируют с
+качеством итоговых рекомендаций.
+
+    \vspace{1cm}
+
+    \textbf{Цель нашей работы} - исследовать эту связь: сравнить различные методы построения Semantic IDs и определить,
+    какие свойства SID действительно отражаются на финальных метриках рекомендательной системы.
+    }
+};
+% Вместо \posterbox используем Ti*k*Z-узел с рамкой и заливкой
+\posterbox{2.0}{28.8}{37.3}{35.7}{gray}{fillgray}{Постановка эксперимента}
+
+\node[
+    anchor=north west,
+    text=ink,
+    inner sep=0pt,
+    text width=35.5cm,
+    align=left
+] at ([xshift=2.8cm,yshift=-31.0cm]current page.north west)
+{
+    {\fontsize{26}{33}\selectfont
+\textbf{\textcolor{purple}{Что хотим выяснить}}
+
+Хотим изучить зависимость между \textbf{метриками Semantic ID} и
+\textbf{downstream-метриками} рекомендательных моделей.
+
+Рассматриваем: \textbf{генерацию} следующих объектов и
+\textbf{ранжирование} кандидатов.
+
+\textbf{\textcolor{orange}{Генерация}}
+
+\textbf{TIGER} авторегрессионно предсказывает SID следующего объекта.
+
+В качестве baseline используем \textbf{SASRec}, который предсказывает
+следующий объект напрямую по item ID.
+
+\vspace{0.7cm}
+
+\textbf{\textcolor{teal}{Ранжирование}}
+
+\textbf{DCNv2} ранжирует объект по счётчикам и признакам.
+SID целевого объекта подаётся в модель как дополнительный признак.
+
+\textbf{TransAct-like} расширяет DCNv2 пользовательской историей: помимо тех же
+признаков модель получает историю взаимодействий пользователя, в которой item ID
+заменены на SID соответствующих объектов.
+
+\vspace{0.7cm}
+
+\textbf{\textcolor{blue}{Датасет и разбиение}}
+
+Все эксперименты ставим на датасете \textbf{Yambda-50M} с \textbf{time split}.
+
+\vspace{0.7cm}
+
+{\fontsize{34}{40}\selectfont
+\textcolor{teal}{Downstream-метрики}}
+
+{\fontsize{30}{37}\selectfont
+Для генерации: Recall@100.\\[0.25cm]
+Для ранжирования: ROC-AUC и pairwise accuracy.}
+
+}
+};
+% Middle column: methods grid
+\posterbox{40.3}{10.4}{37.8}{20.2}{blue}{fillblue}{Balanced RQ-KMeans / RQ-VAE}
+
+\node[
+    anchor=north,
+    text=ink,
+    inner sep=0pt,
+    font=\bfseries\fontsize{22}{27}\selectfont
+] at ([xshift=49.6cm,yshift=-12.8cm]current page.north west)
+  {Balanced RQ-KMeans};
+
+\node[anchor=north, inner sep=0pt]
+  at ([xshift=49.6cm,yshift=-14.2cm]current page.north west)
+  {\includegraphics[width=17.0cm,trim=0 85bp 0 85bp,clip]{балан картинка.png}};
+
+\node[
+    anchor=north,
+    text=ink,
+    inner sep=0pt,
+    font=\bfseries\fontsize{22}{27}\selectfont
+] at ([xshift=68.7cm,yshift=-12.8cm]current page.north west)
+  {RQ-VAE};
+
+\node[anchor=north, inner sep=0pt]
+  at ([xshift=68.7cm,yshift=-15.2cm]current page.north west)
+  {\includegraphics[width=17.0cm]{rq-rqvae.png}};
+
+\node[
+    anchor=south east,
+    text=gray,
+    inner sep=0pt,
+    font=\fontsize{11}{13}\selectfont
+] at ([xshift=77.3cm,yshift=-30.0cm]current page.north west)
+  {Источник: Mike X Cohen (2026), схема Sumit};
+
+\posterbox{40.3}{31.6}{18.4}{16.0}{teal}{fillteal}{PLUM-like}
+
+\node[
+    anchor=north west,
+    text=ink,
+    inner sep=0pt,
+    text width=16.8cm,
+    align=left
+] at ([xshift=41.1cm,yshift=-33.7cm]current page.north west)
+{
+    {\fontsize{21}{26}\selectfont
+
+    Число кодов уменьшается вдвое с каждым уровнем:
+
+    \[
+        C_i = \frac{C_0}{2^i}.
+    \]
+
+    При обучении случайно выбирается длина \textbf{активного
+    префикса}: обновляются только первые уровни SID.
+
+    \vspace{0.25cm}
+
+    Полная глубина выбирается с вероятностью \textbf{0.25};
+    остальные длины делят оставшуюся вероятность.
+
+    \vspace{0.25cm}
+
+    Поэтому ранние токены обучаются чаще, а каждый короткий
+    префикс остаётся информативным.
+
+    }
+
+};
+
+\posterbox{59.7}{31.6}{18.4}{16.0}{teal}{fillteal}{R3-VAE}
+
+\node[
+    anchor=north west,
+    text=ink,
+    inner sep=0pt,
+    text width=16.8cm,
+    align=left
+] at ([xshift=60.5cm,yshift=-34.0cm]current page.north west)
+{
+{\fontsize{22}{28}\selectfont
+Обучаемый \textbf{опорный вектор} задаёт семантический якорь для начального остатка.\\[0.35cm]
+\textbf{Оценка скалярным произведением} сохраняет градиент и снижает риск вырождения кодбука.\\[0.35cm]
+Регуляризация \textbf{SC/PD} сближает объекты внутри кластера и разделяет разные паттерны предпочтений.
+}
+};
+
+\posterbox{40.3}{48.6}{37.8}{15.6}{purple}{fillpurple}{User-aware}
+
+\node[anchor=north, inner sep=0pt]
+  at ([xshift=59.2cm,yshift=-51.2cm]current page.north west)
+  {\includegraphics[width=35.5cm,trim=35bp 120bp 35bp 120bp,clip]
+    {user-aware-semantic-ids-v5.png}};
+
+\posterbox{40.3}{65.2}{18.4}{7.8}{red}{fillpurple}{PSI}
+
+\node[
+    anchor=north west,
+    text=ink,
+    inner sep=0pt,
+    text width=16.8cm,
+    align=left
+] at ([xshift=41.1cm,yshift=-67.6cm]current page.north west)
+{
+{\fontsize{22}{28}\selectfont
+PSI устраняет \textbf{коллизии без дополнительного токена}:
+если ближайший SID уже занят, объект получает следующую
+близкую свободную комбинацию кодов.
+}
+};
+
+\posterbox{59.7}{65.2}{18.4}{7.8}{purple}{fillteal}{LogQ}
+
+\node[
+    anchor=north west,
+    text=ink,
+    inner sep=0pt,
+    text width=16.8cm,
+    align=left
+] at ([xshift=60.5cm,yshift=-67.6cm]current page.north west)
+{
+{\fontsize{20}{24}\selectfont
+\textbf{SID LogQ}: корректируем логиты токенов по частоте SID-префиксов.\\[0.25cm]
+\textbf{Item ID + SID}: добавляем item-level loss с LogQ по частоте объектов.
+}
+};
+
+% Right column: results
+\posterbox{79.1}{10.4}{37.8}{62.6}{orange}{fillorange}{Эксперименты и графики}
+
+% Bottom: main result
+\posterbox{2.0}{74.0}{115.0}{7.9}{headerred}{fillpink}{Главный результат}
+
+
+\end{tikzpicture}
+\null
+\end{document}

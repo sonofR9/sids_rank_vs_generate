@@ -75,10 +75,19 @@ def _model_codebook_offsets(model, device: torch.device) -> torch.Tensor:
     return torch.tensor([0, *sizes[:-1]], device=device).cumsum(dim=0)
 
 
-def _encode_history(model, history, positions, mask):
+def _encode_history(model, history, positions, mask, user_features=None):
     encode_history = getattr(model, "encode_history", None)
     if callable(encode_history):
+        if user_features is not None:
+            return encode_history(
+                history,
+                positions,
+                mask,
+                user_features=user_features,
+            )
         return encode_history(history, positions, mask)
+    if user_features is not None:
+        raise ValueError("model does not support user profile conditioning")
     return model.encoder(history, positions, mask)
 
 
@@ -91,6 +100,8 @@ def semantic_beam_search(
     beam_size: int = 150,
     use_bf16: bool = False,
     sid_catalog: SemanticIDCatalog | None = None,
+    sid_logq_table=None,
+    user_features: torch.Tensor | None = None,
 ):
     if beam_size <= 0:
         raise ValueError("beam_size must be positive")
@@ -103,6 +114,8 @@ def semantic_beam_search(
             mask,
             beam_size,
             sid_catalog,
+            sid_logq_table,
+            user_features,
         )
 
 
@@ -113,16 +126,24 @@ def _semantic_beam_search(
     mask,
     beam_size,
     sid_catalog,
+    sid_logq_table,
+    user_features,
 ):
     codebook_sizes = _model_codebook_sizes(model)
     if sid_catalog is not None and sid_catalog.codebook_sizes != codebook_sizes:
         raise ValueError("catalog and model codebook sizes must match")
+    if (
+        sid_logq_table is not None
+        and tuple(sid_logq_table.codebook_sizes) != codebook_sizes
+    ):
+        raise ValueError("SID LogQ and model codebook sizes must match")
 
     memory, _ = _encode_history(
         model,
         history,
         positions,
         mask,
+        user_features,
     )
 
     batch_size = history.size(0)
@@ -193,6 +214,32 @@ def _semantic_beam_search(
         )
 
         logits = model.heads[level](decoded[:, -1])
+
+        beam_prefixes = None
+        if sid_logq_table is not None:
+            beam_prefixes = beams[:, :, 1:].detach().cpu().tolist()
+            prefix_log_q = {}
+            for batch_prefixes in beam_prefixes:
+                for prefix_values in batch_prefixes:
+                    prefix = tuple(int(token) for token in prefix_values)
+                    if prefix not in prefix_log_q:
+                        prefix_log_q[prefix] = sid_logq_table.log_q_for_prefix(
+                            prefix,
+                            level=level,
+                        )
+            level_log_q = torch.stack(
+                [
+                    prefix_log_q[tuple(int(token) for token in prefix)]
+                    for batch_prefixes in beam_prefixes
+                    for prefix in batch_prefixes
+                ]
+            ).to(device=logits.device, dtype=torch.float32)
+            if level_log_q.shape != logits.shape:
+                raise ValueError("SID LogQ rows must match beam logits")
+            logits = logits.float() - level_log_q
+
+        # Beam search uses the same normalized, LogQ-adjusted categorical
+        # distribution as the SID loss. The LogQ coefficient is fixed at one.
         log_probs = F.log_softmax(logits, dim=-1)
 
         log_probs = log_probs.reshape(
@@ -203,7 +250,8 @@ def _semantic_beam_search(
 
         valid_counts = None
         if sid_catalog is not None:
-            beam_prefixes = beams[:, :, 1:].detach().cpu().tolist()
+            if beam_prefixes is None:
+                beam_prefixes = beams[:, :, 1:].detach().cpu().tolist()
             valid_mask_cpu = torch.zeros(
                 batch_size,
                 current_beam_size,

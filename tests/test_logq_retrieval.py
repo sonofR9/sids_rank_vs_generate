@@ -10,7 +10,11 @@ import torch.distributed as dist
 import torch.multiprocessing as mp
 import torch.nn.functional as F
 
-from sids_rank_vs_generate.data.generation import attach_item_log_q
+from sids_rank_vs_generate.data.generation import (
+    SIDLogQTable,
+    attach_item_log_q,
+    collate_generation,
+)
 from sids_rank_vs_generate.losses.logq_retrieval import (
     InBatchRetrievalLoss,
     apply_logq_correction,
@@ -186,6 +190,41 @@ class LogQDataAndDistributedOrderingTest(unittest.TestCase):
         attached = attach_item_log_q(examples)
         self.assertAlmostEqual(attached[0]["log_q"], math.log(2 / 3), places=6)
         self.assertAlmostEqual(attached[2]["log_q"], math.log(1 / 3), places=6)
+
+    def test_sid_logq_uses_train_prefix_frequencies_with_fixed_smoothing(self) -> None:
+        examples = [
+            {"sid": [0, 0]},
+            {"sid": [0, 0]},
+            {"sid": [0, 1]},
+            {"sid": [1, 0]},
+        ]
+        table = SIDLogQTable(examples, codebook_sizes=(2, 2), beta=1.0)
+
+        root = table.log_q_for_prefix((), level=0).exp()
+        after_zero = table.log_q_for_prefix((0,), level=1).exp()
+        unseen = table.log_q_for_prefix((1,), level=1).exp()
+
+        torch.testing.assert_close(root, torch.tensor([4 / 6, 2 / 6]))
+        torch.testing.assert_close(after_zero, torch.tensor([3 / 5, 2 / 5]))
+        torch.testing.assert_close(unseen, torch.tensor([2 / 3, 1 / 3]))
+        self.assertEqual(table.num_train_interactions, 4)
+        self.assertEqual(table.num_unique_sids, 3)
+
+    def test_generation_collator_attaches_sid_logq_rows(self) -> None:
+        examples = [
+            {"history": [1], "target": 2, "sid": [0, 0]},
+            {"history": [2], "target": 3, "sid": [1, 1]},
+        ]
+        table = SIDLogQTable(examples, codebook_sizes=(2, 2), beta=1.0)
+        batch = collate_generation(
+            examples,
+            num_levels=2,
+            sid_logq_table=table,
+        )
+
+        self.assertEqual(len(batch["sid_log_q"]), 2)
+        self.assertEqual(batch["sid_log_q"][0].shape, (2, 2))
+        self.assertEqual(batch["sid_log_q"][1].shape, (2, 2))
 
     def test_rank_order_keeps_items_logq_and_positive_labels_aligned(self) -> None:
         gathered_items = (

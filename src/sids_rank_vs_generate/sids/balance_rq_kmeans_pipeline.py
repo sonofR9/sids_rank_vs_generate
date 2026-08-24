@@ -4,7 +4,7 @@ import polars as pl
 from dataclasses import dataclass
 from .base import ISidPipeline
 from .balance_rq_kmeans import BalanceRQKMeans
-from ..reproducibility import seed_everything
+from ..reproducibility import SID_EXPERIMENT_SEED, seed_everything
 
 @dataclass(frozen=True)
 class BalanceRQKMeansConfig:
@@ -13,6 +13,7 @@ class BalanceRQKMeansConfig:
     predict_batch_size: int = 16_384
     max_iter: int = 50
     device: str = "auto"
+    seed: int = 42
 
 class BalanceRQKMeansPipeline(ISidPipeline):
     def __init__(self, config):
@@ -20,8 +21,9 @@ class BalanceRQKMeansPipeline(ISidPipeline):
         self.model = None
 
     def train(self, df: pl.DataFrame) -> None:
-        seed_everything(self.config.seed)
+        seed_everything(SID_EXPERIMENT_SEED)
         parameters = asdict(self.config)
+        parameters.pop("seed", None)
         if parameters.get("codebook_sizes") is not None:
             parameters.pop("num_levels", None)
             parameters.pop("codebook_size", None)

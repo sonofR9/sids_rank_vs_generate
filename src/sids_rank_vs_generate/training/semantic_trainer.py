@@ -24,7 +24,9 @@ def train_semantic(
     cfg,
     sid_to_items=None,
     sid_catalog=None,
+    sid_logq_table=None,
     tracker: ExperimentTracker | None = None,
+    validation_callback=None,
 ):
     tracker = tracker or NullTracker()
     optimizer = torch.optim.AdamW(
@@ -36,9 +38,16 @@ def train_semantic(
     checkpoint_path = Path(cfg.checkpoint_path)
     checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if cfg.resolve_collisions:
+    if validation_callback is not None:
+        validate_fn = validation_callback
+        validation_kwargs = {}
+    elif cfg.resolve_collisions:
         validate_fn = validate_semantic_model_without_collisions
-        validation_kwargs = {"sid_catalog": sid_catalog}
+        validation_kwargs = {
+            "sid_catalog": sid_catalog,
+            "sid_logq_table": sid_logq_table,
+            "sid_to_items": sid_to_items,
+        }
     else:
         if sid_to_items is None:
             raise ValueError(
@@ -49,21 +58,31 @@ def train_semantic(
         validation_kwargs = {
             "sid_to_items": sid_to_items,
             "sid_catalog": sid_catalog,
+            "sid_logq_table": sid_logq_table,
         }
 
-    metric_name = f"recall@{cfg.recall_k}"
+    metric_name = getattr(cfg, "validation_metric", None) or (
+        f"recall@{cfg.recall_k}"
+    )
     best_metric = float("-inf")
     epochs_without_improvement = 0
 
     for epoch in range(1, cfg.max_epochs + 1):
         model.train()
         loss_sum = 0.0
+        sid_loss_sum = 0.0
+        sid_sample_count = 0
+        ranking_loss_sum = 0.0
+        ranking_sample_count = 0
         sample_count = 0
         diagnostic_sums: dict[str, float] = {}
         diagnostic_batches = 0
 
         for batch in train_loader:
             batch = move_to_device(batch, cfg.device)
+            model_kwargs = {}
+            if "user_features" in batch:
+                model_kwargs["user_features"] = batch["user_features"]
 
             with autocast(batch["history"].device, cfg.use_bf16):
                 output = model(
@@ -73,6 +92,8 @@ def train_semantic(
                     batch["sid"],
                     target=batch["target"],
                     log_q=batch.get("log_q"),
+                    sid_log_q=batch.get("sid_log_q"),
+                    **model_kwargs,
                 )
 
             loss = output["loss"]
@@ -84,6 +105,14 @@ def train_semantic(
 
             batch_size = batch["sid"].size(0)
             loss_sum += loss.item() * batch_size
+            sid_loss = output.get("sid_loss")
+            if sid_loss is not None:
+                sid_loss_sum += sid_loss.item() * batch_size
+                sid_sample_count += batch_size
+            ranking_loss = output.get("ranking_loss")
+            if ranking_loss is not None:
+                ranking_loss_sum += ranking_loss.item() * batch_size
+                ranking_sample_count += batch_size
             sample_count += batch_size
             diagnostics = output.get("ranking_diagnostics", {})
             if diagnostics:
@@ -102,7 +131,21 @@ def train_semantic(
             **validation_kwargs,
         )
 
-        current_metric = metrics[metric_name]
+        try:
+            current_metric = metrics[metric_name]
+        except KeyError as error:
+            available = ", ".join(sorted(metrics))
+            raise KeyError(
+                f"validation metric {metric_name!r} is unavailable; "
+                f"received: {available}"
+            ) from error
+        training_metrics = {"train.loss": train_loss}
+        if sid_sample_count:
+            training_metrics["train.sid_loss"] = sid_loss_sum / sid_sample_count
+        if ranking_sample_count:
+            training_metrics["train.ranking_loss"] = (
+                ranking_loss_sum / ranking_sample_count
+            )
         train_diagnostics = {
             f"train.logq.{name}": value / diagnostic_batches
             for name, value in diagnostic_sums.items()
@@ -110,7 +153,7 @@ def train_semantic(
         }
         tracker.log_metrics(
             {
-                "train.loss": train_loss,
+                **training_metrics,
                 **train_diagnostics,
                 **{
                     f"validation.{name}": value

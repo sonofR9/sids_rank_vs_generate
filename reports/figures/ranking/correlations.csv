@@ -1,0 +1,481 @@
+ranking_model,ranking_metric,sid_metric,sid_metric_label,group,pearson_r,spearman_rho,num_points
+dcnv2,pairwise_accuracy,icr,ICR,R3VAE (rqkmeans),0.8653818661010768,0.20519567041703082,5
+dcnv2,pairwise_accuracy,icr,ICR,R3VAE (spherical),-0.1819227747173382,-0.3142857142857143,6
+dcnv2,pairwise_accuracy,icr,ICR,RQKMeans,-0.08499007334313373,-0.49999999999999994,5
+dcnv2,pairwise_accuracy,icr,ICR,RQVAE (ECM),,,3
+dcnv2,pairwise_accuracy,icr,ICR,RQVAE,0.9224743695913453,0.8857142857142858,6
+dcnv2,pairwise_accuracy,icr,ICR,RQVAE (RRS),,,3
+dcnv2,pairwise_accuracy,icr,ICR,PLUM,0.8762944222135365,0.5,3
+dcnv2,pairwise_accuracy,icr,ICR,BalanceRQKMeans,0.563110967558877,0.5,3
+dcnv2,pairwise_accuracy,icr,ICR,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,icr,ICR,ALL,0.4797398207456437,0.3883599691761637,34
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,R3VAE (rqkmeans),-0.8653818661010769,-0.20519567041703082,5
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,R3VAE (spherical),0.18192277471733814,0.3142857142857143,6
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,RQKMeans,0.08499007334313369,0.49999999999999994,5
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,RQVAE (ECM),,,3
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,RQVAE,-0.9224743695913451,-0.8857142857142858,6
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,RQVAE (RRS),,,3
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,PLUM,-0.8762944222135363,-0.5,3
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,BalanceRQKMeans,-0.563110967558877,-0.5,3
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,collision_rate,Collision Rate,ALL,-0.4797398207456437,-0.3883599691761637,34
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,R3VAE (rqkmeans),-0.8357027855284437,-0.13157894736842107,5
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,R3VAE (spherical),0.20402972693842109,0.5161002296110789,6
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQKMeans,0.11818872134003336,0.49999999999999994,5
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE (ECM),,,3
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE,-0.9209629032579405,-0.819688599970537,6
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE (RRS),,,3
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,PLUM,,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,ALL,-0.49016671032691667,-0.38871453091715746,28
+dcnv2,pairwise_accuracy,g_max,G_max,R3VAE (rqkmeans),-0.43698916947693206,0.20519567041703082,5
+dcnv2,pairwise_accuracy,g_max,G_max,R3VAE (spherical),0.33197996491944687,0.48571428571428577,6
+dcnv2,pairwise_accuracy,g_max,G_max,RQKMeans,0.3740076795078048,0.15389675281277312,5
+dcnv2,pairwise_accuracy,g_max,G_max,RQVAE (ECM),,,3
+dcnv2,pairwise_accuracy,g_max,G_max,RQVAE,-0.7770773396822659,-0.8406680016960504,6
+dcnv2,pairwise_accuracy,g_max,G_max,RQVAE (RRS),,,3
+dcnv2,pairwise_accuracy,g_max,G_max,PLUM,-0.9765546898281852,-1.0,3
+dcnv2,pairwise_accuracy,g_max,G_max,BalanceRQKMeans,-0.5840198853210442,-0.5,3
+dcnv2,pairwise_accuracy,g_max,G_max,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,g_max,G_max,ALL,-0.29128863892091894,-0.27607756344692536,34
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,R3VAE (rqkmeans),,,5
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,R3VAE (spherical),-0.22619066502827767,-0.13093073414159545,6
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,RQKMeans,,,5
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,RQVAE (ECM),,,3
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,RQVAE,,,6
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,RQVAE (RRS),,,3
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,PLUM,,,0
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,cur_total,CUR_Total,ALL,-0.1521331516535611,-0.1313418624577015,28
+dcnv2,pairwise_accuracy,code_gini,Code Gini,R3VAE (rqkmeans),-0.8225414234164592,-0.20519567041703082,5
+dcnv2,pairwise_accuracy,code_gini,Code Gini,R3VAE (spherical),0.22335362338619885,0.3142857142857143,6
+dcnv2,pairwise_accuracy,code_gini,Code Gini,RQKMeans,0.14483201895442294,0.49999999999999994,5
+dcnv2,pairwise_accuracy,code_gini,Code Gini,RQVAE (ECM),,,3
+dcnv2,pairwise_accuracy,code_gini,Code Gini,RQVAE,-0.933879229649772,-0.8857142857142858,6
+dcnv2,pairwise_accuracy,code_gini,Code Gini,RQVAE (RRS),,,3
+dcnv2,pairwise_accuracy,code_gini,Code Gini,PLUM,,,0
+dcnv2,pairwise_accuracy,code_gini,Code Gini,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,code_gini,Code Gini,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,code_gini,Code Gini,ALL,-0.46611667501817877,-0.3897476159943923,28
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,R3VAE (rqkmeans),0.886389826125377,0.20519567041703082,5
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,R3VAE (spherical),-0.15307337749673677,-0.3142857142857143,6
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,RQKMeans,-0.04595473827399589,-0.49999999999999994,5
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,RQVAE (ECM),,,3
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,RQVAE,0.9127968961037246,0.942857142857143,6
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,RQVAE (RRS),,,3
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,PLUM,,,0
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,code_entropy,Code Entropy,ALL,0.4734356657536446,0.40380499111158746,28
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,R3VAE (rqkmeans),0.7041596969648081,0.20519567041703082,5
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,R3VAE (spherical),-0.30285061954943715,-0.3142857142857143,6
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQKMeans,-0.21065612776089765,-0.49999999999999994,5
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE (ECM),,,0
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE,0.9316251712373604,0.942857142857143,6
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE (RRS),,,0
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,PLUM,,,0
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,ALL,0.3702450087892997,0.31361550950716194,22
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,R3VAE (rqkmeans),-0.25324889219421753,-0.8720815992723809,5
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,R3VAE (spherical),-0.4198302985374874,-0.6571428571428573,6
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQKMeans,-0.35620692510010604,-0.22360679774997896,5
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE (ECM),0.6574296928013301,0.5,3
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE,0.4816683565217226,0.7714285714285715,6
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE (RRS),0.5310385518747065,0.5,3
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,PLUM,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,ALL,0.12090165346340717,0.042415971482997375,28
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,R3VAE (rqkmeans),-0.22028200276219942,-0.8720815992723809,5
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,R3VAE (spherical),-0.3970223422841994,-0.4285714285714286,6
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQKMeans,-0.3303573670667526,-0.22360679774997896,5
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE (ECM),0.6810352481300634,0.5,3
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE,0.5066121058651543,0.7714285714285715,6
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE (RRS),0.55942319630708,0.5,3
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,PLUM,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,ALL,0.1727377091386894,0.2269799138273028,28
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,R3VAE (rqkmeans),-0.9338294147174135,-0.9486832980505139,4
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,R3VAE (spherical),-0.4983355632413112,-0.7,5
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQKMeans,-0.3562507677513811,-0.316227766016838,4
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE (ECM),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE,0.6733281760341636,0.7,5
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE (RRS),,,0
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,PLUM,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,ALL,0.05953523927762798,0.025920336553759075,18
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,R3VAE (rqkmeans),,,5
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,R3VAE (spherical),,,6
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQKMeans,,,5
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE (ECM),,,3
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE,,,6
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE (RRS),,,3
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,PLUM,,,0
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,BalanceRQKMeans,,,0
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE-token,,,0
+dcnv2,pairwise_accuracy,valid_sid_rate,Valid SID Rate,ALL,,,28
+dcnv2,roc_auc,icr,ICR,R3VAE (rqkmeans),0.14490832521700842,0.09999999999999999,5
+dcnv2,roc_auc,icr,ICR,R3VAE (spherical),0.0004726592587435269,-0.2571428571428572,6
+dcnv2,roc_auc,icr,ICR,RQKMeans,0.15780997387174406,0.0,5
+dcnv2,roc_auc,icr,ICR,RQVAE (ECM),,,3
+dcnv2,roc_auc,icr,ICR,RQVAE,0.025604932519057252,-0.08571428571428573,6
+dcnv2,roc_auc,icr,ICR,RQVAE (RRS),,,3
+dcnv2,roc_auc,icr,ICR,PLUM,-0.9993385860106205,-1.0,3
+dcnv2,roc_auc,icr,ICR,BalanceRQKMeans,0.13478027874828047,-0.5,3
+dcnv2,roc_auc,icr,ICR,RQVAE-token,,,0
+dcnv2,roc_auc,icr,ICR,ALL,-0.09001145313559905,-0.3563398482104581,34
+dcnv2,roc_auc,collision_rate,Collision Rate,R3VAE (rqkmeans),-0.14490832521700842,-0.09999999999999999,5
+dcnv2,roc_auc,collision_rate,Collision Rate,R3VAE (spherical),-0.0004726592587435269,0.2571428571428572,6
+dcnv2,roc_auc,collision_rate,Collision Rate,RQKMeans,-0.15780997387174395,0.0,5
+dcnv2,roc_auc,collision_rate,Collision Rate,RQVAE (ECM),,,3
+dcnv2,roc_auc,collision_rate,Collision Rate,RQVAE,-0.025604932519057294,0.08571428571428573,6
+dcnv2,roc_auc,collision_rate,Collision Rate,RQVAE (RRS),,,3
+dcnv2,roc_auc,collision_rate,Collision Rate,PLUM,0.9993385860106201,1.0,3
+dcnv2,roc_auc,collision_rate,Collision Rate,BalanceRQKMeans,-0.13478027874828047,0.5,3
+dcnv2,roc_auc,collision_rate,Collision Rate,RQVAE-token,,,0
+dcnv2,roc_auc,collision_rate,Collision Rate,ALL,0.09001145313559901,0.3563398482104581,34
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,R3VAE (rqkmeans),-0.1646445806857768,0.10259783520851543,5
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,R3VAE (spherical),0.009835973643181325,0.33394720739540396,6
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQKMeans,-0.26872554419718503,0.0,5
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE (ECM),,,3
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE,-0.034610878256782135,0.33394720739540396,6
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE (RRS),,,3
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,PLUM,,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,BalanceRQKMeans,,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE-token,,,0
+dcnv2,roc_auc,p95_collision_group_size,p95 Collision Group Size,ALL,0.1290043345388752,0.37813853815825665,28
+dcnv2,roc_auc,g_max,G_max,R3VAE (rqkmeans),-0.3732183626849638,-0.3,5
+dcnv2,roc_auc,g_max,G_max,R3VAE (spherical),-0.25031262673820254,0.14285714285714288,6
+dcnv2,roc_auc,g_max,G_max,RQKMeans,-0.1612868908865014,0.5642880936468347,5
+dcnv2,roc_auc,g_max,G_max,RQVAE (ECM),,,3
+dcnv2,roc_auc,g_max,G_max,RQVAE,0.07376724546115698,0.3768511731740915,6
+dcnv2,roc_auc,g_max,G_max,RQVAE (RRS),,,3
+dcnv2,roc_auc,g_max,G_max,PLUM,0.775509062474924,0.5,3
+dcnv2,roc_auc,g_max,G_max,BalanceRQKMeans,-0.16002725360390563,0.5,3
+dcnv2,roc_auc,g_max,G_max,RQVAE-token,,,0
+dcnv2,roc_auc,g_max,G_max,ALL,0.07527690113492967,0.38201604056930394,34
+dcnv2,roc_auc,cur_total,CUR_Total,R3VAE (rqkmeans),,,5
+dcnv2,roc_auc,cur_total,CUR_Total,R3VAE (spherical),0.27847538332711747,0.39279220242478635,6
+dcnv2,roc_auc,cur_total,CUR_Total,RQKMeans,,,5
+dcnv2,roc_auc,cur_total,CUR_Total,RQVAE (ECM),,,3
+dcnv2,roc_auc,cur_total,CUR_Total,RQVAE,,,6
+dcnv2,roc_auc,cur_total,CUR_Total,RQVAE (RRS),,,3
+dcnv2,roc_auc,cur_total,CUR_Total,PLUM,,,0
+dcnv2,roc_auc,cur_total,CUR_Total,BalanceRQKMeans,,,0
+dcnv2,roc_auc,cur_total,CUR_Total,RQVAE-token,,,0
+dcnv2,roc_auc,cur_total,CUR_Total,ALL,0.12173449126509044,0.25015959146215205,28
+dcnv2,roc_auc,code_gini,Code Gini,R3VAE (rqkmeans),-0.18851307869269313,-0.09999999999999999,5
+dcnv2,roc_auc,code_gini,Code Gini,R3VAE (spherical),-0.027247854419108875,0.2571428571428572,6
+dcnv2,roc_auc,code_gini,Code Gini,RQKMeans,-0.2072786523691697,0.0,5
+dcnv2,roc_auc,code_gini,Code Gini,RQVAE (ECM),,,3
+dcnv2,roc_auc,code_gini,Code Gini,RQVAE,-0.0534392565152256,0.08571428571428573,6
+dcnv2,roc_auc,code_gini,Code Gini,RQVAE (RRS),,,3
+dcnv2,roc_auc,code_gini,Code Gini,PLUM,,,0
+dcnv2,roc_auc,code_gini,Code Gini,BalanceRQKMeans,,,0
+dcnv2,roc_auc,code_gini,Code Gini,RQVAE-token,,,0
+dcnv2,roc_auc,code_gini,Code Gini,ALL,0.037802049465525456,0.33219138950315774,28
+dcnv2,roc_auc,code_entropy,Code Entropy,R3VAE (rqkmeans),0.11711725325609532,0.09999999999999999,5
+dcnv2,roc_auc,code_entropy,Code Entropy,R3VAE (spherical),-0.019143095359689513,-0.2571428571428572,6
+dcnv2,roc_auc,code_entropy,Code Entropy,RQKMeans,0.12279710771113095,0.0,5
+dcnv2,roc_auc,code_entropy,Code Entropy,RQVAE (ECM),,,3
+dcnv2,roc_auc,code_entropy,Code Entropy,RQVAE,0.004565052859848304,-0.3714285714285715,6
+dcnv2,roc_auc,code_entropy,Code Entropy,RQVAE (RRS),,,3
+dcnv2,roc_auc,code_entropy,Code Entropy,PLUM,,,0
+dcnv2,roc_auc,code_entropy,Code Entropy,BalanceRQKMeans,,,0
+dcnv2,roc_auc,code_entropy,Code Entropy,RQVAE-token,,,0
+dcnv2,roc_auc,code_entropy,Code Entropy,ALL,-0.06374424704940472,-0.3574907337368419,28
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,R3VAE (rqkmeans),0.3265518066838214,0.09999999999999999,5
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,R3VAE (spherical),0.10474463848691314,-0.2571428571428572,6
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,RQKMeans,0.2792253359418251,0.0,5
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE (ECM),,,0
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE,0.09204285176573504,-0.3714285714285715,6
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE (RRS),,,0
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,PLUM,,,0
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,BalanceRQKMeans,,,0
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE-token,,,0
+dcnv2,roc_auc,intra_code_similarity,Intra-code Similarity,ALL,0.17749832916964642,-0.1507622811970638,22
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,R3VAE (rqkmeans),0.04553703665134587,-0.09999999999999999,5
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,R3VAE (spherical),-0.2507818746485191,-0.3714285714285715,6
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQKMeans,0.025440060412668164,-0.4472135954999579,5
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE (ECM),0.39867359026733606,0.5,3
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE,-0.26328272662778684,-0.48571428571428577,6
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE (RRS),0.7525325644580194,0.5,3
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,PLUM,,,0
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,BalanceRQKMeans,,,0
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE-token,,,0
+dcnv2,roc_auc,prefix_coherence_1,Prefix Coherence@1,ALL,-0.07781059705571841,-0.2111750918328093,28
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,R3VAE (rqkmeans),-0.0010711875197684517,-0.3,5
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,R3VAE (spherical),-0.2827881630945172,-0.5428571428571429,6
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQKMeans,0.00974827113012422,-0.4472135954999579,5
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE (ECM),0.4276061883509582,0.5,3
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE,-0.23485354429633393,-0.48571428571428577,6
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE (RRS),0.7743981663183033,0.5,3
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,PLUM,,,0
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,BalanceRQKMeans,,,0
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE-token,,,0
+dcnv2,roc_auc,prefix_coherence_2,Prefix Coherence@2,ALL,-0.10994862899724002,-0.27437024924905284,28
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,R3VAE (rqkmeans),0.055265208253811426,-0.39999999999999997,4
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,R3VAE (spherical),-0.21342463024365468,-0.49999999999999994,5
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQKMeans,0.02378988327218387,-0.632455532033676,4
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE (ECM),,,0
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE,-0.16757436475170334,-0.6,5
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE (RRS),,,0
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,PLUM,,,0
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,BalanceRQKMeans,,,0
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE-token,,,0
+dcnv2,roc_auc,prefix_coherence_3,Prefix Coherence@3,ALL,-0.11177863240427528,-0.4481157024639239,18
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,R3VAE (rqkmeans),,,5
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,R3VAE (spherical),,,6
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,RQKMeans,,,5
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE (ECM),,,3
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE,,,6
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE (RRS),,,3
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,PLUM,,,0
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,BalanceRQKMeans,,,0
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE-token,,,0
+dcnv2,roc_auc,valid_sid_rate,Valid SID Rate,ALL,,,28
+transact,pairwise_accuracy,icr,ICR,R3VAE (rqkmeans),0.6466210050631065,0.6,5
+transact,pairwise_accuracy,icr,ICR,R3VAE (spherical),0.029833082514712714,-0.2,6
+transact,pairwise_accuracy,icr,ICR,RQKMeans,0.2612157969358385,0.3,5
+transact,pairwise_accuracy,icr,ICR,RQVAE (ECM),,,3
+transact,pairwise_accuracy,icr,ICR,RQVAE,-0.733840681413425,-0.3142857142857143,6
+transact,pairwise_accuracy,icr,ICR,RQVAE (RRS),,,3
+transact,pairwise_accuracy,icr,ICR,PLUM,0.06992876481994709,0.5,3
+transact,pairwise_accuracy,icr,ICR,BalanceRQKMeans,-0.9824088402455771,-1.0,3
+transact,pairwise_accuracy,icr,ICR,RQVAE-token,,,0
+transact,pairwise_accuracy,icr,ICR,ALL,-0.12704589187265444,-0.0019920378595763154,34
+transact,pairwise_accuracy,collision_rate,Collision Rate,R3VAE (rqkmeans),-0.6466210050631065,-0.6,5
+transact,pairwise_accuracy,collision_rate,Collision Rate,R3VAE (spherical),-0.029833082514712686,0.2,6
+transact,pairwise_accuracy,collision_rate,Collision Rate,RQKMeans,-0.26121579693583846,-0.3,5
+transact,pairwise_accuracy,collision_rate,Collision Rate,RQVAE (ECM),,,3
+transact,pairwise_accuracy,collision_rate,Collision Rate,RQVAE,0.7338406814134252,0.3142857142857143,6
+transact,pairwise_accuracy,collision_rate,Collision Rate,RQVAE (RRS),,,3
+transact,pairwise_accuracy,collision_rate,Collision Rate,PLUM,-0.06992876481994703,-0.5,3
+transact,pairwise_accuracy,collision_rate,Collision Rate,BalanceRQKMeans,0.982408840245577,1.0,3
+transact,pairwise_accuracy,collision_rate,Collision Rate,RQVAE-token,,,0
+transact,pairwise_accuracy,collision_rate,Collision Rate,ALL,0.12704589187265442,0.0019920378595763154,34
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,R3VAE (rqkmeans),-0.6789299568922178,-0.7181848464596079,5
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,R3VAE (spherical),-0.09959471648275248,0.030358837035945815,6
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQKMeans,-0.2692092886620911,-0.3,5
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE (ECM),,,3
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE,0.7345256774483429,0.3946648814672956,6
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE (RRS),,,3
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,PLUM,,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,RQVAE-token,,,0
+transact,pairwise_accuracy,p95_collision_group_size,p95 Collision Group Size,ALL,0.09877613217619226,-0.027201263691652957,28
+transact,pairwise_accuracy,g_max,G_max,R3VAE (rqkmeans),-0.8006133662676156,-0.7,5
+transact,pairwise_accuracy,g_max,G_max,R3VAE (spherical),0.42659642965865063,0.3714285714285715,6
+transact,pairwise_accuracy,g_max,G_max,RQKMeans,-0.4529608229762314,-0.15389675281277312,5
+transact,pairwise_accuracy,g_max,G_max,RQVAE (ECM),,,3
+transact,pairwise_accuracy,g_max,G_max,RQVAE,0.24380715109680873,0.11595420713048968,6
+transact,pairwise_accuracy,g_max,G_max,RQVAE (RRS),,,3
+transact,pairwise_accuracy,g_max,G_max,PLUM,0.6049173981197841,0.5,3
+transact,pairwise_accuracy,g_max,G_max,BalanceRQKMeans,0.9773224054053395,1.0,3
+transact,pairwise_accuracy,g_max,G_max,RQVAE-token,,,0
+transact,pairwise_accuracy,g_max,G_max,ALL,0.06582690005494315,-0.046285352375869046,34
+transact,pairwise_accuracy,cur_total,CUR_Total,R3VAE (rqkmeans),,,5
+transact,pairwise_accuracy,cur_total,CUR_Total,R3VAE (spherical),0.2145484172123891,0.39279220242478635,6
+transact,pairwise_accuracy,cur_total,CUR_Total,RQKMeans,,,5
+transact,pairwise_accuracy,cur_total,CUR_Total,RQVAE (ECM),,,3
+transact,pairwise_accuracy,cur_total,CUR_Total,RQVAE,,,6
+transact,pairwise_accuracy,cur_total,CUR_Total,RQVAE (RRS),,,3
+transact,pairwise_accuracy,cur_total,CUR_Total,PLUM,,,0
+transact,pairwise_accuracy,cur_total,CUR_Total,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,cur_total,CUR_Total,RQVAE-token,,,0
+transact,pairwise_accuracy,cur_total,CUR_Total,ALL,0.03789198711353929,0.07150352786041385,28
+transact,pairwise_accuracy,code_gini,Code Gini,R3VAE (rqkmeans),-0.6809367360503442,-0.6,5
+transact,pairwise_accuracy,code_gini,Code Gini,R3VAE (spherical),-0.001730135584134318,0.2,6
+transact,pairwise_accuracy,code_gini,Code Gini,RQKMeans,-0.2905762209964272,-0.3,5
+transact,pairwise_accuracy,code_gini,Code Gini,RQVAE (ECM),,,3
+transact,pairwise_accuracy,code_gini,Code Gini,RQVAE,0.7096075163706679,0.3142857142857143,6
+transact,pairwise_accuracy,code_gini,Code Gini,RQVAE (RRS),,,3
+transact,pairwise_accuracy,code_gini,Code Gini,PLUM,,,0
+transact,pairwise_accuracy,code_gini,Code Gini,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,code_gini,Code Gini,RQVAE-token,,,0
+transact,pairwise_accuracy,code_gini,Code Gini,ALL,0.09860744075606874,-0.0261350537286,28
+transact,pairwise_accuracy,code_entropy,Code Entropy,R3VAE (rqkmeans),0.6267731045140605,0.6,5
+transact,pairwise_accuracy,code_entropy,Code Entropy,R3VAE (spherical),0.0462025674166826,-0.2,6
+transact,pairwise_accuracy,code_entropy,Code Entropy,RQKMeans,0.24132525931091203,0.3,5
+transact,pairwise_accuracy,code_entropy,Code Entropy,RQVAE (ECM),,,3
+transact,pairwise_accuracy,code_entropy,Code Entropy,RQVAE,-0.7494236002244384,-0.2,6
+transact,pairwise_accuracy,code_entropy,Code Entropy,RQVAE (RRS),,,3
+transact,pairwise_accuracy,code_entropy,Code Entropy,PLUM,,,0
+transact,pairwise_accuracy,code_entropy,Code Entropy,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,code_entropy,Code Entropy,RQVAE-token,,,0
+transact,pairwise_accuracy,code_entropy,Code Entropy,ALL,-0.11559469080878326,0.042366297623204215,28
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,R3VAE (rqkmeans),0.7169663900986261,0.6,5
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,R3VAE (spherical),-0.022503434218263077,-0.2,6
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQKMeans,0.2999922933725164,0.3,5
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE (ECM),,,0
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE,-0.6154497808120775,-0.2,6
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE (RRS),,,0
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,PLUM,,,0
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,RQVAE-token,,,0
+transact,pairwise_accuracy,intra_code_similarity,Intra-code Similarity,ALL,-0.10157725523120906,-0.002824061112331559,22
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,R3VAE (rqkmeans),0.8370045381030767,0.6,5
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,R3VAE (spherical),-0.21155975575793137,-0.2,6
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQKMeans,0.11601688915066394,0.22360679774997896,5
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE (ECM),-0.9190829917166647,-1.0,3
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE,-0.1085302346075509,-0.14285714285714288,6
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE (RRS),-0.950093182316651,-1.0,3
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,PLUM,,,0
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,RQVAE-token,,,0
+transact,pairwise_accuracy,prefix_coherence_1,Prefix Coherence@1,ALL,-0.0813797225616409,-0.11426223735378527,28
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,R3VAE (rqkmeans),0.865980755001418,0.7,5
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,R3VAE (spherical),-0.18671319965359867,-0.4285714285714286,6
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQKMeans,0.09106216794938343,0.22360679774997896,5
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE (ECM),-0.9061006575512447,-1.0,3
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE,-0.11751706681096563,-0.14285714285714288,6
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE (RRS),-0.9389860554356717,-1.0,3
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,PLUM,,,0
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,RQVAE-token,,,0
+transact,pairwise_accuracy,prefix_coherence_2,Prefix Coherence@2,ALL,-0.14602329652044568,-0.17723599673165172,28
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,R3VAE (rqkmeans),0.9604244416903118,1.0,4
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,R3VAE (spherical),-0.24551187052965606,-0.3,5
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQKMeans,0.12035337901931287,0.316227766016838,4
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE (ECM),,,0
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE,-0.09311344836710539,0.3,5
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE (RRS),,,0
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,PLUM,,,0
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,RQVAE-token,,,0
+transact,pairwise_accuracy,prefix_coherence_3,Prefix Coherence@3,ALL,-0.03174834449503658,0.026859504132231406,18
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,R3VAE (rqkmeans),,,5
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,R3VAE (spherical),,,6
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQKMeans,,,5
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE (ECM),,,3
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE,,,6
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE (RRS),,,3
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,PLUM,,,0
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,BalanceRQKMeans,,,0
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,RQVAE-token,,,0
+transact,pairwise_accuracy,valid_sid_rate,Valid SID Rate,ALL,,,28
+transact,roc_auc,icr,ICR,R3VAE (rqkmeans),0.9048700469065137,0.09999999999999999,5
+transact,roc_auc,icr,ICR,R3VAE (spherical),-0.48245861246512256,-0.2571428571428572,6
+transact,roc_auc,icr,ICR,RQKMeans,-0.6700849204460977,-0.3,5
+transact,roc_auc,icr,ICR,RQVAE (ECM),,,3
+transact,roc_auc,icr,ICR,RQVAE,-0.5464155189729041,-0.48571428571428577,6
+transact,roc_auc,icr,ICR,RQVAE (RRS),,,3
+transact,roc_auc,icr,ICR,PLUM,-0.18563744765121915,0.5,3
+transact,roc_auc,icr,ICR,BalanceRQKMeans,0.8415168502831799,0.5,3
+transact,roc_auc,icr,ICR,RQVAE-token,,,0
+transact,roc_auc,icr,ICR,ALL,0.2986440035706348,-0.2707018537351159,34
+transact,roc_auc,collision_rate,Collision Rate,R3VAE (rqkmeans),-0.9048700469065137,-0.09999999999999999,5
+transact,roc_auc,collision_rate,Collision Rate,R3VAE (spherical),0.48245861246512256,0.2571428571428572,6
+transact,roc_auc,collision_rate,Collision Rate,RQKMeans,0.6700849204460977,0.3,5
+transact,roc_auc,collision_rate,Collision Rate,RQVAE (ECM),,,3
+transact,roc_auc,collision_rate,Collision Rate,RQVAE,0.5464155189729041,0.48571428571428577,6
+transact,roc_auc,collision_rate,Collision Rate,RQVAE (RRS),,,3
+transact,roc_auc,collision_rate,Collision Rate,PLUM,0.1856374476512192,-0.5,3
+transact,roc_auc,collision_rate,Collision Rate,BalanceRQKMeans,-0.8415168502831799,-0.5,3
+transact,roc_auc,collision_rate,Collision Rate,RQVAE-token,,,0
+transact,roc_auc,collision_rate,Collision Rate,ALL,-0.2986440035706348,0.2707018537351159,34
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,R3VAE (rqkmeans),-0.8795256185010919,-0.15389675281277312,5
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,R3VAE (spherical),0.44281657781865597,0.21251185925162072,6
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQKMeans,0.6680900023407681,0.3,5
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE (ECM),,,3
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE,0.59541093959706,0.6375355777548621,6
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE (RRS),,,3
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,PLUM,,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,BalanceRQKMeans,,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,RQVAE-token,,,0
+transact,roc_auc,p95_collision_group_size,p95 Collision Group Size,ALL,-0.17413232354785052,0.39776025622428923,28
+transact,roc_auc,g_max,G_max,R3VAE (rqkmeans),-0.5154860832238808,0.19999999999999998,5
+transact,roc_auc,g_max,G_max,R3VAE (spherical),0.27821385341165406,0.08571428571428573,6
+transact,roc_auc,g_max,G_max,RQKMeans,0.28984775383907035,0.35909242322980395,5
+transact,roc_auc,g_max,G_max,RQVAE (ECM),,,3
+transact,roc_auc,g_max,G_max,RQVAE,0.39487505511527043,0.550782483869826,6
+transact,roc_auc,g_max,G_max,RQVAE (RRS),,,3
+transact,roc_auc,g_max,G_max,PLUM,0.7872697572570945,0.5,3
+transact,roc_auc,g_max,G_max,BalanceRQKMeans,-0.8550314284915945,-0.5,3
+transact,roc_auc,g_max,G_max,RQVAE-token,,,0
+transact,roc_auc,g_max,G_max,ALL,-0.13643630343263125,0.3037403552778837,34
+transact,roc_auc,cur_total,CUR_Total,R3VAE (rqkmeans),,,5
+transact,roc_auc,cur_total,CUR_Total,R3VAE (spherical),-0.21831142775121198,-0.13093073414159545,6
+transact,roc_auc,cur_total,CUR_Total,RQKMeans,,,5
+transact,roc_auc,cur_total,CUR_Total,RQVAE (ECM),,,3
+transact,roc_auc,cur_total,CUR_Total,RQVAE,,,6
+transact,roc_auc,cur_total,CUR_Total,RQVAE (RRS),,,3
+transact,roc_auc,cur_total,CUR_Total,PLUM,,,0
+transact,roc_auc,cur_total,CUR_Total,BalanceRQKMeans,,,0
+transact,roc_auc,cur_total,CUR_Total,RQVAE-token,,,0
+transact,roc_auc,cur_total,CUR_Total,ALL,-0.05594342758452346,-0.13103597648017493,28
+transact,roc_auc,code_gini,Code Gini,R3VAE (rqkmeans),-0.8669193405027505,-0.09999999999999999,5
+transact,roc_auc,code_gini,Code Gini,R3VAE (spherical),0.4602097124480089,0.2571428571428572,6
+transact,roc_auc,code_gini,Code Gini,RQKMeans,0.6176603546156529,0.3,5
+transact,roc_auc,code_gini,Code Gini,RQVAE (ECM),,,3
+transact,roc_auc,code_gini,Code Gini,RQVAE,0.5621980675456023,0.48571428571428577,6
+transact,roc_auc,code_gini,Code Gini,RQVAE (RRS),,,3
+transact,roc_auc,code_gini,Code Gini,PLUM,,,0
+transact,roc_auc,code_gini,Code Gini,BalanceRQKMeans,,,0
+transact,roc_auc,code_gini,Code Gini,RQVAE-token,,,0
+transact,roc_auc,code_gini,Code Gini,ALL,-0.28690368475102873,0.3792151706331577,28
+transact,roc_auc,code_entropy,Code Entropy,R3VAE (rqkmeans),0.9238067146048666,0.09999999999999999,5
+transact,roc_auc,code_entropy,Code Entropy,R3VAE (spherical),-0.4972494614402731,-0.2571428571428572,6
+transact,roc_auc,code_entropy,Code Entropy,RQKMeans,-0.7005127551771948,-0.3,5
+transact,roc_auc,code_entropy,Code Entropy,RQVAE (ECM),,,3
+transact,roc_auc,code_entropy,Code Entropy,RQVAE,-0.5378825032686367,-0.4285714285714286,6
+transact,roc_auc,code_entropy,Code Entropy,RQVAE (RRS),,,3
+transact,roc_auc,code_entropy,Code Entropy,PLUM,,,0
+transact,roc_auc,code_entropy,Code Entropy,BalanceRQKMeans,,,0
+transact,roc_auc,code_entropy,Code Entropy,RQVAE-token,,,0
+transact,roc_auc,code_entropy,Code Entropy,ALL,0.3079646988641533,-0.3792151706331577,28
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,R3VAE (rqkmeans),0.7466778629793094,0.09999999999999999,5
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,R3VAE (spherical),-0.36256140542565113,-0.2571428571428572,6
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,RQKMeans,-0.5456486719992201,-0.3,5
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE (ECM),,,0
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE,-0.54542165288934,-0.4285714285714286,6
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE (RRS),,,0
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,PLUM,,,0
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,BalanceRQKMeans,,,0
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,RQVAE-token,,,0
+transact,roc_auc,intra_code_similarity,Intra-code Similarity,ALL,0.2902780783564764,-0.13156408808582723,22
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,R3VAE (rqkmeans),-0.07158997687314728,-0.6,5
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,R3VAE (spherical),0.25640857621186025,0.3714285714285715,6
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQKMeans,0.2854034276847742,0.22360679774997896,5
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE (ECM),-0.8953741232721111,-1.0,3
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE,-0.38456445714170095,-0.6,6
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE (RRS),0.7370861437595837,0.5,3
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,PLUM,,,0
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,BalanceRQKMeans,,,0
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,RQVAE-token,,,0
+transact,roc_auc,prefix_coherence_1,Prefix Coherence@1,ALL,-0.008743136232820161,-0.056970712193546484,28
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,R3VAE (rqkmeans),-0.030472118789391822,-0.3,5
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,R3VAE (spherical),0.28741658141637794,0.5428571428571429,6
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQKMeans,0.263865944443439,0.22360679774997896,5
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE (ECM),-0.8807756458463263,-1.0,3
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE,-0.39434006832617297,-0.6,6
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE (RRS),0.7595444327770944,0.5,3
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,PLUM,,,0
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,BalanceRQKMeans,,,0
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,RQVAE-token,,,0
+transact,roc_auc,prefix_coherence_2,Prefix Coherence@2,ALL,0.0366671403298996,0.13855423764473127,28
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,R3VAE (rqkmeans),-0.06524993161650097,0.0,4
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,R3VAE (spherical),0.342824025786195,0.6,5
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQKMeans,0.49333369604313304,0.316227766016838,4
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE (ECM),,,0
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE,-0.46832891730299175,-0.3,5
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE (RRS),,,0
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,PLUM,,,0
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,BalanceRQKMeans,,,0
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,RQVAE-token,,,0
+transact,roc_auc,prefix_coherence_3,Prefix Coherence@3,ALL,0.045637643768667496,0.25503359103361567,18
+transact,roc_auc,valid_sid_rate,Valid SID Rate,R3VAE (rqkmeans),,,5
+transact,roc_auc,valid_sid_rate,Valid SID Rate,R3VAE (spherical),,,6
+transact,roc_auc,valid_sid_rate,Valid SID Rate,RQKMeans,,,5
+transact,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE (ECM),,,3
+transact,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE,,,6
+transact,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE (RRS),,,3
+transact,roc_auc,valid_sid_rate,Valid SID Rate,PLUM,,,0
+transact,roc_auc,valid_sid_rate,Valid SID Rate,BalanceRQKMeans,,,0
+transact,roc_auc,valid_sid_rate,Valid SID Rate,RQVAE-token,,,0
+transact,roc_auc,valid_sid_rate,Valid SID Rate,ALL,,,28

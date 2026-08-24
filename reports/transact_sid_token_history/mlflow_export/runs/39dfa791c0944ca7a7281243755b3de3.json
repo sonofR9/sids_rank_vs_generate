@@ -1,0 +1,136 @@
+{
+  "local_run_directory": null,
+  "metric_histories": {
+    "test.logloss": [
+      {
+        "step": 0,
+        "timestamp": 1786563167536,
+        "value": 0.06711528450250626
+      }
+    ],
+    "test.pairwise_accuracy": [
+      {
+        "step": 0,
+        "timestamp": 1786563167536,
+        "value": 0.618881106376648
+      }
+    ],
+    "test.pairwise_accuracy_ci95_high": [
+      {
+        "step": 0,
+        "timestamp": 1786563167536,
+        "value": 0.6480452418327332
+      }
+    ],
+    "test.pairwise_accuracy_ci95_low": [
+      {
+        "step": 0,
+        "timestamp": 1786563167536,
+        "value": 0.5897169709205627
+      }
+    ],
+    "test.pairwise_accuracy_std_error": [
+      {
+        "step": 0,
+        "timestamp": 1786563167536,
+        "value": 0.014879665337502956
+      }
+    ],
+    "test.pairwise_comparisons": [
+      {
+        "step": 0,
+        "timestamp": 1786563167536,
+        "value": 1716.0
+      }
+    ],
+    "test.pairwise_users": [
+      {
+        "step": 0,
+        "timestamp": 1786563167536,
+        "value": 523.0
+      }
+    ],
+    "test.pr_auc": [
+      {
+        "step": 0,
+        "timestamp": 1786563167536,
+        "value": 0.4455489218235016
+      }
+    ],
+    "test.roc_auc": [
+      {
+        "step": 0,
+        "timestamp": 1786563167536,
+        "value": 0.9290438294410706
+      }
+    ],
+    "train.loss": [
+      {
+        "step": 1,
+        "timestamp": 1786563165821,
+        "value": 0.0853063947237097
+      }
+    ]
+  },
+  "mlflow_artifacts": [],
+  "params": {
+    "config.dcn_cross_layers": "3",
+    "config.dcn_deep_units": "[256, 128, 64]",
+    "config.dcn_low_rank": "32",
+    "config.dcn_num_experts": "4",
+    "config.dcnv2_training.batch_size": "32768",
+    "config.dcnv2_training.epochs": "2",
+    "config.dcnv2_training.learning_rate": "0.002",
+    "config.dense_bins": "32",
+    "config.dense_train_rows": "1000000",
+    "config.device": "auto",
+    "config.dropout": "0.2",
+    "config.embedding_dim": "32",
+    "config.enabled_models": "[\"transact\"]",
+    "config.grad_clip": "1.0",
+    "config.hidden_dim": "128",
+    "config.hyperparameter_tuning": "False",
+    "config.max_history_len": "50",
+    "config.min_history_len": "2",
+    "config.num_workers": "0",
+    "config.show_progress": "True",
+    "config.train_days": "270.0",
+    "config.transact_d_model": "64",
+    "config.transact_ff_dim": "256",
+    "config.transact_heads": "4",
+    "config.transact_layers": "1",
+    "config.transact_training.batch_size": "8192",
+    "config.transact_training.epochs": "1",
+    "config.transact_training.learning_rate": "0.0005",
+    "config.validation_days": "7.0",
+    "config.weight_decay": "0.0001",
+    "examples.test": "89407",
+    "examples.train": "2967449",
+    "examples.validation": "0"
+  },
+  "run": {
+    "end_time": 1786563167638,
+    "lifecycle_stage": "active",
+    "name": "ranking.transact",
+    "parent_source_run_id": "a2b2c66a801d4d0fa616f0eacfd5a886",
+    "start_time": 1786563055340,
+    "status": "FINISHED"
+  },
+  "schema_version": 1,
+  "source": {
+    "experiment_id": "1",
+    "experiment_name": "transact-sid-token-history-20260812",
+    "run_id": "39dfa791c0944ca7a7281243755b3de3",
+    "tracking_uri": "http://127.0.0.1:5000"
+  },
+  "tags": {
+    "mlflow.parentRunId": "a2b2c66a801d4d0fa616f0eacfd5a886",
+    "mlflow.runName": "ranking.transact",
+    "mlflow.source.git.commit": "74e7759bc3074f7c105433d95e263a81291f1527",
+    "mlflow.source.name": "run.py",
+    "mlflow.source.type": "LOCAL",
+    "mlflow.user": "sashanovak",
+    "model": "transact",
+    "stage": "ranking"
+  }
+}
